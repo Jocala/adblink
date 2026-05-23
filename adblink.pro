@@ -5,15 +5,24 @@
 #-------------------------------------------------
 
 QT       += core gui sql network concurrent
-
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
-
-#LIBS += -lQt5Concurrent
 
 TARGET = adblink
 TEMPLATE = app
 
-SOURCES += main.cpp\
+# ==================== macOS SDK Configuration ====================
+macx {
+    QMAKE_MAC_SDK = macosx15.5 
+    QMAKE_MACOSX_DEPLOYMENT_TARGET = 15.5
+    CONFIG += sdk_no_version_check        
+    QMAKE_LIBS_OPENGL = -framework OpenGL
+    ICON = adblink.icns
+}
+
+
+
+# ==================== Sources / Headers / Forms ====================
+SOURCES += main.cpp \
     adboutput.cpp \
     adbutils.cpp \
     connectadb.cpp \
@@ -48,13 +57,9 @@ SOURCES += main.cpp\
     setpdialog.cpp \
     sleepdialog.cpp \
     adbstring.cpp \
-    oculusdialog.cpp 
+    oculusdialog.cpp
 
-
-
-RESOURCES = adbLink.qrc
-
-HEADERS  += mainwindow.h \
+HEADERS += mainwindow.h \
     about.h \
     adboutput.h \
     adbutils.h \
@@ -73,7 +78,7 @@ HEADERS  += mainwindow.h \
     uninstalldialog.h \
     preferencesdialog.h \
     usbfiledialog.h \
-    adblogdialog.h \  
+    adblogdialog.h \
     datadialog.h \
     restdialog.h \
     listfiledialog.h \
@@ -84,7 +89,7 @@ HEADERS  += mainwindow.h \
     oslogdialog.h \
     editordialog.h \
     searchdialog.h \
-    tcpipdialog.h \    
+    tcpipdialog.h \
     forcequitdialog.h \
     adbprefdialog.h \
     sleepdialog.h \
@@ -92,11 +97,9 @@ HEADERS  += mainwindow.h \
     detachableprocess.h \
     adbstring.h \
     version.h \
-    oculusdialog.h 
- 
+    oculusdialog.h
 
-
-FORMS    +=  \
+FORMS += \
     helpdialog.ui \
     scpdialog.ui \
     uninstalldialog.ui \
@@ -116,31 +119,20 @@ FORMS    +=  \
     tcpipdialog.ui \
     forcequitdialog.ui \
     setpdialog.ui \
-    sleepdialog.ui\
+    sleepdialog.ui \
     oculusdialog.ui
 
+RESOURCES = adbLink.qrc
 
-QMAKE_CXXFLAGS += -Wno-deprecated
-
-ICON = adblink.icns
-RC_FILE = adblink.rc
-
-# QMAKE_APPLE_DEVICE_ARCHS=arm64
-
-# QMAKE_MAC_SDK = macosx12.3
-
-# QMAKE_MAC_SDK = macosx13.0
+# ==================== Build flags ====================
+QMAKE_CXXFLAGS += -Wno-deprecated -Wno-deprecated-declarations
 
 linux {
-QMAKE_LFLAGS += -no-pie
+    QMAKE_LFLAGS += -no-pie
 }
 
-QMAKE_CXXFLAGS += -Wno-deprecated-declarations
-
-CONFIG+=sdk_no_version_check
-
-OTHER_FILES +=
-
-macx {
-    QMAKE_LIBS_OPENGL = -framework OpenGL
+# RC_FILE is Windows-only
+win32 {
+    RC_FILE = adblink.rc
 }
+

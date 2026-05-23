@@ -969,9 +969,13 @@ QString usbfileDialog::RunLongProcess_ufd(QString cstring)
     ui->usbprogressBar->setHidden(false);
     ui->usbprogressBar->setValue(0);
 
-    QTimer *timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(usbTimerEvent()));
-    timer->start(2000);
+    if (operationTimer) {
+        operationTimer->stop();
+        operationTimer->deleteLater();
+    }
+    operationTimer = new QTimer(this);
+    connect(operationTimer, SIGNAL(timeout()), this, SLOT(usbTimerEvent()));
+    operationTimer->start(2000);
 
 
   // fmactivityIcon(true);

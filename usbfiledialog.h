@@ -59,6 +59,7 @@ public:
     QString current_directory2;
     QString current_directory1;
     QString rootShell;
+    QTimer* operationTimer;
 
 
 public slots:
