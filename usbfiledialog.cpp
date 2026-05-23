@@ -37,32 +37,6 @@ QString quote2="'\"";
 const QString adbShell = " shell ";
 QString scriptDir;
 
-#include "usbfiledialog.h"
-#include "ui_usbfiledialog.h"
-#include "customlistwidget.h" // Ensure this is included
-#include <QDir>
-
-
-#include "usbfiledialog.h"
-#include "ui_usbfiledialog.h"
-#include "customlistwidget.h"
-#include <QDir>
-#include <QApplication>
-#include <QDebug>
-
-#include "usbfiledialog.h"
-#include "ui_usbfiledialog.h"
-#include "customlistwidget.h"
-#include <QDir>
-#include <QApplication>
-#include <QDebug>
-#include "usbfiledialog.h"
-#include "ui_usbfiledialog.h"
-#include "customlistwidget.h"
-#include <QDir>
-#include <QApplication>
-#include <QDebug>
-
 
 usbfileDialog::usbfileDialog(bool iskodi, int fmfont, QWidget *parent) :
     QDialog(parent),
