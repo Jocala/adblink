@@ -104,7 +104,6 @@ FORMS += \
     scpdialog.ui \
     uninstalldialog.ui \
     preferencesdialog.ui \
-    usbfiledialog.ui \
     adblogdialog.ui \
     datadialog.ui \
     restdialog.ui \
