@@ -1,5 +1,6 @@
 #ifndef USBFILEDIALOG_H
 #define USBFILEDIALOG_H
+#include <QListWidget>
 #include <QMessageBox>
 #include <QDialog>
 
@@ -79,11 +80,12 @@ public slots:
     void assignWindow1();
     void assignWindow2();
     void usbTimerEvent();
-    void gather_push();
     void handleFilesDropped(const QStringList &fileNames, const QString &targetDir);
 
 private:
-int    fmfont;
+    void setPathCommon(QListWidget *widget, QString &currentDir, QString &previousDir, QString &currentItem, const QString &dir);
+    int    fmfont;
+    bool hasfocus = false;
 
 private slots:
     QString fix_directory(QString dirname);
