@@ -2,10 +2,17 @@
 #define PREFERENCESDIALOG_H
 
 #include <QDialog>
-
-namespace Ui {
-class preferencesDialog;
-}
+#include <QPushButton>
+#include <QLineEdit>
+#include <QCheckBox>
+#include <QRadioButton>
+#include <QComboBox>
+#include <QListWidget>
+#include <QLabel>
+#include <QGroupBox>
+#include <QGridLayout>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
 
 class preferencesDialog : public QDialog
 {
@@ -66,16 +73,43 @@ private slots:
     void on_ostypeBox_currentIndexChanged(int index);
     void on_filepathButton_clicked();
     void on_listDevicesp_doubleClicked(const QModelIndex &index);
-    void on_clearPort_clicked();
     void on_wsa_clicked(bool checked);
     void on_scoped_clicked(bool checked);
 
- //   void on_ostypeBox_activated(int index);
-
-
-
 private:
-    Ui::preferencesDialog *ui;
+    QPushButton *m_pfolderButton;
+    QPushButton *m_filepathButton;
+    QPushButton *m_saveButton;
+    QPushButton *m_cancelButton;
+
+    QLineEdit *m_packagename;
+    QLineEdit *m_pulldir;
+    QLineEdit *m_daddr;
+    QLineEdit *m_description;
+    QLineEdit *m_filepath;
+    QLineEdit *m_port;
+    QLineEdit *m_scrcpy;
+    QLineEdit *m_data_root;
+
+    QCheckBox *m_isusb;
+    QCheckBox *m_scoped;
+    QCheckBox *m_wsa;
+    QCheckBox *m_disableroot;
+
+    QRadioButton *m_kodiButton;
+    QRadioButton *m_spmcButton;
+    QRadioButton *m_otherButton;
+
+    QComboBox *m_ostypeBox;
+
+    QListWidget *m_listDevicesp;
+    QListWidget *m_listkodirootBox;
+
+    QLabel *m_versionLabel;
+    QLabel *m_kodi2;
+    QLabel *m_kodi3;
+
+    QGroupBox *m_mediaBox;
 };
 
 #endif // PREFERENCESDIALOG_H

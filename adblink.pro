@@ -103,7 +103,6 @@ FORMS += \
     helpdialog.ui \
     scpdialog.ui \
     uninstalldialog.ui \
-    preferencesdialog.ui \
     adblogdialog.ui \
     datadialog.ui \
     restdialog.ui \
