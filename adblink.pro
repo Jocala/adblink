@@ -106,7 +106,6 @@ FORMS += \
     datadialog.ui \
     restdialog.ui \
     backupdialog.ui \
-    cachedialog.ui \
     listfiledialog.ui \
     keyboarddialog.ui \
     klogdialog.ui \
