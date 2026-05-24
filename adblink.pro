@@ -102,7 +102,6 @@ HEADERS += mainwindow.h \
 FORMS += \
     helpdialog.ui \
     adblogdialog.ui \
-    datadialog.ui \
     restdialog.ui \
     backupdialog.ui \
     listfiledialog.ui \
