@@ -116,8 +116,7 @@ FORMS += \
     tcpipdialog.ui \
     forcequitdialog.ui \
     setpdialog.ui \
-    sleepdialog.ui \
-    oculusdialog.ui
+    sleepdialog.ui
 
 RESOURCES = adbLink.qrc
 
