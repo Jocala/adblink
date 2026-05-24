@@ -101,7 +101,6 @@ HEADERS += mainwindow.h \
 
 FORMS += \
     helpdialog.ui \
-    scpdialog.ui \
     uninstalldialog.ui \
     adblogdialog.ui \
     datadialog.ui \

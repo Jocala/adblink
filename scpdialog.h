@@ -3,9 +3,7 @@
 
 #include <QDialog>
 
-namespace Ui {
-class scpDialog;
-}
+class QLineEdit;
 
 class scpDialog : public QDialog
 {
@@ -15,16 +13,14 @@ public:
     explicit scpDialog(QWidget *parent = nullptr);
     ~scpDialog();
 
-    void setArgs( QString myargs);
-
-
-  QString scpArgs();
+    void setArgs(QString myargs);
+    QString scpArgs();
 
 private slots:
-  void on_pushButton_clicked();
+    void on_pushButton_clicked();
 
 private:
-    Ui::scpDialog *ui;
+    QLineEdit *scpargs;
 };
 
 #endif // SCPDIALOG_H
