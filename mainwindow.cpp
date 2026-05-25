@@ -8412,11 +8412,11 @@ for (int i = 0; i < 16; ++i) {
             grid1Buttons[i]->setToolTip("Restore device data (Ctrl+R)");
             break;
         case 4:
-            grid1Buttons[i]->setText("Install APK");
+            grid1Buttons[i]->setText("Install");
             grid1Buttons[i]->setToolTip("Install an APK file (Ctrl+V)");
             break;
         case 5:
-            grid1Buttons[i]->setText("Uninstall APK");
+            grid1Buttons[i]->setText("Uninstall");
             grid1Buttons[i]->setToolTip("Uninstall an APK (Ctrl+U)");
             break;
         case 6:
