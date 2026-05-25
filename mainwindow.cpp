@@ -1,4 +1,5 @@
     #include "mainwindow.h"
+    #include <QRegularExpression>
     #include "about.h"
     #include "helpdialog.h"
     #include "connectadb.h"
@@ -26,6 +27,11 @@
     #include "getlocaladb.h"
     #include "version.h"
     #include "point.h"
+    #include "adbconnection.h"
+    #include "adbdevice.h"
+    #include "backupmanager.h"
+    #include "consolemanager.h"
+    #include "kodidatamanager.h"
 
 
     #ifdef __WIN32__
@@ -107,6 +113,10 @@
      MainWindow::MainWindow(QWidget *parent)
          : QMainWindow(parent)
          , m_networkManager(new QNetworkAccessManager(this))
+         , m_adbConnection(new AdbConnection(this))
+         , m_dataManager(new KodiDataManager(this))
+         , m_consoleManager(new ConsoleManager(this))
+         , m_backupManager(new BackupManager(this))
      {
 
 
@@ -118,6 +128,10 @@
         scrcpydir=QCoreApplication::applicationDirPath()+"/adbfiles/"+"scrcpy/";
         xmldir = adbfiles+"remotes/";
         splashdir = adbfiles+"splash/";
+
+        m_dataManager->os = os;
+        m_dataManager->logFileDir = logfiledir;
+        m_backupManager->setDataManager(m_dataManager);
 
 
        if (!QFile::exists(adbfiles + "adb") && !QFile::exists(adbfiles + "adb.exe")) {
@@ -198,7 +212,7 @@
 
 
         donateButton = setupDonateButton(statusBar);
-        QString donation = readDonationValue();
+        QString donation = m_dataManager->readDonationValue(jsonstring);
         setDonateButtonActive(donation != "jocala.com");
 
         container = new QWidget(statusBar);
@@ -274,27 +288,27 @@
 
 
 
-         dbstring = databasedir + "adblink.db";
-         QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-         db.setDatabaseName(dbstring);
+        m_dataManager->dataBaseDir = databasedir;
+        m_dataManager->logFileDir = logfiledir;
+        m_dataManager->scriptDir = scriptdir;
+
+        dbstring = databasedir + "adblink.db";
+        if (!m_dataManager->initializeDatabase(dbstring)) {
+            QString errorMsg = QSqlDatabase::database().lastError().text();
+            logfile(QString("Error opening database: %1 - %2").arg(dbstring, errorMsg));
+            QMessageBox::critical(0, qApp->tr("Cannot open database"),
+                                  QString("Failed to open database:\n%1\nError: %2").arg(dbstring, errorMsg),
+                                  QMessageBox::Cancel);
+            return;
+        }
 
 
-         if (!db.open()) {
-             QString errorMsg = db.lastError().text();
-             logfile(QString("Error opening database: %1 - %2").arg(dbstring, errorMsg));
-             QMessageBox::critical(0, qApp->tr("Cannot open database"),
-                                   QString("Failed to open database:\n%1\nError: %2").arg(dbstring, errorMsg),
-                                   QMessageBox::Cancel);
-             return;
-         }
 
 
+            deviceTable = new NoHScrollTableWidget(this);
 
-
-           deviceTable = new NoHScrollTableWidget(this);
-
-            createTables();
-            createjson();
+             m_dataManager->createTables();
+             m_dataManager->createJsonConfig(jsonstring);
             setupMenus();
 
 
@@ -357,19 +371,7 @@
 
 
     QString MainWindow::readDonationValue() {
-         QJsonObject obj;
-         QJsonDocument doc;
-         QFile file(databasedir + "adblink.json");
-
-         if (file.open(QIODevice::ReadOnly)) {
-      doc = QJsonDocument::fromJson(file.readAll());
-      obj = doc.object();
-      file.close();
-      return obj["donation"].toString();
-         } else {
-      // qDebug() << "Error: Could not open adblink.json for reading";
-      return QString(); // Return empty string on error
-         }
+        return m_dataManager->readDonationValue(jsonstring);
     }
 
     /////////////////////////////////////////////////////
@@ -616,7 +618,7 @@
           }
 
        QTextStream out(&file);
-                out  << line << endl;
+                out  << line << Qt::endl;
 
      }
 
@@ -719,47 +721,19 @@
 
 
      //////////////////////////////////////////
-    void MainWindow::kill_server()
-    {
+     void MainWindow::kill_server()
+     {
 
-     QString cstring = getadbpath() + " kill-server";
-     QString command=getadbOutput(cstring);
-     logfile("server stopped");
+      m_adbConnection->killServer();
 
-    }
+     }
 
 
     //////////////////////////////////////
     bool MainWindow::start_server()
     {
 
-     bool serverRunning;
-
-        QString cstring = getadbpath() + " kill-server";
-        QString command=getadbOutput(cstring);
-
-
-           cstring = getadbpath() + " start-server";
-          command=getadbOutput(cstring);
-
-
-
-         if (command.contains("daemon started successfully"))
-            {
-
-               serverRunning = true;
-              }
-
-             else
-            {
-             logfile("start-server failed!");
-             logfile(cstring);
-             logfile(command);
-             serverRunning = false;
-             }
-
-
-             return serverRunning;
+        return m_adbConnection->startServer();
 
     }
 
@@ -770,26 +744,12 @@
     {
 
 
-             bool is_packageInstalled;
+        QString selectedDescription = deviceTable->item(deviceTable->currentRow(), 0)->text();
+        DeviceRecord device = queryDeviceRecord(selectedDescription);
+        AdbDevice adbDevice(device, this);
 
+        return adbDevice.isPackageInstalled(package);
 
-        QString cstring = getadb() + " shell pm list packages ";
-
-
-        QString command=getadbOutput(cstring);
-        // logfile ("package: "+cstring);
-
-            if (command.contains(package))
-                {
-                //logfile(package+ " is installed");
-                is_packageInstalled = true;
-                }
-                else
-                {
-                logfile(package+ " not found");
-                is_packageInstalled = false;}
-
-            return  is_packageInstalled;
     }
 
 
@@ -1442,7 +1402,7 @@
     if(getreturncode(cstring))
     {  cstring = getadb() + " shell cat /sdcard/xbmc_env.properties";
                command=getadbOutput(cstring);
-               command.replace(QRegExp("[\r\n]"), "");
+               command.replace(QRegularExpression("[\r\n]"), "");
                mcpath = command.mid(command.indexOf("xbmc.data=") + 10);
                mcpath=mcpath+"/.kodi";
     }
@@ -1649,14 +1609,14 @@
        cstring = "null devices";
        command = getadbOutput(cstring);
 
-       mstringlist = command.split(QRegExp("[\t\n\r]"), QString::SkipEmptyParts);
+       mstringlist = command.split(QRegularExpression("[\t\n\r]"), Qt::SkipEmptyParts);
 
        if (command.contains("List of devices attached"))
        {
             mstringlist.removeFirst();
             for (int a = 0; a < mstringlist.size(); a = a + 2)
             {
-                   QStringList pieces = mstringlist.at(a).split(":", QString::SkipEmptyParts);
+                   QStringList pieces = mstringlist.at(a).split(":", Qt::SkipEmptyParts);
                    if (!mstringlist.at(a).contains("daemon"))
                   dstringlist << pieces.at(0);
             }
@@ -1926,7 +1886,7 @@
     if(getreturncode(cstring))
     {  cstring = getadb() + " shell cat /sdcard/xbmc_env.properties";
               command=getadbOutput(cstring);
-              command.replace(QRegExp("[\r\n]"), "");
+              command.replace(QRegularExpression("[\r\n]"), "");
               mcpath = command.mid(command.indexOf("xbmc.data=") + 10);
               mcpath=mcpath+"/.kodi";
     }
@@ -2094,13 +2054,13 @@
 
                    QTextStream out(&file);
 
-                   out  << line1 << endl;
-                   out  << line2 << endl;
-                   out  << line3 << endl;
-                   out  << line4 << endl;
-                   out  << line5 << endl;
-                   out  << line6 << endl;
-                   out  << line7 << endl;
+                   out  << line1 << Qt::endl;
+                   out  << line2 << Qt::endl;
+                   out  << line3 << Qt::endl;
+                   out  << line4 << Qt::endl;
+                   out  << line5 << Qt::endl;
+                   out  << line6 << Qt::endl;
+                   out  << line7 << Qt::endl;
 
                    file.flush();
                    file.close();
@@ -2180,7 +2140,7 @@
           if(getreturncode(cstring))
           {  cstring = getadb() + " shell cat /sdcard/xbmc_env.properties";
             command=getadbOutput(cstring);
-            command.replace(QRegExp("[\r\n]"), "");
+            command.replace(QRegularExpression("[\r\n]"), "");
             mcpath = command.mid(command.indexOf("xbmc.data=") + 10);
             mcpath=mcpath+"/.kodi";
           }
@@ -2601,7 +2561,7 @@
          {
             cstring = getadb() + " shell cat /sdcard/xbmc_env.properties";
             command = getadbOutput(cstring);
-            command.replace(QRegExp("[\r\n]"), "");
+            command.replace(QRegularExpression("[\r\n]"), "");
             mcpath = command.mid(command.indexOf("xbmc.data=") + 10);
             mcpath = mcpath + "/.kodi";
          }
@@ -3036,7 +2996,7 @@
                 command = getadbOutput(cstring);
 
 
-                command.replace(QRegExp("[\r\n]"), "");
+                command.replace(QRegularExpression("[\r\n]"), "");
 
                 int startIndex = command.indexOf("=") + 1;
                 int endIndex = command.indexOf(".kodi") + 5;
@@ -4071,7 +4031,7 @@
         if(getreturncode(cstring))
         {  cstring = getadb() + " shell cat /sdcard/xbmc_env.properties";
             command=getadbOutput(cstring);
-            command.replace(QRegExp("[\r\n]"), "");
+            command.replace(QRegularExpression("[\r\n]"), "");
             mcpath = command.mid(command.indexOf("xbmc.data=") + 10);
             mcpath=mcpath+"/.kodi";
         }
@@ -4316,10 +4276,10 @@
 
                        QTextStream out(&file);
 
-                      out  <<  "echo off"  << endl;
+                      out  <<  "echo off"  << Qt::endl;
                       if(getlocaladb() == "")
-               //            out  << "set PATH=%PATH%;"+adbfiles+";"<< endl;
-                            out << "set PATH="+adbfiles+";%PATH%" << endl;
+               //            out  << "set PATH=%PATH%;"+adbfiles+";"<< Qt::endl;
+                            out << "set PATH="+adbfiles+";%PATH%" << Qt::endl;
 
 
                        file.flush();
@@ -4376,17 +4336,17 @@
 
 
                       QTextStream out(&file);
-                       out  << "#!/bin/sh" << endl;
+                       out  << "#!/bin/sh" << Qt::endl;
 
 
                      if(getlocaladb() == "")
-                       // out  << "export PATH="+pathdir+":$PATH" << endl;
+                       // out  << "export PATH="+pathdir+":$PATH" << Qt::endl;
 
 
                         out << "export PATH=\"" + pathdir + "\":$PATH" << Qt::endl;
 
 
-                     out  << "/bin/sh" << endl;
+                     out  << "/bin/sh" << Qt::endl;
 
 
                       file.flush();
@@ -4528,7 +4488,7 @@
 
 
 
-                  out << "#!/bin/sh" << endl;
+                  out << "#!/bin/sh" << Qt::endl;
 
 
                   QString adbPath = getadbpath();
@@ -4537,7 +4497,7 @@
                   // cstring = getadbpath() + " -s " + daddr + " shell -t \"export PATH=\\$PATH:/data/local/tmp/adblink; sh -i\"";
 
 
-                  out << cstring << endl;
+                  out << cstring << Qt::endl;
 
 
 
@@ -4729,7 +4689,7 @@
 
                  QTextStream out2(&file2);
 
-                 out2 << argval << endl;
+                 out2 << argval << Qt::endl;
 
                  file2.flush();
                  file2.close();
@@ -4746,10 +4706,10 @@
 
                  QTextStream out(&file);
 
-                 // out << "set PATH=%PATH%;" + adbfiles + ";" + scrcpydir + ";" << endl;
-                 out << "set PATH=" + adbfiles + ";" + scrcpydir + ";%PATH%" << endl;
+                 // out << "set PATH=%PATH%;" + adbfiles + ";" + scrcpydir + ";" << Qt::endl;
+                 out << "set PATH=" + adbfiles + ";" + scrcpydir + ";%PATH%" << Qt::endl;
 
-                 out << "scrcpy.exe -s " + daddr + " " + argval << endl;
+                 out << "scrcpy.exe -s " + daddr + " " + argval << Qt::endl;
 
                  file.flush();
                  file.close();
@@ -4777,7 +4737,7 @@
 
                  QTextStream out2(&file2);
 
-                 out2 << argval << endl;
+                 out2 << argval << Qt::endl;
 
                  file2.flush();
                  file2.close();
@@ -4795,8 +4755,8 @@
 
 
                  QTextStream out(&file);
-                 out << "#!/bin/sh" << endl;
-                 out << "scrcpy -s " + daddr + " " + argval << endl;
+                 out << "#!/bin/sh" << Qt::endl;
+                 out << "scrcpy -s " + daddr + " " + argval << Qt::endl;
 
                  file.flush();
                  file.close();
@@ -4857,16 +4817,8 @@
 
 ///////////////////////////////////////////////////////////
 
- QString MainWindow::readBackup(QString databasedir) {
-  QJsonObject obj;
-  QJsonDocument doc(obj);
-  QFile file(databasedir + "adblink.json");
-  file.open(QIODevice::ReadOnly);
-  doc = QJsonDocument::fromJson(file.readAll());
-  obj = doc.object();
-  QString backup = obj["backup"].toString();
-  file.close();
-  return backup;
+QString MainWindow::readBackup(QString /*databasedir*/) {
+  return m_dataManager->readBackupPath(jsonstring);
 }
 
 /*
@@ -4908,7 +4860,7 @@ void MainWindow::dos_shell()
 
   QTextStream out(&file);
 
-  out << "@echo off" << endl;
+  out << "@echo off" << Qt::endl;
 
 
 
@@ -4922,7 +4874,7 @@ void MainWindow::dos_shell()
   }
 
 
-  out << quotedAdbPath << " -s " + daddr + " shell -t \"export PATH=\\$PATH:/data/local/tmp/adblink; export PS1=\\$HOSTNAME:\\$PWD\\$\\ ; sh -i\"" << endl;
+  out << quotedAdbPath << " -s " + daddr + " shell -t \"export PATH=\\$PATH:/data/local/tmp/adblink; export PS1=\\$HOSTNAME:\\$PWD\\$\\ ; sh -i\"" << Qt::endl;
 
   file.flush();
   file.close();
@@ -4981,20 +4933,20 @@ void MainWindow::dos_shell()
   QTextStream out(&file);
 
 
-  out  <<  "echo off"  << endl;
+  out  <<  "echo off"  << Qt::endl;
 
 
-//  out  << "set PATH=%PATH%;"+adbfiles+";" << endl;
+//  out  << "set PATH=%PATH%;"+adbfiles+";" << Qt::endl;
 
 
 
-    out << "set PATH=" + adbfiles + ";%PATH%" << endl;
+    out << "set PATH=" + adbfiles + ";%PATH%" << Qt::endl;
 
-//  out  <<  "adb.exe "+ sernum + " shell"  << endl;
+//  out  <<  "adb.exe "+ sernum + " shell"  << Qt::endl;
 
-//  out <<  "adb.exe "+ sernum +  " shell -t \"export PATH=\\$PATH:/data/local/tmp/adblink; export PS1=\\$HOSTNAME:\\$PWD\\$\\ ; sh -i\"" << endl;
+//  out <<  "adb.exe "+ sernum +  " shell -t \"export PATH=\\$PATH:/data/local/tmp/adblink; export PS1=\\$HOSTNAME:\\$PWD\\$\\ ; sh -i\"" << Qt::endl;
 
-  out << "adb.exe " + sernum + " shell -t \"export PATH=\\\"$PATH:/data/local/tmp/adblink\\\"; export PS1=\\\"$HOSTNAME:$PWD\\\\$\\\"; sh -i\"" << endl;
+  out << "adb.exe " + sernum + " shell -t \"export PATH=\\\"$PATH:/data/local/tmp/adblink\\\"; export PS1=\\\"$HOSTNAME:$PWD\\\\$\\\"; sh -i\"" << Qt::endl;
 
 
   file.flush();
@@ -5023,64 +4975,19 @@ void MainWindow::dos_shell()
 
 ///////////////////////////////////////////////////
 void MainWindow::writeBackup (QString dir) {
-    QDir adir = QDir(dir);
-     adir.cdUp();
-     QString backup = adir.absolutePath();
-     QFile file(databasedir + "/adblink.json");
-     file.open(QIODevice::ReadOnly);
-     QByteArray data = file.readAll();
-     QJsonDocument doc = QJsonDocument::fromJson(data);
-     QJsonObject obj = doc.object();
-     obj["backup"] = backup;
-     doc.setObject(obj);
-     file.close();
-     file.open(QIODevice::WriteOnly);
-     file.write(doc.toJson());
-     file.close();
-
-
+    m_dataManager->writeBackupPath(jsonstring, dir);
 }
 
 
 ///////////////////////////////////////////////////////
-QString MainWindow::readInstall(QString databasedir) {
-     QJsonObject obj;
-     QJsonDocument doc(obj);
-     QFile file(databasedir + "adblink.json");
-
-     if (file.open(QIODevice::ReadOnly)) {
-     doc = QJsonDocument::fromJson(file.readAll());
-     obj = doc.object();
-     QString install = obj["install"].toString();
-     file.close();
-
-     // Return home directory if install is null or empty
-     if (install.isNull() || install.isEmpty()) {
-                    return QDir::homePath();
-     }
-     return install;
-     }
-
-     return QDir::homePath();
+QString MainWindow::readInstall(QString /*databasedir*/) {
+    return m_dataManager->readInstallPath(jsonstring);
 }
 
 
 /////////////////////////////////////////////////////
 void MainWindow::writeInstall (QString install) {
-
-    QFile file(databasedir + "/adblink.json");
-    file.open(QIODevice::ReadOnly);
-    QByteArray data = file.readAll();
-    QJsonDocument doc = QJsonDocument::fromJson(data);
-    QJsonObject obj = doc.object();
-    obj["install"] = install;
-    doc.setObject(obj);
-    file.close();
-    file.open(QIODevice::WriteOnly);
-    file.write(doc.toJson());
-    file.close();
-
-
+    m_dataManager->writeInstallPath(jsonstring, install);
 }
 
 /////////////////////////////////////////////
@@ -5263,7 +5170,7 @@ void MainWindow::restoreButton_clicked() {
      if (  returncode(getadbpath(), args)) {
          cstring = "null -s "+ device.daddr + " shell cat /sdcard/xbmc_env.properties";
          command = getadbOutput(cstring);
-         command.replace(QRegExp("[\r\n]"), "");
+         command.replace(QRegularExpression("[\r\n]"), "");
          int startIndex = command.indexOf("=") + 1;
          int endIndex = command.indexOf(".kodi") + 5;
          xbmcpath = command.mid(startIndex, endIndex - startIndex);
@@ -5539,7 +5446,7 @@ void MainWindow::mvdataButton_clicked()
                list[i] == "/storage/emulated" ||
                list[i] == "/storage" ||
                list[i] == "/storage/self" ||
-               list[i] == NULL)          {
+                               list[i].isNull())          {
             list.removeAt(i);
             i--;
            }
@@ -5655,7 +5562,7 @@ void MainWindow::mvdataButton_clicked()
 
 
     cstring = getadb()+ " shell mkdir -p "+destination+"/files";
-    command=getreturncode(cstring);
+    getreturncode(cstring);
 
 
 
@@ -5791,7 +5698,7 @@ void MainWindow::on_actionSplash_Screen_triggered()
     if(getreturncode(cstring))
     {  cstring = getadb() + " shell cat /sdcard/xbmc_env.properties";
      command=getadbOutput(cstring);
-     command.replace(QRegExp("[\r\n]"), "");
+     command.replace(QRegularExpression("[\r\n]"), "");
      mcpath = command.mid(command.indexOf("xbmc.data=") + 10);
      mcpath=mcpath+"/.kodi";
     }
@@ -5925,7 +5832,7 @@ void MainWindow::on_actionGet_UID_from_APK_file_triggered()
 
 
 
-            mstringlist=command.split(QRegExp("[\t\n\r]"),QString::SkipEmptyParts);
+            mstringlist=command.split(QRegularExpression("[\t\n\r]"),Qt::SkipEmptyParts);
 
 
             for (QStringList::iterator it = mstringlist.begin();
@@ -5934,7 +5841,7 @@ void MainWindow::on_actionGet_UID_from_APK_file_triggered()
               QString item=*it;
               if (item.contains("package"))
               {
-              QRegExp rx("(\\')");
+              QRegularExpression rx("(\\')");
               QStringList query = item.split(rx);
               QString packagename = query.at(1);
               logfile("package name query: "+packagename);
@@ -6978,7 +6885,7 @@ void MainWindow::on_actionEdit_XML_triggered()
  if(getreturncode(cstring))
  {  cstring = getadb() + " shell cat /sdcard/xbmc_env.properties";
            command=getadbOutput(cstring);
-           command.replace(QRegExp("[\r\n]"), "");
+           command.replace(QRegularExpression("[\r\n]"), "");
            mcpath = command.mid(command.indexOf("xbmc.data=") + 10);
            mcpath=mcpath+"/.kodi";
  }
@@ -7006,7 +6913,7 @@ void MainWindow::on_actionEdit_XML_triggered()
 
 
 
- QStringList filelist=command.split(QRegExp("[\r\n]"),QString::SkipEmptyParts);
+ QStringList filelist=command.split(QRegularExpression("[\r\n]"),Qt::SkipEmptyParts);
 
  if (command.isEmpty() || command.contains("No such file or directory"))
  { QMessageBox::critical(this,"","No files found");
@@ -7229,9 +7136,8 @@ DeviceRecord MainWindow::queryDeviceRecord(const QString& description) {
  if (query.lastError().isValid()) {
                logfile(sqlstatement);
                logfile("SqLite error:" + query.lastError().text());
-               logfile("SqLite error code:" + QString::number(query.lastError().number()));
+               logfile("SqLite error code:" + query.lastError().nativeErrorCode());
  }
-
 
  return record;
 }
@@ -7269,7 +7175,7 @@ DeviceRecord MainWindow::queryDeviceRecord(const QString& description) {
  if (query.lastError().isValid()) {
                logfile(sqlstatement);
                logfile("SqLite error:" + query.lastError().text());
-               logfile("SqLite error code:" + QString::number(query.lastError().number()));
+               logfile("SqLite error code:" + query.lastError().nativeErrorCode());
  }
 
  return record;
@@ -7583,7 +7489,7 @@ void MainWindow::createTables()
                       if (!query.exec(sqlstatement)) {
                           logfile("SQL statement: " + sqlstatement);
                           logfile("SQLite error: " + query.lastError().text());
-                          logfile("SQLite error code: " + QString::number(query.lastError().number()));
+                           logfile("SQLite error code: " + query.lastError().nativeErrorCode());
                           logfile("Database file path: " + db.databaseName());
                       } else {
                           logfile("Successfully created new device table");
@@ -7820,8 +7726,8 @@ QString MainWindow::battery()
     QString batteryStatus = "";
     bool batteryPresent = false;
 
-    // Use split with QString::SkipEmptyParts for compatibility with Qt 5.12
-    QStringList lines = output.split('\n', QString::SkipEmptyParts);
+    // Use split with Qt::SkipEmptyParts for compatibility with Qt 5.12
+    QStringList lines = output.split('\n', Qt::SkipEmptyParts);
     for (const QString& line : lines) {
         QString trimmedLine = line.trimmed();
         if (trimmedLine.contains("present", Qt::CaseInsensitive)) {
@@ -8193,8 +8099,8 @@ void MainWindow::projectivyAccess()
         cstring = "null -s " + device.daddr + " shell dumpsys accessibility";
         QString result = getadbOutput(cstring);
 
-        bool bound = result.contains(QRegExp("Bound services:.*" + QRegExp::escape(projectivyEntry)));
-        bool enabled = result.contains(QRegExp("Enabled services:.*" + QRegExp::escape(projectivyEntry)));
+        bool bound = result.contains(QRegularExpression("Bound services:.*" + QRegularExpression::escape(projectivyEntry)));
+        bool enabled = result.contains(QRegularExpression("Enabled services:.*" + QRegularExpression::escape(projectivyEntry)));
 
         if (bound || enabled) {
             QMessageBox::information(nullptr, "Accessibility Status", "Service is active");
@@ -8384,8 +8290,8 @@ void MainWindow::projectivyAccess()
         cstring = "null -s " + device.daddr + " shell dumpsys accessibility";
         QString result=getadbOutput(cstring);
 
-bool bound = result.contains(QRegExp("Bound services:.*" + QRegExp::escape(projectivyEntry)));
-bool enabled = result.contains(QRegExp("Enabled services:.*" + QRegExp::escape(projectivyEntry)));
+bool bound = result.contains(QRegularExpression("Bound services:.*" + QRegularExpression::escape(projectivyEntry)));
+bool enabled = result.contains(QRegularExpression("Enabled services:.*" + QRegularExpression::escape(projectivyEntry)));
 
 if (bound || enabled) {
     QMessageBox::information(nullptr, "Accessibility Status", "Service is active");

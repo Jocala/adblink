@@ -12,10 +12,11 @@ TEMPLATE = app
 
 # ==================== macOS SDK Configuration ====================
 macx {
-    QMAKE_MAC_SDK = macosx15.5 
+    QMAKE_MAC_SDK = macosx15.5
     QMAKE_MACOSX_DEPLOYMENT_TARGET = 15.5
-    CONFIG += sdk_no_version_check        
+    CONFIG += sdk_no_version_check
     QMAKE_LIBS_OPENGL = -framework OpenGL
+    QMAKE_LFLAGS += -F/Users/jeff/Qt/MacOSX15.5.sdk/System/Library/Frameworks
     ICON = adblink.icns
 }
 
@@ -23,14 +24,19 @@ macx {
 
 # ==================== Sources / Headers / Forms ====================
 SOURCES += main.cpp \
+    adbconnection.cpp \
+    adbdevice.cpp \
     adboutput.cpp \
     adbutils.cpp \
+    backupmanager.cpp \
     connectadb.cpp \
+    consolemanager.cpp \
     customlistwidget.cpp \
     getadbdata.cpp \
     getdevices.cpp \
     getlocaladb.cpp \
     getreturncode.cpp \
+    kodidatamanager.cpp \
     logfile.cpp \
     mainwindow.cpp \
     about.cpp \
@@ -58,10 +64,14 @@ SOURCES += main.cpp \
     oculusdialog.cpp
 
 HEADERS += mainwindow.h \
+    adbconnection.h \
+    adbdevice.h \
     about.h \
     adboutput.h \
     adbutils.h \
+    backupmanager.h \
     connectadb.h \
+    consolemanager.h \
     customlistwidget.h \
     devicerecord.h \
     getadbdata.h \
@@ -69,6 +79,7 @@ HEADERS += mainwindow.h \
     getlocaladb.h \
     getreturncode.h \
     helpdialog.h \
+    kodidatamanager.h \
     logfile.h \
     point.h \
     returncode.h \
@@ -100,7 +111,7 @@ FORMS +=
 RESOURCES = adbLink.qrc
 
 # ==================== Build flags ====================
-QMAKE_CXXFLAGS += -Wno-deprecated -Wno-deprecated-declarations
+QMAKE_CXXFLAGS += -Wno-deprecated -Wno-deprecated-declarations -Wno-implicit-function-declaration
 
 linux {
     QMAKE_LFLAGS += -no-pie

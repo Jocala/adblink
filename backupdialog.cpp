@@ -140,7 +140,7 @@ void backupDialog::setadb_backup(const QString &adb_backup, const QString &data_
     }
 
     QTextStream out1(&file21);
-    out1 << command << endl;
+    out1 << command << Qt::endl;
 
     file21.flush();
     file21.close();

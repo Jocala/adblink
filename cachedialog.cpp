@@ -245,13 +245,13 @@ void cacheDialog::on_copyxml_clicked()
     cacheFile.open(QIODevice::ReadWrite);
     QTextStream out1(&cacheFile);
 
-       out1  << line1 << endl;
-       out1  << line2 << endl;
-       out1  << line3 << endl;
-       out1  << line4 << endl;
-       out1  << line5 << endl;
-       out1  << line6 << endl;
-       out1  << line7 << endl;
+       out1  << line1 << Qt::endl;
+       out1  << line2 << Qt::endl;
+       out1  << line3 << Qt::endl;
+       out1  << line4 << Qt::endl;
+       out1  << line5 << Qt::endl;
+       out1  << line6 << Qt::endl;
+       out1  << line7 << Qt::endl;
 
     cacheFile.flush();
     out1.seek(0);

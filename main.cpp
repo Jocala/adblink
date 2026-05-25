@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include <QApplication>
+#include <QScreen>
 #include <QStyle>
-#include <QDesktopWidget>
 #include <QStyleFactory>
 #include <QFile>
 #include <QFontDatabase>
@@ -42,7 +42,8 @@ int main(int argc, char *argv[])
     MainWindow w;
 
     // Center the window
-    w.setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, w.size(), a.desktop()->availableGeometry()));
+    if (auto *screen = a.primaryScreen())
+        w.setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, w.size(), screen->availableGeometry()));
     w.show();
 
     return a.exec();

@@ -30,6 +30,12 @@
 #include <QSize>
 #include "devicerecord.h"
 
+class AdbConnection;
+class AdbDevice;
+class BackupManager;
+class ConsoleManager;
+class KodiDataManager;
+
 /////////////////////////////////////////////////////
 
 class IpTableWidgetItem : public QTableWidgetItem {
@@ -218,6 +224,11 @@ private:
     QPushButton* setupDonateButton(QWidget* parent);
     QPushButton* donateButton;
     void setDonateButtonActive(bool active);
+
+    AdbConnection *m_adbConnection;
+    KodiDataManager *m_dataManager;
+    ConsoleManager *m_consoleManager;
+    BackupManager *m_backupManager;
 
     const QString vqurl = "http://www.jocala.com/version.txt";
     const QString busypath = "/data/local/tmp/adblink/";

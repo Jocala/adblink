@@ -24,6 +24,6 @@ void logfile(const QString& line)
     }
 
     QTextStream out(&file);
-    out << line << endl;
+    out << line << Qt::endl;
     file.close();
 }

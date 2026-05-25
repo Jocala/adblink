@@ -1,13 +1,18 @@
 #ifndef USBFILEDIALOG_H
 #define USBFILEDIALOG_H
 #include <QListWidget>
+#include <QComboBox>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QProgressBar>
 #include <QMessageBox>
 #include <QDialog>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QSplitter>
+#include <QLabel>
 
-
-namespace Ui {
-class usbfileDialog;
-}
+#include "customlistwidget.h"
 
 class usbfileDialog : public QDialog
 {
@@ -43,7 +48,6 @@ public:
     QString mcpath;
     void setTitle(QString text);
     QString buffer;
-    Ui::usbfileDialog *ui;
     QString tmpdir1;
     QString tmpstr1;
     QString commstr1;
@@ -62,6 +66,10 @@ public:
     QString rootShell;
     QTimer* operationTimer;
 
+
+    inline static const QString adbShell = QStringLiteral(" shell ");
+    inline static const QString quote1 = QStringLiteral("\"'");
+    inline static const QString quote2 = QStringLiteral("'\"");
 
 public slots:
     void on_usblistWidget1_doubleClicked(const QModelIndex &index);
@@ -86,6 +94,17 @@ private:
     void setPathCommon(QListWidget *widget, QString &currentDir, QString &previousDir, QString &currentItem, const QString &dir);
     int    fmfont;
     bool hasfocus = false;
+    bool noroot = false;
+    QString ufdlogfiledir;
+    QString scriptDir;
+
+    CustomListWidget *usblistWidget1 = nullptr;
+    CustomListWidget *usblistWidget2 = nullptr;
+    QComboBox *kodiDirs = nullptr;
+    QProgressBar *usbprogressBar = nullptr;
+    QLineEdit *customdir = nullptr;
+    QPushButton *goButton = nullptr;
+
 
 private slots:
     QString fix_directory(QString dirname);
