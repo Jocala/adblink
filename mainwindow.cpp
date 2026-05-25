@@ -22,7 +22,6 @@
     #include "program.h"
     #include "getadbdata.h"
     #include "logfile.h"
-    #include "setpdialog.h"
     #include "adbutils.h"
     #include "getlocaladb.h"
     #include "version.h"
@@ -7448,70 +7447,6 @@ bool MainWindow::renameColumn(const QString& oldColumnName, const QString& newCo
 
 
 ////////////////////////////////////////////////////////////
-
-void MainWindow::on_actionSet_Kodi_permissions_triggered()
-{
-
-
-           QString selectedDescription;
-           if (!validateDeviceSelection(selectedDescription)) {
-                      return;
-           }
-
-           DeviceRecord device = queryDeviceRecord(selectedDescription);
-
-
-           QString flag;
-
-           QString cstring;
-
-
-
-
-
-           setpDialog dialog(this);
-           dialog.setWindowModality(Qt::WindowModal);
-
-            if (stackedWidget->currentIndex() == 0)
-                   dialog.setpname(device.xbmcpackage);
-            else
-                   dialog.setpname("");
-
-
-
-           if(dialog.exec() == QDialog::Accepted)
-           {
-
-                      if (dialog.getbutton())
-                          flag="allow";
-                      else
-                          flag="deny";
-
-//    adb shell appops set --uid org.xbmc.kodi MANAGE_EXTERNAL_STORAGE allow
-//    adb shell appops get --uid org.xbmc.kodi MANAGE_EXTERNAL_STORAGE
-
-
-                      cstring = getadb()+ " shell appops set --uid "+  dialog.getpname() +" MANAGE_EXTERNAL_STORAGE "+flag;
-
-
-
-
-                      if (!getreturncode(cstring))
-                          QMessageBox::critical(this, "", "Error setting app permissions");
-                      else
-                          QMessageBox::information(this, "", "app permissions set");
-
-
-
-           }
-
-
-
-
-
-}
-
-////////////////////////////////////
 
 void MainWindow::serverlabel()
 {

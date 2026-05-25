@@ -198,7 +198,6 @@ private slots:
     void on_actionSplash_Screen_triggered();
     void on_View_Changelog_triggered();
     void on_Erase_adbLink_database_triggered();
-    void on_actionSet_Kodi_permissions_triggered();
     void on_actionGet_UID_from_APK_file_triggered();
     void on_actionOculus_VR_triggered();
     void on_actionSend_text_triggered();

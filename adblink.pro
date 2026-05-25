@@ -54,7 +54,6 @@ SOURCES += main.cpp \
     tcpipdialog.cpp \
     forcequitdialog.cpp \
     adbprefdialog.cpp \
-    setpdialog.cpp \
     sleepdialog.cpp \
     adbstring.cpp \
     oculusdialog.cpp
@@ -93,7 +92,6 @@ HEADERS += mainwindow.h \
     forcequitdialog.h \
     adbprefdialog.h \
     sleepdialog.h \
-    setpdialog.h \
     detachableprocess.h \
     adbstring.h \
     version.h \
@@ -112,7 +110,6 @@ FORMS += \
     searchdialog.ui \
     tcpipdialog.ui \
     forcequitdialog.ui \
-    setpdialog.ui \
     sleepdialog.ui
 
 RESOURCES = adbLink.qrc
