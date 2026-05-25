@@ -90,8 +90,8 @@ HEADERS += mainwindow.h \
     forcequitdialog.h \
     adbprefdialog.h \
     sleepdialog.h \
-    detachableprocess.h \
     adbstring.h \
+    program.h \
     version.h \
     oculusdialog.h
 
