@@ -104,7 +104,6 @@ FORMS += \
     editordialog.ui \
     searchdialog.ui \
     tcpipdialog.ui \
-    forcequitdialog.ui \
     sleepdialog.ui
 
 RESOURCES = adbLink.qrc
