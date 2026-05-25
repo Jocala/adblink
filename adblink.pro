@@ -61,7 +61,9 @@ SOURCES += main.cpp \
     adbprefdialog.cpp \
     sleepdialog.cpp \
     adbstring.cpp \
-    oculusdialog.cpp
+    oculusdialog.cpp \
+    kodidownloader.cpp \
+    kodiarchdialog.cpp
 
 HEADERS += mainwindow.h \
     adbconnection.h \
@@ -104,7 +106,9 @@ HEADERS += mainwindow.h \
     adbstring.h \
     program.h \
     version.h \
-    oculusdialog.h
+    oculusdialog.h \
+    kodidownloader.h \
+    kodiarchdialog.h
 
 FORMS +=
 

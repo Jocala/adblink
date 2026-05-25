@@ -35,6 +35,7 @@ class AdbDevice;
 class BackupManager;
 class ConsoleManager;
 class KodiDataManager;
+class KodiDownloader;
 
 /////////////////////////////////////////////////////
 
@@ -229,6 +230,7 @@ private:
     KodiDataManager *m_dataManager;
     ConsoleManager *m_consoleManager;
     BackupManager *m_backupManager;
+    KodiDownloader *m_kodiDownloader;
 
     const QString vqurl = "http://www.jocala.com/version.txt";
     const QString busypath = "/data/local/tmp/adblink/";

@@ -27,11 +27,13 @@
     #include "getlocaladb.h"
     #include "version.h"
     #include "point.h"
-    #include "adbconnection.h"
-    #include "adbdevice.h"
-    #include "backupmanager.h"
-    #include "consolemanager.h"
-    #include "kodidatamanager.h"
+#include "adbconnection.h"
+#include "adbdevice.h"
+#include "backupmanager.h"
+#include "consolemanager.h"
+#include "kodidatamanager.h"
+#include "kodidownloader.h"
+#include "kodiarchdialog.h"
 
 
     #ifdef __WIN32__
@@ -117,6 +119,7 @@
          , m_dataManager(new KodiDataManager(this))
          , m_consoleManager(new ConsoleManager(this))
          , m_backupManager(new BackupManager(this))
+         , m_kodiDownloader(new KodiDownloader(this))
      {
 
 
@@ -132,6 +135,10 @@
         m_dataManager->os = os;
         m_dataManager->logFileDir = logfiledir;
         m_backupManager->setDataManager(m_dataManager);
+
+        connect(m_kodiDownloader, &KodiDownloader::logMessage, this, [](const QString &msg) {
+            logfile(msg);
+        });
 
 
        if (!QFile::exists(adbfiles + "adb") && !QFile::exists(adbfiles + "adb.exe")) {
@@ -3057,108 +3064,52 @@
      void MainWindow::on_actionKodi_version()
      {
          QString selectedDescription;
-         if (!validateDeviceSelection(selectedDescription)) {
-                return;
-         }
+         if (!validateDeviceSelection(selectedDescription))
+             return;
 
          DeviceRecord device = queryDeviceRecord(selectedDescription);
-         QString cstring = "null -s " + device.daddr + " shell dumpsys package org.xbmc.kodi | grep versionName";
-         QString command = getadbOutput(cstring);
 
-         QString kversion;
-         QString installedVersion = command;
-         installedVersion = installedVersion.replace("versionName=", "").trimmed();
-
-         if (installedVersion.isEmpty()) {
-                installedVersion = "Unknown";
-                logfile("Failed to retrieve installed Kodi version.");
+         QString installedVer = m_kodiDownloader->installedVersionOnDevice(
+             getadb(), device.daddr);
+         if (installedVer.isEmpty()) {
+             installedVer = "Unknown";
+             logfile("Failed to retrieve installed Kodi version.");
          } else {
-                logfile("Installed Kodi version: " + installedVersion);
+             logfile("Installed Kodi version: " + installedVer);
          }
 
-         QNetworkAccessManager *manager = new QNetworkAccessManager(this);
-         QNetworkRequest versionRequest(QUrl("https://api.github.com/repos/xbmc/xbmc/releases/latest"));
-         versionRequest.setHeader(QNetworkRequest::UserAgentHeader, "adblink/1.0");
-         QNetworkReply *versionReply = manager->get(versionRequest);
-         QString latestVersion = "Unknown";
-         QString releaseName = "Unknown";
-         QEventLoop loop;
-         connect(versionReply, &QNetworkReply::finished, [&]() {
-             if (versionReply->error() == QNetworkReply::NoError) {
-                 QJsonDocument versionDoc = QJsonDocument::fromJson(versionReply->readAll());
-                 if (!versionDoc.isNull() && versionDoc.isObject()) {
-                     latestVersion = versionDoc.object()["tag_name"].toString();
-                     releaseName = versionDoc.object()["name"].toString();
-                     latestVersion.remove('v'); // Remove 'v' from version if present
-                 } else {
-                     logfile("Failed to parse Kodi version JSON");
-                 }
-             } else {
-                 logfile("Failed to fetch latest Kodi version: " + versionReply->errorString());
-             }
-             versionReply->deleteLater();
-             loop.quit();
-         });
-         loop.exec();
+         QString latestVer = m_kodiDownloader->fetchLatestVersion();
 
-         // Compare versions and prepare message
+         bool isUpToDate = !KodiDownloader::isNewerVersionAvailable(installedVer, latestVer);
+
+         logfile("Latest Kodi version: " + latestVer);
+
          QString message;
-         bool isUpToDate = true;
-         if (installedVersion == "Unknown" || latestVersion == "Unknown") {
-                message = "Cannot compare versions.\nInstalled Kodi Version: " + installedVersion +
-                          "\nLatest Stable Version: " + latestVersion;
+         if (installedVer == "Unknown" || latestVer == "Unknown") {
+             message = "Cannot compare versions.\n"
+                       "Installed Kodi Version: " + installedVer + "\n"
+                       "Latest Stable Version: " + latestVer;
          } else {
-                QStringList installedParts = installedVersion.split('.');
-                QStringList latestParts = latestVersion.split('.');
-
-                if (installedParts.size() >= 2 && latestParts.size() >= 2) {
-                 int installedMajor = installedParts[0].toInt();
-                 int installedMinor = installedParts[1].toInt();
-                 int latestMajor = latestParts[0].toInt();
-                 int latestMinor = latestParts[1].toInt();
-
-                 if (installedMajor < latestMajor || (installedMajor == latestMajor && installedMinor < latestMinor)) {
-                        isUpToDate = false;
-                 }
-                } else {
-                 isUpToDate = (installedVersion == latestVersion);
-                }
-
-                kversion=latestVersion.section('-', 0, 0);
-
-                message = "Installed Kodi Version: " + installedVersion +
-                          "\nLatest Stable Version: " + kversion; //latestVersion;
-                if (isUpToDate) {
-                 message += "\nYour Kodi version is up to date.";
-                } else {
-                 message += "\nA newer version of Kodi is available.";
-                }
+             message = "Installed Kodi Version: " + installedVer + "\n"
+                       "Latest Stable Version: " + latestVer + "\n"
+                     + (isUpToDate ? "Your Kodi version is up to date."
+                                   : "A newer version of Kodi is available.");
          }
 
          logfile(message);
 
-         // Display dialog based on version status
-         if (!isUpToDate && installedVersion != "Unknown" && latestVersion != "Unknown") {
-
-
-                QMessageBox msgBox(this);
-                msgBox.setWindowTitle("Kodi Version Check");
-                msgBox.setText(message + "\n\nWould you like to download " + kversion+"?");
-                QPushButton *downloadButton = msgBox.addButton("Download", QMessageBox::ActionRole);
-                msgBox.addButton(QMessageBox::Cancel);
-                msgBox.setDefaultButton(downloadButton);
-
-
-                msgBox.exec();
-
-                if (msgBox.clickedButton() == downloadButton) {
+         if (!isUpToDate && installedVer != "Unknown" && latestVer != "Unknown") {
+             QMessageBox msgBox(this);
+             msgBox.setWindowTitle("Kodi Version Check");
+             msgBox.setText(message + "\n\nWould you like to download " + latestVer + "?");
+             QPushButton *downloadBtn = msgBox.addButton("Download", QMessageBox::ActionRole);
+             msgBox.addButton(QMessageBox::Cancel);
+             msgBox.exec();
+             if (msgBox.clickedButton() == downloadBtn)
                  on_actionDownload_Kodi_triggered();
-                }
          } else {
-                QMessageBox::information(this, "Kodi Version Check", message);
+             QMessageBox::information(this, "Kodi Version Check", message);
          }
-
-         manager->deleteLater();
      }
 
 
@@ -3349,284 +3300,95 @@
 
     void MainWindow::on_actionDownload_Kodi_triggered()
     {
-         QJsonObject obj;
-         QJsonDocument doc(obj);
-         QFile jsonFile(databasedir + "adblink.json");
-         if (jsonFile.open(QIODevice::ReadOnly)) {
-   doc = QJsonDocument::fromJson(jsonFile.readAll());
-   obj = doc.object();
-   jsonFile.close();
-         } else {
-   logfile("Failed to open adblink.json");
-         }
+        QJsonObject obj;
+        QJsonDocument doc(obj);
+        QFile jsonFile(databasedir + "adblink.json");
+        if (jsonFile.open(QIODevice::ReadOnly)) {
+            doc = QJsonDocument::fromJson(jsonFile.readAll());
+            obj = doc.object();
+            jsonFile.close();
+        }
 
-         QString downloadDir = obj["install"].toString();
-         if (downloadDir.isEmpty()) {
-   downloadDir = QDir::homePath();
-         }
+        QString downloadDir = obj["install"].toString();
+        if (downloadDir.isEmpty())
+            downloadDir = QDir::homePath();
 
-         QDir().mkpath(downloadDir);
+        QString kodiVersion = m_kodiDownloader->fetchLatestVersion();
 
-         QNetworkAccessManager *manager = new QNetworkAccessManager(this);
-         QNetworkRequest versionRequest(QUrl("https://api.github.com/repos/xbmc/xbmc/releases/latest"));
-         versionRequest.setHeader(QNetworkRequest::UserAgentHeader, "adblink/1.0");
-         QNetworkReply *versionReply = manager->get(versionRequest);
-         QString kodiVersion = "Unknown";
-         QEventLoop loop;
-         connect(versionReply, &QNetworkReply::finished, [&]() {
-             if (versionReply->error() == QNetworkReply::NoError) {
-                 QJsonDocument versionDoc = QJsonDocument::fromJson(versionReply->readAll());
-                 if (!versionDoc.isNull() && versionDoc.isObject()) {
-                     kodiVersion = versionDoc.object()["name"].toString();
-                     if (kodiVersion.isEmpty()) {
-                         kodiVersion = versionDoc.object()["tag_name"].toString();
-                     }
-                     kodiVersion.remove('v'); // Remove 'v' from version if present
-                 }
-             } else {
-                 logfile("Failed to fetch Kodi version: " + versionReply->errorString());
-             }
-             versionReply->deleteLater();
-             loop.quit();
-         });
-         loop.exec();
+        KodiArchDialog archDialog(kodiVersion, this);
+        if (archDialog.exec() != QDialog::Accepted)
+            return;
 
-         QDialog dialog(nullptr);
-         dialog.setStyleSheet("QDialog { border: 1px solid grey; }");
-         dialog.setWindowTitle("Select Download Option");
-         dialog.setFixedWidth(250);
-         dialog.setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint);
-         QVBoxLayout *layout = new QVBoxLayout(&dialog);
-         QLabel *label = new QLabel("Kodi " + kodiVersion);
-         QButtonGroup *group = new QButtonGroup(&dialog);
-         QRadioButton *optV7a = new QRadioButton("Download v7a (32Bit)");
-         QRadioButton *optV8a = new QRadioButton("Download v8a (64Bit)");
-         QRadioButton *optWebsite = new QRadioButton("Open website");
-         optV7a->setChecked(true);
-         group->addButton(optV7a, 0);
-         group->addButton(optV8a, 1);
-         group->addButton(optWebsite, 2);
-         layout->addWidget(label, 0, Qt::AlignHCenter);
-         layout->addWidget(optV7a);
-         layout->addWidget(optV8a);
-         layout->addWidget(optWebsite);
-         QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+        int arch = archDialog.selectedArch();
+        if (arch == 2) {
+            QDesktopServices::openUrl(QUrl("https://kodi.tv/download/android"));
+            return;
+        }
 
-         buttons->setCenterButtons(true);
-         layout->addWidget(buttons, 0, Qt::AlignHCenter);
+        if (kodiVersion == "Unknown") {
+            QMessageBox::critical(this, "Error",
+                "Cannot download: Kodi version unknown. See log");
+            logfile("Download aborted: Unknown Kodi version");
+            return;
+        }
 
-         connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
-         connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
-         if (dialog.exec() != QDialog::Accepted) {
-   return;
-         }
+        disconnect(m_kodiDownloader, &KodiDownloader::downloadCompleted, this, nullptr);
+        disconnect(m_kodiDownloader, &KodiDownloader::downloadFailed, this, nullptr);
+        disconnect(m_kodiDownloader, &KodiDownloader::downloadProgress, this, nullptr);
 
-         int selected = group->checkedId();
-         if (selected == 2) {
-   QDesktopServices::openUrl(QUrl("https://kodi.tv/download/android"));
-   return;
-         }
+        progressBar->setHidden(false);
+        progressBar->setValue(0);
+        server_running->setText("Downloading Kodi...");
+        container->setHidden(true);
 
-         if (kodiVersion == "Unknown") {
-   QMessageBox::critical(nullptr, "Error", "Cannot download: Kodi version unknown. See log");
-   logfile("Download aborted: Unknown Kodi version");
-   return;
-         }
+        auto hideProgress = [this]() {
+            progressBar->setHidden(true);
+            progressBar->setValue(0);
+            container->setHidden(false);
+            server_running->setText("");
+            serverlabel();
+        };
 
-         QString baseUrl = "https://mirrors.kodi.tv/releases/android/";
-         QString arch = (selected == 0 ? "arm/kodi-" : "arm64-v8a/kodi-");
-         QString filename = "kodi-" + kodiVersion + (selected == 0 ? "-armeabi-v7a.apk" : "-arm64-v8a.apk");
-         QUrl url(baseUrl + arch + kodiVersion + (selected == 0 ? "-armeabi-v7a.apk" : "-arm64-v8a.apk"));
-         QNetworkRequest request(url);
-         request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
-         QString filePath = QDir(downloadDir).filePath(filename);
-         QFile *file = new QFile(filePath);
-         if (file->open(QIODevice::WriteOnly)) {
-   QNetworkReply *reply = manager->get(request);
-   connect(reply, &QNetworkReply::readyRead, [=]() {
-       file->write(reply->readAll());
-   });
-   connect(reply, &QNetworkReply::finished, [this, reply, file, filePath]() { // Added 'this' to capture
-       file->close();
-       if (reply->error() == QNetworkReply::NoError) {
-           // Custom QMessageBox with OK and Install buttons
-           QMessageBox msgBox(nullptr);
-           msgBox.setWindowTitle("Download Success");
-           msgBox.setText("Kodi downloaded. See log for details");
-           QAbstractButton* okButton = msgBox.addButton(QMessageBox::Ok);
-           QAbstractButton* installButton = msgBox.addButton("Install", QMessageBox::ActionRole);
+        connect(m_kodiDownloader, &KodiDownloader::downloadProgress,
+                this, [this](qint64 received, qint64 total) {
+            if (total > 0)
+                progressBar->setValue(static_cast<int>(received * 100 / total));
+        });
 
-           msgBox.exec();
+        connect(m_kodiDownloader, &KodiDownloader::downloadCompleted,
+                this, [this, hideProgress](const QString &filePath) {
+            hideProgress();
+            logfile("The Kodi APK file has been downloaded successfully to:\n" + filePath);
 
-           if (msgBox.clickedButton() == installButton) {
+            QMessageBox msgBox(this);
+            msgBox.setWindowTitle("Download Success");
+            msgBox.setText("Kodi downloaded. See log for details");
+            QAbstractButton *installBtn = msgBox.addButton("Install", QMessageBox::ActionRole);
+            QAbstractButton *logBtn = msgBox.addButton("Logfile", QMessageBox::ActionRole);
+            msgBox.addButton(QMessageBox::Ok);
+            msgBox.exec();
 
+            if (msgBox.clickedButton() == installBtn) {
+                QString desc;
+                if (validateDeviceSelection(desc)) {
+                    DeviceRecord device = queryDeviceRecord(desc);
+                    installAPK(filePath);
+                }
+            } else if (msgBox.clickedButton() == logBtn) {
+                on_actionView_adbLink_Log_triggered();
+            }
+        });
 
-               QString selectedDescription;
-               if (!validateDeviceSelection(selectedDescription)) {
-                   return;
-               }
+        connect(m_kodiDownloader, &KodiDownloader::downloadFailed,
+                this, [hideProgress](const QString &error) {
+            hideProgress();
+            logfile("Kodi download failed: " + error);
+            QMessageBox::critical(nullptr, "Download Failed",
+                "Failed to download Kodi. See log");
+        });
 
-               DeviceRecord device = queryDeviceRecord(selectedDescription);
-
-
-               this->installAPK(filePath);
-
-
-
-
-           }
-
-           logfile("The Kodi APK file has been downloaded successfully to:\n" + filePath);
-       } else {
-           QMessageBox::critical(nullptr, "Download Failed", "Failed to download Kodi. See log");
-           logfile("Kodi download failed\n" + reply->errorString());
-       }
-       file->deleteLater();
-       reply->deleteLater();
-   });
-   connect(reply, &QNetworkReply::errorOccurred, [=](QNetworkReply::NetworkError) {
-       file->close();
-       file->deleteLater();
-       reply->deleteLater();
-   });
-         } else {
-   QMessageBox::critical(nullptr, "File Error", "Failed to open file for writing at:\n" + filePath);
-   file->deleteLater();
-         }
+        m_kodiDownloader->startDownload(kodiVersion, arch, downloadDir);
     }
-
-/*
-    void MainWindow::on_actionDownload_Kodi_triggered()
-    {
-
-
-
-
-         QJsonObject obj;
-         QJsonDocument doc(obj);
-         QFile jsonFile(databasedir + "adblink.json");
-         if (jsonFile.open(QIODevice::ReadOnly)) {
-   doc = QJsonDocument::fromJson(jsonFile.readAll());
-   obj = doc.object();
-   jsonFile.close();
-         } else {
-   logfile("Failed to open adblink.json");
-         }
-
-         QString downloadDir = obj["install"].toString();
-         if (downloadDir.isEmpty()) {
-   downloadDir = QDir::homePath();
-         }
-
-         QDir().mkpath(downloadDir);
-
-         QNetworkAccessManager *manager = new QNetworkAccessManager(this);
-         QNetworkRequest versionRequest(QUrl("https://api.github.com/repos/xbmc/xbmc/releases/latest"));
-         versionRequest.setHeader(QNetworkRequest::UserAgentHeader, "adblink/1.0");
-         QNetworkReply *versionReply = manager->get(versionRequest);
-         QString kodiVersion = "Unknown";
-         QEventLoop loop;
-         connect(versionReply, &QNetworkReply::finished, [&]() {
-             if (versionReply->error() == QNetworkReply::NoError) {
-                 QJsonDocument versionDoc = QJsonDocument::fromJson(versionReply->readAll());
-                 if (!versionDoc.isNull() && versionDoc.isObject()) {
-                     kodiVersion = versionDoc.object()["name"].toString();
-                     if (kodiVersion.isEmpty()) {
-                         kodiVersion = versionDoc.object()["tag_name"].toString();
-                     }
-                     kodiVersion.remove('v'); // Remove 'v' from version if present
-                 }
-             } else {
-                 logfile("Failed to fetch Kodi version: " + versionReply->errorString());
-             }
-             versionReply->deleteLater();
-             loop.quit();
-         });
-         loop.exec();
-
-         QDialog dialog(nullptr);
-         dialog.setStyleSheet("QDialog { border: 1px solid grey; }");
-         dialog.setWindowTitle("Select Download Option");
-         dialog.setFixedWidth(250);
-         dialog.setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint);
-         QVBoxLayout *layout = new QVBoxLayout(&dialog);
-         QLabel *label = new QLabel("Kodi " + kodiVersion);
-         QButtonGroup *group = new QButtonGroup(&dialog);
-         QRadioButton *optV7a = new QRadioButton("Download v7a (32Bit)");
-         QRadioButton *optV8a = new QRadioButton("Download v8a (64Bit)");
-         QRadioButton *optWebsite = new QRadioButton("Open website");
-         optV7a->setChecked(true);
-         group->addButton(optV7a, 0);
-         group->addButton(optV8a, 1);
-         group->addButton(optWebsite, 2);
-         layout->addWidget(label, 0, Qt::AlignHCenter);
-         layout->addWidget(optV7a);
-         layout->addWidget(optV8a);
-         layout->addWidget(optWebsite);
-         QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-
-         buttons->setCenterButtons(true);
-         layout->addWidget(buttons, 0, Qt::AlignHCenter);
-
-
-         connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
-         connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
-         if (dialog.exec() != QDialog::Accepted) {
-   return;
-         }
-
-         int selected = group->checkedId();
-         if (selected == 2) {
-   QDesktopServices::openUrl(QUrl("https://kodi.tv/download/android"));
-   return;
-         }
-
-         if (kodiVersion == "Unknown") {
-   QMessageBox::critical(nullptr, "Error", "Cannot download: Kodi version unknown. See log");
-   logfile("Download aborted: Unknown Kodi version");
-   return;
-         }
-
-         QString baseUrl = "https://mirrors.kodi.tv/releases/android/";
-         QString arch = (selected == 0 ? "arm/kodi-" : "arm64-v8a/kodi-");
-         QString filename = "kodi-" + kodiVersion + (selected == 0 ? "-armeabi-v7a.apk" : "-arm64-v8a.apk");
-         QUrl url(baseUrl + arch + kodiVersion + (selected == 0 ? "-armeabi-v7a.apk" : "-arm64-v8a.apk"));
-         QNetworkRequest request(url);
-         request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
-         QString filePath = QDir(downloadDir).filePath(filename);
-         QFile *file = new QFile(filePath);
-         if (file->open(QIODevice::WriteOnly)) {
-   QNetworkReply *reply = manager->get(request);
-   connect(reply, &QNetworkReply::readyRead, [=]() {
-       file->write(reply->readAll());
-   });
-   connect(reply, &QNetworkReply::finished, [=]() {
-       file->close();
-       if (reply->error() == QNetworkReply::NoError) {
-           QMessageBox::information(nullptr, "Download Success", "Kodi downloaded. See log for details");
-           logfile("The Kodi APK file has been downloaded successfully to:\n" + filePath);
-       } else {
-           QMessageBox::critical(nullptr, "Download Failed", "Failed to download Kodi. See log");
-           logfile("Kodi download failed\n" + reply->errorString());
-       }
-       file->deleteLater();
-       reply->deleteLater();
-   });
-   connect(reply, &QNetworkReply::errorOccurred, [=](QNetworkReply::NetworkError) {
-       file->close();
-       file->deleteLater();
-       reply->deleteLater();
-   });
-         } else {
-   QMessageBox::critical(nullptr, "File Error", "Failed to open file for writing at:\n" + filePath);
-   file->deleteLater();
-         }
-
-
-
-    }
-
-*/
 
 
     ////////////////////////////////////////////////////////
