@@ -95,12 +95,7 @@ HEADERS += mainwindow.h \
     version.h \
     oculusdialog.h
 
-FORMS += \
-    restdialog.ui \
-    backupdialog.ui \
-    listfiledialog.ui \
-    keyboarddialog.ui \
-    searchdialog.ui
+FORMS +=
 
 RESOURCES = adbLink.qrc
 

@@ -4,9 +4,9 @@
 #include <QDialog>
 #include <QStringList>
 
-namespace Ui {
-class restDialog;
-}
+class QLabel;
+class QListWidget;
+class QPushButton;
 
 class restDialog : public QDialog
 {
@@ -24,7 +24,9 @@ private slots:
     void on_okButton_clicked();
 
 private:
-    Ui::restDialog *ui;
+    QListWidget *m_listDirectories;
+    QPushButton *m_okButton;
+    QPushButton *m_cancelButton;
 };
 
 #endif // RESTDIALOG_H
