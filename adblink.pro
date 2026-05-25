@@ -47,8 +47,7 @@ SOURCES += main.cpp \
     cachedialog.cpp \
     keyboarddialog.cpp \
     listfiledialog.cpp \
-    klogdialog.cpp \
-    oslogdialog.cpp \
+    logdialog.cpp \
     editordialog.cpp \
     searchdialog.cpp \
     tcpipdialog.cpp \
@@ -84,8 +83,7 @@ HEADERS += mainwindow.h \
     backupdialog.h \
     cachedialog.h \
     keyboarddialog.h \
-    klogdialog.h \
-    oslogdialog.h \
+    logdialog.h \
     editordialog.h \
     searchdialog.h \
     tcpipdialog.h \
@@ -104,8 +102,6 @@ FORMS += \
     backupdialog.ui \
     listfiledialog.ui \
     keyboarddialog.ui \
-    klogdialog.ui \
-    oslogdialog.ui \
     editordialog.ui \
     searchdialog.ui \
     tcpipdialog.ui \

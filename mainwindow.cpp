@@ -12,7 +12,7 @@
     #include "datadialog.h"
     #include "forcequitdialog.h"
     #include "restdialog.h"
-    #include "klogdialog.h"
+    #include "logdialog.h"
     #include "tcpipdialog.h"
     #include "adbprefdialog.h"
     #include "sleepdialog.h"
@@ -2225,10 +2225,10 @@
         device.filepath=xpath;
 
         logfile("opening kodi log");
-        klogDialog klogdialog;
-        klogdialog.passdata(getadb(),device.data_root,device.filepath,device.xbmcpackage);
-        klogdialog.setModal(true);
-        klogdialog.exec();
+        logDialog logdialog;
+        logdialog.loadRemoteLog(getadb(), device.filepath);
+        logdialog.setModal(true);
+        logdialog.exec();
 
     }
 
