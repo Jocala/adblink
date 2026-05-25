@@ -91,6 +91,7 @@ void CustomListWidget::contextMenuEvent(QContextMenuEvent *event)
 
 void CustomListWidget::mousePressEvent(QMouseEvent *event)
 {
+    emit focusRequested();
     qDebug() << "mousePressEvent called, pos:" << event->pos();
     QListWidgetItem *item = itemAt(event->pos());
     if (item) {

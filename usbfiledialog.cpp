@@ -30,7 +30,6 @@ usbfileDialog::usbfileDialog(bool iskodi, int fmfont, QWidget *parent) :
     usbprogressBar = new QProgressBar(this);
     goButton = new QPushButton(tr("Go"), this);
     customdir = new QLineEdit(this);
-    customdir->setMaxLength(50);
     QFontMetrics fm(customdir->font());
     customdir->setFixedWidth(fm.horizontalAdvance(QString(30, 'X')) + 10);
 
@@ -43,6 +42,7 @@ usbfileDialog::usbfileDialog(bool iskodi, int fmfont, QWidget *parent) :
     topLayout->addWidget(kodiDirs);
     topLayout->addWidget(goButton);
     topLayout->addWidget(customdir);
+    topLayout->addStretch(1);
     mainLayout->addLayout(topLayout);
 
     auto *listLayout = new QHBoxLayout();
@@ -694,10 +694,10 @@ void usbfileDialog::on_goButton_clicked()
 
 
 
-    if (usblistWidget2->hasFocus())
-        setPath2(xpath);
-      else
+    if (hasfocus)
         setPath1(xpath);
+      else
+        setPath2(xpath);
 
 
 
