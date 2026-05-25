@@ -1,12 +1,13 @@
 #include "editordialog.h"
-#include "ui_editordialog.h"
 #include "searchdialog.h"
-#include<QClipboard>
+
+#include <QClipboard>
+#include <QHBoxLayout>
+#include <QLabel>
 #include <QMessageBox>
-
-
-
-
+#include <QPushButton>
+#include <QTextBrowser>
+#include <QVBoxLayout>
 
 #ifdef Q_OS_LINUX
  int edos=0;
@@ -16,51 +17,75 @@
 int edos=2;
 #endif
 
-// QClipboard *edclipboard = QApplication::clipboard();
 QClipboard *edclipboard = nullptr;
 
 editorDialog::editorDialog(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::editorDialog)
+    QDialog(parent)
 {
-    ui->setupUi(this);
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    resize(580, 610);
+    setMinimumSize(300, 200);
+    setWindowTitle(QStringLiteral("editor"));
 
+    auto *mainLayout = new QVBoxLayout(this);
 
+    m_editorfilename = new QLabel(QStringLiteral("filename"), this);
+    m_editorfilename->setObjectName(QStringLiteral("editorfilename"));
+    mainLayout->addWidget(m_editorfilename);
+
+    m_editorBrowser = new QTextBrowser(this);
+    m_editorBrowser->setObjectName(QStringLiteral("editorBrowser"));
+    m_editorBrowser->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    m_editorBrowser->setReadOnly(false);
+    mainLayout->addWidget(m_editorBrowser, 1);
+
+    auto *buttonLayout = new QHBoxLayout;
+
+    m_editquitButton = new QPushButton(QStringLiteral("Cancel"), this);
+    m_editquitButton->setObjectName(QStringLiteral("editquitButton"));
+    buttonLayout->addWidget(m_editquitButton);
+
+    m_copyButton = new QPushButton(QStringLiteral("Copy"), this);
+    m_copyButton->setObjectName(QStringLiteral("copyButton"));
+    buttonLayout->addWidget(m_copyButton);
+
+    m_searchButton = new QPushButton(QStringLiteral("Search"), this);
+    m_searchButton->setObjectName(QStringLiteral("searchButton"));
+    buttonLayout->addWidget(m_searchButton);
+
+    m_saveButton = new QPushButton(QStringLiteral("Save"), this);
+    m_saveButton->setObjectName(QStringLiteral("saveButton"));
+    buttonLayout->addWidget(m_saveButton);
+
+    mainLayout->addLayout(buttonLayout);
+
+    connect(m_editquitButton, &QPushButton::clicked, this, &QDialog::reject);
+    connect(m_saveButton, &QPushButton::clicked, this, &QDialog::accept);
 }
 
 editorDialog::~editorDialog()
 {
-    delete ui;
 }
-
-/////////////////////////////////////////////////////////////
 
 void editorDialog::seteditor(const QString &xmlfile)
 {
-    ui->editorBrowser->setText(xmlfile);
-
+    m_editorBrowser->setText(xmlfile);
 }
 
 void editorDialog::on_copyButton_clicked()
 {
-    edclipboard->setText(ui->editorBrowser->toPlainText());
-
+    edclipboard->setText(m_editorBrowser->toPlainText());
 }
 
-///////////////////////////////////////////////////
 QString editorDialog::xmlfile() {
-    return ui->editorBrowser->toPlainText();
+    return m_editorBrowser->toPlainText();
 }
 
-///////////////////////////////////////////////////
 void editorDialog::setfilename(const QString &filename)
 {
-    ui->editorfilename->setText(filename);
+    m_editorfilename->setText(filename);
 }
 
-
-///////////////////////////////////////////
 void editorDialog::on_searchButton_clicked()
 {
     searchDialog sdialog;
@@ -71,9 +96,8 @@ void editorDialog::on_searchButton_clicked()
        {
         QString fstring = sdialog.esearch1();
         QString rstring = sdialog.esearch2();
-        QString tempstring = ui->editorBrowser->toPlainText();
+        QString tempstring = m_editorBrowser->toPlainText();
         tempstring.replace(fstring,rstring);
-        ui->editorBrowser->setText(tempstring);
+        m_editorBrowser->setText(tempstring);
        }
-
 }

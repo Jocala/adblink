@@ -3,20 +3,20 @@
 
 #include <QDialog>
 
-namespace Ui {
-class helpDialog;
-}
+class QTextBrowser;
+class QPushButton;
 
 class helpDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit helpDialog(QWidget *parent = 0);
+    explicit helpDialog(QWidget *parent = nullptr);
     ~helpDialog();
 
 private:
-    Ui::helpDialog *ui;
+    QTextBrowser *m_textBrowser;
+    QPushButton *m_pushButton;
 };
 
 #endif // HELPDIALOG_H
