@@ -97,7 +97,6 @@ HEADERS += mainwindow.h \
 
 FORMS += \
     helpdialog.ui \
-    adblogdialog.ui \
     restdialog.ui \
     backupdialog.ui \
     listfiledialog.ui \
