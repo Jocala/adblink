@@ -37,6 +37,7 @@ class CacheManager;
 class ConsoleManager;
 class FileManager;
 class KodiDataManager;
+class KodiDownloadCoordinator;
 class KodiDownloader;
 class KodiSetupManager;
 class RemotePushManager;
@@ -241,6 +242,7 @@ private:
     XmlEditorManager *m_xmlEditor;
     bool m_isBusy = false;
     KodiDownloader *m_kodiDownloader;
+    KodiDownloadCoordinator *m_kodiDownloadCoordinator;
     KodiSetupManager *m_kodiSetupManager;
     RemotePushManager *m_remotePushManager;
 

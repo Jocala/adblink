@@ -43,6 +43,7 @@
 #include "kodidatamanager.h"
 #include "kodidownloader.h"
 #include "kodiarchdialog.h"
+#include "kodidownloadcoordinator.h"
 #include "kodisetupmanager.h"
     #include "oculusmanager.h"
     #include "preferencesmanager.h"
@@ -140,6 +141,7 @@
            , m_wirelessAdbManager(new WirelessAdbManager(this))
            , m_xmlEditor(new XmlEditorManager(this))
            , m_kodiDownloader(new KodiDownloader(this))
+           , m_kodiDownloadCoordinator(new KodiDownloadCoordinator(this))
            , m_kodiSetupManager(new KodiSetupManager(this))
            , m_remotePushManager(new RemotePushManager(this))
      {
@@ -2048,95 +2050,18 @@
 
     void MainWindow::on_actionDownload_Kodi_triggered()
     {
-        QJsonObject obj;
-        QJsonDocument doc(obj);
-        QFile jsonFile(databasedir + "adblink.json");
-        if (jsonFile.open(QIODevice::ReadOnly)) {
-            doc = QJsonDocument::fromJson(jsonFile.readAll());
-            obj = doc.object();
-            jsonFile.close();
-        }
-
-        QString downloadDir = obj["install"].toString();
-        if (downloadDir.isEmpty())
-            downloadDir = QDir::homePath();
-
-        QString kodiVersion = m_kodiDownloader->fetchLatestVersion();
-
-        KodiArchDialog archDialog(kodiVersion, this);
-        if (archDialog.exec() != QDialog::Accepted)
-            return;
-
-        int arch = archDialog.selectedArch();
-        if (arch == 2) {
-            QDesktopServices::openUrl(QUrl("https://kodi.tv/download/android"));
-            return;
-        }
-
-        if (kodiVersion == "Unknown") {
-            QMessageBox::critical(this, "Error",
-                "Cannot download: Kodi version unknown. See log");
-            logfile("Download aborted: Unknown Kodi version");
-            return;
-        }
-
-        disconnect(m_kodiDownloader, &KodiDownloader::downloadCompleted, this, nullptr);
-        disconnect(m_kodiDownloader, &KodiDownloader::downloadFailed, this, nullptr);
-        disconnect(m_kodiDownloader, &KodiDownloader::downloadProgress, this, nullptr);
-
-        progressBar->setHidden(false);
-        progressBar->setValue(0);
-        server_running->setText("Downloading Kodi...");
-        container->setHidden(true);
-
-        auto hideProgress = [this]() {
-            progressBar->setHidden(true);
-            progressBar->setValue(0);
-            container->setHidden(false);
-            server_running->setText("");
-            serverlabel();
-        };
-
-        connect(m_kodiDownloader, &KodiDownloader::downloadProgress,
-                this, [this](qint64 received, qint64 total) {
-            if (total > 0)
-                progressBar->setValue(static_cast<int>(received * 100 / total));
-        });
-
-        connect(m_kodiDownloader, &KodiDownloader::downloadCompleted,
-                this, [this, hideProgress](const QString &filePath) {
-            hideProgress();
-            logfile("The Kodi APK file has been downloaded successfully to:\n" + filePath);
-
-            QMessageBox msgBox(this);
-            msgBox.setWindowTitle("Download Success");
-            msgBox.setText("Kodi downloaded. See log for details");
-            QAbstractButton *installBtn = msgBox.addButton("Install", QMessageBox::ActionRole);
-            QAbstractButton *logBtn = msgBox.addButton("Logfile", QMessageBox::ActionRole);
-            msgBox.addButton(QMessageBox::Ok);
-            msgBox.exec();
-
-            if (msgBox.clickedButton() == installBtn) {
+        m_kodiDownloadCoordinator->downloadKodi(this, databasedir, m_kodiDownloader,
+            progressBar, server_running, container,
+            [this](const QString &filePath) {
                 QString desc;
-                if (validateDeviceSelection(desc)) {
-                    DeviceRecord device = queryDeviceRecord(desc);
+                if (validateDeviceSelection(desc))
                     installAPK(filePath);
-                }
-            } else if (msgBox.clickedButton() == logBtn) {
-                on_actionView_adbLink_Log_triggered();
-            }
-        });
-
-        connect(m_kodiDownloader, &KodiDownloader::downloadFailed,
-                this, [hideProgress](const QString &error) {
-            hideProgress();
-            logfile("Kodi download failed: " + error);
-            QMessageBox::critical(nullptr, "Download Failed",
-                "Failed to download Kodi. See log");
-        });
-
-        m_kodiDownloader->startDownload(kodiVersion, arch, downloadDir);
+                return true;
+            },
+            [this]() { on_actionView_adbLink_Log_triggered(); },
+            [this]() { serverlabel(); });
     }
+
 
 
     /////////////////////////////////////////////////////////
