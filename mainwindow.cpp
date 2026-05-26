@@ -38,6 +38,7 @@
 #include "splashscreenmanager.h"
 #include "timermanager.h"
 #include "uninstallmanager.h"
+#include "wirelessadbmanager.h"
 #include "xmleditormanager.h"
 #include "kodidatamanager.h"
 #include "kodidownloader.h"
@@ -136,6 +137,7 @@
            , m_splashScreenManager(new SplashScreenManager(this))
            , m_timerManager(new TimerManager(this))
            , m_uninstallManager(new UninstallManager(this))
+           , m_wirelessAdbManager(new WirelessAdbManager(this))
            , m_xmlEditor(new XmlEditorManager(this))
            , m_kodiDownloader(new KodiDownloader(this))
            , m_kodiSetupManager(new KodiSetupManager(this))
@@ -1898,80 +1900,14 @@
     void MainWindow::on_actionWireless_ADBD_triggered()
     {
         QString selectedDescription;
-        if (!validateDeviceSelection(selectedDescription)) {
-                return;
-        }
+        if (!validateDeviceSelection(selectedDescription))
+            return;
 
         DeviceRecord device = queryDeviceRecord(selectedDescription);
 
-        if (!device.isusb) {
-                QMessageBox::critical(this, "", "USB devices only!");
-                return;
-        }
-
-        QStringList args;
-        QString command;
-        QString cstring;
-
-
-
-        cstring = "null -s " +device.daddr+ " shell ip route";
-        command = getadbOutput(cstring);
-
-        QString ip;
-        {
-                QRegularExpression re(R"(src\s+(\d+\.\d+\.\d+\.\d+))");
-                QRegularExpressionMatch match = re.match(command);
-                if (match.hasMatch())
-              ip = match.captured(1);
-        }
-
-        logfile("Device IP: " + ip);
-
-        tcpipDialog dialog;
-
-
-        cstring = "null  -s "+device.daddr+" shell getprop persist.adb.tcp.port";
-        command = getadbOutput(cstring);
-        logfile("shell getprop persist.adb.tcp.port: " + command);
-
-        dialog.settcplabel("Device IP: " + ip);
-
-
-        if(dialog.exec() == QDialog::Accepted)
-        {
-
-                cstring = "null -s "+device.daddr+" tcpip 5555";
-                command = getadbOutput(cstring);
-                logfile(command);
-
-
-                QTimer::singleShot(2000, this, [this, ip]() {
-
-                    // Connect over Wi-Fi
-                    QString cstring = "null connect " + ip + ":5555";
-                    QString command = getadbOutput(cstring);
-                    logfile("adb connect: " + command);
-
-
-                    if (command.contains("connected to"))
-                    {
-                        QMessageBox::information(this, "Success",
-                                                 "Wireless ADB enabled for " + ip);
-
-
-                         cstring = "null disconnect " + ip + ":5555";
-                        command = getadbOutput(cstring);
-                        logfile("adb disconnect: " + command);
-                    }
-                    else
-                    {
-                        QMessageBox::warning(this, "Failure",
-                                             "Failed to connect over TCP/IP to " + ip);
-                    }
-                });
-        }
+        m_wirelessAdbManager->enableWirelessAdb(this, device, getadb());
     }
+
 
 
 

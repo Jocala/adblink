@@ -77,6 +77,7 @@ SOURCES += main.cpp \
     splashscreenmanager.cpp \
     timermanager.cpp \
     uninstallmanager.cpp \
+    wirelessadbmanager.cpp \
     xmleditormanager.cpp
 
 HEADERS += mainwindow.h \
@@ -136,6 +137,7 @@ HEADERS += mainwindow.h \
     splashscreenmanager.h \
     timermanager.h \
     uninstallmanager.h \
+    wirelessadbmanager.h \
     xmleditormanager.h
 
 FORMS +=

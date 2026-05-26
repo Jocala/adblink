@@ -46,6 +46,7 @@ class DataMoveManager;
 class SplashScreenManager;
 class TimerManager;
 class UninstallManager;
+class WirelessAdbManager;
 class XmlEditorManager;
 
 /////////////////////////////////////////////////////
@@ -236,6 +237,7 @@ private:
     SplashScreenManager *m_splashScreenManager;
     TimerManager *m_timerManager;
     UninstallManager *m_uninstallManager;
+    WirelessAdbManager *m_wirelessAdbManager;
     XmlEditorManager *m_xmlEditor;
     bool m_isBusy = false;
     KodiDownloader *m_kodiDownloader;
