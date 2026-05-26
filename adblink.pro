@@ -68,6 +68,7 @@ SOURCES += main.cpp \
     kodiarchdialog.cpp \
     kodisetupmanager.cpp \
     preferencesmanager.cpp \
+    remotepushmanager.cpp \
     datamovemanager.cpp \
     deviceeditor.cpp \
     filemanager.cpp \
@@ -124,6 +125,7 @@ HEADERS += mainwindow.h \
     kodiarchdialog.h \
     kodisetupmanager.h \
     preferencesmanager.h \
+    remotepushmanager.h \
     datamovemanager.h \
     deviceeditor.h \
     filemanager.h \

@@ -43,6 +43,7 @@
 #include "kodisetupmanager.h"
     #include "oculusmanager.h"
     #include "preferencesmanager.h"
+#include "remotepushmanager.h"
     #include "deviceeditor.h"
 
     #ifdef __WIN32__
@@ -134,6 +135,7 @@
            , m_xmlEditor(new XmlEditorManager(this))
            , m_kodiDownloader(new KodiDownloader(this))
            , m_kodiSetupManager(new KodiSetupManager(this))
+           , m_remotePushManager(new RemotePushManager(this))
      {
 
 
@@ -1288,114 +1290,13 @@
 
     void MainWindow::on_actionPush_remote_triggered()
     {
+        QString selectedDescription;
+        if (!validateDeviceSelection(selectedDescription))
+            return;
 
-    QString cstring;
-    QString command;
-    QString mcpath="";
+        DeviceRecord device = queryDeviceRecord(selectedDescription);
 
-    QString selectedDescription;
-    if (!validateDeviceSelection(selectedDescription)) {
-               return;
-    }
-
-    DeviceRecord device = queryDeviceRecord(selectedDescription);
-
-
-    if (!::isPackageInstalled(getadb(), device.xbmcpackage))
-    { QMessageBox::critical(
-                   this,
-                   "",
-                   device.xbmcpackage+" not installed");
-               return;
-    }
-
-
-
-
-    mcpath = resolveKodiPath(getadb(), "/sdcard/", device.xbmcpackage, false);
-
-
-
-
-    cstring = getadb() + " shell ls "+mcpath;
-
-    command=getadbOutput(cstring);
-
-    if (command.contains("No such file or directory"))
-    {
-               QMessageBox::critical(
-                   this,
-                   "",
-                   "Kodi data not found"+mcpath);
-               return;
-    }
-
-    mcpath = mcpath+"/userdata/keymaps/";
-    cstring = getadb() + " shell ls "+mcpath;
-
-    command=getadbOutput(cstring);
-
-    if (command.contains("No such file or directory"))
-    {
-               cstring = getadb() + " mkdir -p "+ mcpath;
-               command=getadbOutput(cstring);
-    }
-
-
-
-
-    QString fileName = QFileDialog::getOpenFileName(this,
-                                                    "Choose remote xml file", QDir::homePath(), tr("Files (*.xml)"));
-
-    if (!fileName.isEmpty() )
-    {
-
-
-               QMessageBox::StandardButton reply;
-               reply = QMessageBox::question(this, "Push", fileName+" selected. Continue?",QMessageBox::Yes|QMessageBox::No);
-
-               if (reply == QMessageBox::No)
-                   return;
-
-
-               cstring = getadb() + " push "+'"'+fileName+'"'+ " "+mcpath+"/keyboard.xml";
-               command=getadbOutput(cstring);
-
-
-
-
-
-               logfile("push remote:"+command);
-
-
-
-               if (command.contains("bytes"))
-
-
-               {
-
-
-                   QMessageBox::information(this,"","Remote xml installed.");
-
-
-               }
-               else
-
-               {
-
-                   QMessageBox::critical(
-                       this,
-                       "",
-                       "Remote xml installation failed.");}
-
-
-
-    }
-
-
-
-
-
+        m_remotePushManager->pushRemoteXml(this, device, getadb());
     }
 
 
