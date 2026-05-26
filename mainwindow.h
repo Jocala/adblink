@@ -40,6 +40,7 @@ class FileManager;
 class KodiDataManager;
 class KodiDownloadCoordinator;
 class KodiDownloader;
+class KodiLogManager;
 class KodiSetupManager;
 class RemotePushManager;
 class ScreenCapManager;
@@ -162,9 +163,8 @@ private slots:
     bool mount_system(QString mnt);
     bool fileExists(QString path);
     bool is_su();
-    QString strip(QString str);
     void kill_server();
-    void androidLog();
+    QString strip(QString str);
     void on_actionReboot_triggered();
     void deleteRecord(QString descrip);
     bool isConnectedToNetwork();
@@ -245,6 +245,7 @@ private:
     bool m_isBusy = false;
     KodiDownloader *m_kodiDownloader;
     KodiDownloadCoordinator *m_kodiDownloadCoordinator;
+    KodiLogManager *m_kodiLogManager;
     KodiSetupManager *m_kodiSetupManager;
     RemotePushManager *m_remotePushManager;
 

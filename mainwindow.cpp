@@ -45,6 +45,7 @@
 #include "kodidownloader.h"
 #include "kodiarchdialog.h"
 #include "kodidownloadcoordinator.h"
+#include "kodilogmanager.h"
 #include "kodisetupmanager.h"
     #include "oculusmanager.h"
     #include "preferencesmanager.h"
@@ -144,6 +145,7 @@
            , m_xmlEditor(new XmlEditorManager(this))
            , m_kodiDownloader(new KodiDownloader(this))
            , m_kodiDownloadCoordinator(new KodiDownloadCoordinator(this))
+           , m_kodiLogManager(new KodiLogManager(this))
            , m_kodiSetupManager(new KodiSetupManager(this))
            , m_remotePushManager(new RemotePushManager(this))
      {
@@ -1303,76 +1305,15 @@
     //////////////////////////////////////////////////
     void MainWindow::on_actionView_Kodi_Log_triggered()
     {
-
-    QString selectedDescription;
-    if (!validateDeviceSelection(selectedDescription)) {
-               return;
-    }
-
-    DeviceRecord device = queryDeviceRecord(selectedDescription);
-
-            androidLog();
-
-    }
-
-    //////////////////////////////////////////////////
-    void MainWindow::androidLog()
-    {
-          QString selectedDescription;
-          if (!validateDeviceSelection(selectedDescription)) {
+        QString selectedDescription;
+        if (!validateDeviceSelection(selectedDescription))
             return;
-          }
 
-          DeviceRecord device = queryDeviceRecord(selectedDescription);
+        DeviceRecord device = queryDeviceRecord(selectedDescription);
 
-
-
-          QString xpath = "";
-          QString cstring;
-          QString command;
-          QString mcpath="";
-
-
-
-          mcpath = resolveKodiPath(getadb(), device.data_root, device.xbmcpackage, ::isScopedStorage(getadb()));
-
-
-
-
-
-          xpath = mcpath+"/temp/";
-
-
-          // qDebug() << xpath;
-
-          cstring = getadb() + " shell "+busypath+"busybox find " +xpath+ " -maxdepth 1 -name kodi.log ";
-
-          command=getadbOutput(cstring);
-
-
-          if (command.isEmpty() || command.contains("No such file or directory"))
-          { QMessageBox::critical(this,"","Kodi log not found");
-
-            // logfile(cstring);
-            logfile(command);
-            logfile("Kodi log not found!");
-            return;
-          }
-
-
-
-
-
-
-        device.filepath=xpath;
-
-        logfile("opening kodi log");
-        logDialog logdialog;
-        logdialog.loadRemoteLog(getadb(), device.filepath);
-        logdialog.setModal(true);
-        logdialog.exec();
-
+        m_kodiLogManager->viewKodiLog(this, device, getadb(), busypath);
     }
+
 
     ////////////////////////////////////////////////////
     void MainWindow::on_actionView_adbLink_Log_triggered()

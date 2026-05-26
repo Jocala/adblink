@@ -66,9 +66,10 @@ SOURCES += main.cpp \
     adbstring.cpp \
     oculusdialog.cpp \
     oculusmanager.cpp \
-    kodidownloader.cpp \
     kodiarchdialog.cpp \
     kodidownloadcoordinator.cpp \
+    kodidownloader.cpp \
+    kodilogmanager.cpp \
     kodisetupmanager.cpp \
     preferencesmanager.cpp \
     remotepushmanager.cpp \
@@ -128,9 +129,10 @@ HEADERS += mainwindow.h \
     version.h \
     oculusdialog.h \
     oculusmanager.h \
-    kodidownloader.h \
     kodiarchdialog.h \
     kodidownloadcoordinator.h \
+    kodidownloader.h \
+    kodilogmanager.h \
     kodisetupmanager.h \
     preferencesmanager.h \
     remotepushmanager.h \
