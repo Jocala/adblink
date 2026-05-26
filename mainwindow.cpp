@@ -63,7 +63,6 @@
     #include <QElapsedTimer>
     #include <QTextStream>
     #include <QDate>
-    #include <QRegularExpression>
     #include <QStringList>
     #include <QListWidget>
     #include <QListWidgetItem>
@@ -79,11 +78,9 @@
     #include <QtNetwork/QNetworkInterface>
     #include <adblogdialog.h>
     #include <QFileInfo>
-    #include <QThread>
     #include<QClipboard>
     #include <QShortcut>
     #include <QDebug>
-    #include <QRegularExpression>
     #include <QStackedWidget>
     #include <QGridLayout>
     #include <QVBoxLayout>
@@ -6795,46 +6792,6 @@ QString MainWindow::getadb()
 }
 
 ///////////////////////////////////////////////////
-
-/*
-
-DeviceRecord MainWindow::queryDeviceRecord(const QString& description) {
- DeviceRecord record;
- QString quotedDescription = "\"" + description + "\"";
- QSqlQuery query;
-
- QString sqlstatement = "SELECT Id, daddr, pulldir, xbmcpackage, data_root, buffermode, buffersize, "
-                        "bufferfactor, description, filepath, port, isusb, disableroot, flag1, flag2, ostype "
-                        "FROM device WHERE description=" + quotedDescription;
- query.exec(sqlstatement);
- while (query.next()) {
-               record.id = query.value("Id").toInt();
-               record.daddr = query.value("daddr").toString();
-               record.pulldir = query.value("pulldir").toString();
-               record.xbmcpackage = query.value("xbmcpackage").toString();
-               record.data_root = query.value("data_root").toString();
-               record.buffermode = query.value("buffermode").toInt();
-               record.buffersize = query.value("buffersize").toString();
-               record.bufferfactor = query.value("bufferfactor").toString();
-               record.description = query.value("description").toString();
-               record.filepath = query.value("filepath").toString();
-               record.port = query.value("port").toString();
-               record.isusb = query.value("isusb").toBool();
-               record.disableroot = query.value("disableroot").toBool();
-               record.scoped = query.value("flag1").toBool();
-               record.wsa = query.value("flag2").toBool();
-               record.ostype = query.value("ostype").toString();
- }
- if (query.lastError().isValid()) {
-               logfile(sqlstatement);
-               logfile("SqLite error:" + query.lastError().text());
-               logfile("SqLite error code:" + query.lastError().nativeErrorCode());
- }
-
- return record;
-}
-
-*/
 
 DeviceRecord MainWindow::queryDeviceRecord(const QString& description) {
  DeviceRecord record;
