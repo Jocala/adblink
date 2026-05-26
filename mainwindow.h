@@ -40,10 +40,10 @@ class KodiDataManager;
 class KodiDownloader;
 class KodiSetupManager;
 class RemotePushManager;
+class DataUsageManager;
 class DataMoveManager;
 class SplashScreenManager;
 class TimerManager;
-class UninstallManager;
 class UninstallManager;
 class XmlEditorManager;
 
@@ -230,6 +230,7 @@ private:
     CacheManager *m_cacheManager;
     FileManager *m_fileManager;
     DataMoveManager *m_dataMoveManager;
+    DataUsageManager *m_dataUsageManager;
     SplashScreenManager *m_splashScreenManager;
     TimerManager *m_timerManager;
     UninstallManager *m_uninstallManager;

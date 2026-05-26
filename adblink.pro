@@ -69,6 +69,7 @@ SOURCES += main.cpp \
     kodisetupmanager.cpp \
     preferencesmanager.cpp \
     remotepushmanager.cpp \
+    datausagemanager.cpp \
     datamovemanager.cpp \
     deviceeditor.cpp \
     filemanager.cpp \
@@ -126,6 +127,7 @@ HEADERS += mainwindow.h \
     kodisetupmanager.h \
     preferencesmanager.h \
     remotepushmanager.h \
+    datausagemanager.h \
     datamovemanager.h \
     deviceeditor.h \
     filemanager.h \

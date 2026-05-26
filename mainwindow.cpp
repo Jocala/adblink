@@ -32,6 +32,7 @@
 #include "cachemanager.h"
 #include "consolemanager.h"
 #include "datamovemanager.h"
+#include "datausagemanager.h"
 #include "filemanager.h"
 #include "splashscreenmanager.h"
 #include "timermanager.h"
@@ -129,6 +130,7 @@
            , m_cacheManager(new CacheManager(this))
            , m_fileManager(new FileManager(this))
            , m_dataMoveManager(new DataMoveManager(this))
+           , m_dataUsageManager(new DataUsageManager(this))
            , m_splashScreenManager(new SplashScreenManager(this))
            , m_timerManager(new TimerManager(this))
            , m_uninstallManager(new UninstallManager(this))
@@ -1977,78 +1979,18 @@
 
     void MainWindow::on_actionKodi_data_usage_triggered()
     {
-        QString kodidata;
-        QString cstring;
-        QString command;
-        QString xbmcpath;
-
         QString selectedDescription;
-        if (!validateDeviceSelection(selectedDescription)) {
-                return;
-        }
+        if (!validateDeviceSelection(selectedDescription))
+            return;
 
         DeviceRecord device = queryDeviceRecord(selectedDescription);
 
-        cstring = " -s "+ device.daddr + " shell ls /sdcard/xbmc_env.properties";
-        QStringList args = QProcess::splitCommand(cstring);
-
-        if (  returncode(getadbpath(), args)    ) {
-                cstring = "null -s "+ device.daddr + " shell cat /sdcard/xbmc_env.properties";
-                command = getadbOutput(cstring);
-
-
-                command.replace(QRegularExpression("[\r\n]"), "");
-
-                int startIndex = command.indexOf("=") + 1;
-                int endIndex = command.indexOf(".kodi") + 5;
-                xbmcpath = command.mid(startIndex, endIndex - startIndex);
-
-        }
-
-        else
-
-        {
-
-
-
-                xbmcpath = "/sdcard/Android/data/"+device.xbmcpackage;
-
-        }
-
-
-        cstring = getadb() + " shell du -sh " + xbmcpath;
-
-
-        command=RunLongProcess(cstring,"calculating data size");
-
-
-        if (command.contains("No such file"))
-        {
-                kodidata = "No data found";
-        }
-
-        else
-        {
-
-
-
-                int z = command.indexOf("G");
-
-                if (z==-1)
-              z = command.indexOf("M");
-
-                if (z==-1)
-              z = command.indexOf("K");
-
-
-                if (z != -1)
-              kodidata = command.mid(0,z+1);
-
-        }
-
-        QMessageBox::information(0,"Kodi Data","Kodi data size:  " + kodidata);
-
+        m_dataUsageManager->showKodiDataUsage(this, device, getadb(),
+            [this](const QString &cstring, const QString &jobname) {
+                return RunLongProcess(cstring, jobname);
+            });
     }
+
 
 
 
