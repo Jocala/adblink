@@ -2,8 +2,9 @@
     #include <QRegularExpression>
     #include "about.h"
     #include "helpdialog.h"
-    #include "connectadb.h"
-    #include "uninstalldialog.h"
+     #include "connectadb.h"
+     #include "connectmanager.h"
+     #include "uninstalldialog.h"
     #include "getreturncode.h"
     #include "editordialog.h"
     #include "keyboarddialog.h"
@@ -131,6 +132,7 @@
           , m_consoleManager(new ConsoleManager(this))
            , m_backupManager(new BackupManager(this))
            , m_cacheManager(new CacheManager(this))
+           , m_connectManager(new ConnectManager(this))
            , m_fileManager(new FileManager(this))
            , m_dataMoveManager(new DataMoveManager(this))
            , m_dataUsageManager(new DataUsageManager(this))
@@ -957,93 +959,14 @@
 
     void MainWindow::connButton_clicked()
     {
-                      QString adhoc="Ad hoc";
-                      QString cstring;
-                      QString command;
-                      QString s;
-                      QString selectedDescription;
-                      QString daddr;
-                      QString port;
-
-                      int selectedRow;
-
-                      if (!adhoc_ip->text().isEmpty())
-                      {
-                            adhocip();
-                            adhoc_ip->clear();
-                            for (int row = 0; row < deviceTable->rowCount(); ++row) {
-                              QTableWidgetItem* item = deviceTable->item(row, 0);
-                              if (item && item->text() == adhoc) {
-                  deviceTable->selectRow(row);
-                  break;
-                              }
-                            }
-                      }
-
-                      selectedRow = deviceTable->currentRow();
-                      if (selectedRow >= 0 && deviceTable->item(selectedRow, 0)) {
-                            selectedDescription = deviceTable->item(selectedRow, 0)->text();
-                      } else {
-                            QMessageBox::critical(this, "", "No device selected in table");
-                             return;
-                       }
-
-                       DeviceRecord device = queryDeviceRecord(selectedDescription);
-
-                       if (device.isusb) {
-                            logfile("USB connection attempted, not supported");
-                            QMessageBox::critical(this, "", "Inactive for USB connections");
-                            return;
-                      }
-
-                      if (!validateIPAddress(device.daddr)) {
-                            QMessageBox::critical(this, "Error", "Invalid IP address");
-                            return;
-                      }
-
-                      port = device.port.isEmpty() ? "5555" : device.port;
-                      daddr = device.daddr + ":" + port;
-
-
-                       command = connectadb(getadbpath(), QStringList() << "connect" << daddr);
-
-
-                      if (command.contains("failed to authenticate") || command.contains("offline")) {
-
-                            deviceTable->setItem(selectedRow, 2, new QTableWidgetItem(
-                                                                         command.contains("failed to authenticate") ? "Unauthorized" : "Offline"));
-                            logfile(cstring);
-                            logfile(command);
-                            QString cstring = getadbpath() + " disconnect " + daddr;
-                            command = connectadb(getadbpath(), QStringList() << "disconnect" << daddr);
-                            // command = connectadb(cstring);
-                            return;
-                      }
-
-
-
-                      if (command.contains("connected to")) {
-
-                            deviceTable->setItem(selectedRow, 2, new QTableWidgetItem("Connected"));
-
-                            deviceTable->clearSelection();
-                            deviceTable->setCurrentCell(selectedRow, 0);
-                            deviceTable->selectRow(selectedRow);
-                            deviceTable->setFocus();
-
-                            logfile("Connected to " + daddr);
-                            // logfile("Android version: " + s.setNum(getandroid()));
-                            infolog();
-
-                      } else {
-
-                            deviceTable->setItem(selectedRow, 2, new QTableWidgetItem("NA"));
-                            logfile("Unable to connect to: " + daddr);
-                            QMessageBox::critical(this, "", "Unable to connect to: " + daddr);
-                      }
-
-
+        m_connectManager->connectToDevice(this, adhoc_ip, deviceTable,
+            [this](const QString &desc) { return queryDeviceRecord(desc); },
+            [this](const QString &ip) { return validateIPAddress(ip); },
+            [this]() { infolog(); },
+            [this]() { adhocip(); },
+            getadbpath());
     }
+
 
 
 ////////////////////////////////////////////

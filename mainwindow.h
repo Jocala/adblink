@@ -34,6 +34,7 @@ class AdbConnection;
 class AdbDevice;
 class BackupManager;
 class CacheManager;
+class ConnectManager;
 class ConsoleManager;
 class FileManager;
 class KodiDataManager;
@@ -231,6 +232,7 @@ private:
     ConsoleManager *m_consoleManager;
     BackupManager *m_backupManager;
     CacheManager *m_cacheManager;
+    ConnectManager *m_connectManager;
     FileManager *m_fileManager;
     DataMoveManager *m_dataMoveManager;
     DataUsageManager *m_dataUsageManager;

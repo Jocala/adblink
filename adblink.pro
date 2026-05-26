@@ -31,6 +31,7 @@ SOURCES += main.cpp \
     backupmanager.cpp \
     cachemanager.cpp \
     connectadb.cpp \
+    connectmanager.cpp \
     consolemanager.cpp \
     customlistwidget.cpp \
     getadbdata.cpp \
@@ -90,6 +91,7 @@ HEADERS += mainwindow.h \
     backupmanager.h \
     cachemanager.h \
     connectadb.h \
+    connectmanager.h \
     consolemanager.h \
     customlistwidget.h \
     devicerecord.h \

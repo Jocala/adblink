@@ -1,0 +1,87 @@
+#include "connectmanager.h"
+#include "devicerecord.h"
+#include "connectadb.h"
+#include "logfile.h"
+
+#include <QMessageBox>
+#include <QLineEdit>
+#include <QTableWidget>
+#include <QWidget>
+
+ConnectManager::ConnectManager(QObject *parent)
+    : QObject(parent)
+{
+}
+
+void ConnectManager::connectToDevice(QWidget *parentWidget,
+                                      QLineEdit *adhocIpEdit,
+                                      QTableWidget *deviceTable,
+                                      DeviceQueryCallback queryDevice,
+                                      ValidateIPCallback validateIP,
+                                      InfoLogCallback infoLog,
+                                      AdhocIpCallback adhocIpHandler,
+                                      const QString &adbPath)
+{
+    const QString adhoc = "Ad hoc";
+
+    if (!adhocIpEdit->text().isEmpty()) {
+        adhocIpHandler();
+        adhocIpEdit->clear();
+        for (int row = 0; row < deviceTable->rowCount(); ++row) {
+            QTableWidgetItem *item = deviceTable->item(row, 0);
+            if (item && item->text() == adhoc) {
+                deviceTable->selectRow(row);
+                break;
+            }
+        }
+    }
+
+    int selectedRow = deviceTable->currentRow();
+    QString selectedDescription;
+    if (selectedRow >= 0 && deviceTable->item(selectedRow, 0)) {
+        selectedDescription = deviceTable->item(selectedRow, 0)->text();
+    } else {
+        QMessageBox::critical(parentWidget, "", "No device selected in table");
+        return;
+    }
+
+    DeviceRecord device = queryDevice(selectedDescription);
+
+    if (device.isusb) {
+        logfile("USB connection attempted, not supported");
+        QMessageBox::critical(parentWidget, "", "Inactive for USB connections");
+        return;
+    }
+
+    if (!validateIP(device.daddr)) {
+        QMessageBox::critical(parentWidget, "Error", "Invalid IP address");
+        return;
+    }
+
+    QString port = device.port.isEmpty() ? "5555" : device.port;
+    QString daddr = device.daddr + ":" + port;
+
+    QString command = connectadb(adbPath, QStringList() << "connect" << daddr);
+
+    if (command.contains("failed to authenticate") || command.contains("offline")) {
+        deviceTable->setItem(selectedRow, 2, new QTableWidgetItem(
+            command.contains("failed to authenticate") ? "Unauthorized" : "Offline"));
+        logfile(command);
+        connectadb(adbPath, QStringList() << "disconnect" << daddr);
+        return;
+    }
+
+    if (command.contains("connected to")) {
+        deviceTable->setItem(selectedRow, 2, new QTableWidgetItem("Connected"));
+        deviceTable->clearSelection();
+        deviceTable->setCurrentCell(selectedRow, 0);
+        deviceTable->selectRow(selectedRow);
+        deviceTable->setFocus();
+        logfile("Connected to " + daddr);
+        infoLog();
+    } else {
+        deviceTable->setItem(selectedRow, 2, new QTableWidgetItem("NA"));
+        logfile("Unable to connect to: " + daddr);
+        QMessageBox::critical(parentWidget, "", "Unable to connect to: " + daddr);
+    }
+}
