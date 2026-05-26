@@ -67,6 +67,7 @@ SOURCES += main.cpp \
     kodidownloader.cpp \
     kodiarchdialog.cpp \
     preferencesmanager.cpp \
+    datamovemanager.cpp \
     deviceeditor.cpp \
     filemanager.cpp \
     xmleditormanager.cpp
@@ -118,6 +119,7 @@ HEADERS += mainwindow.h \
     kodidownloader.h \
     kodiarchdialog.h \
     preferencesmanager.h \
+    datamovemanager.h \
     deviceeditor.h \
     filemanager.h \
     xmleditormanager.h
