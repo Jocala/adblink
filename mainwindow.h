@@ -127,7 +127,6 @@ private slots:
     void on_actionHelp_triggered();
     void backupButton_clicked();
     void restoreButton_clicked();
-    void dos_shell();
     void adbshellButton_clicked();
     void delay(int secs);
     void createTables();

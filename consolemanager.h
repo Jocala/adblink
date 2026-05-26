@@ -22,6 +22,14 @@ public:
 
     void launchTerminal(const QString &scriptPath, int terminalChoice) const;
     QString terminalCommand(const QString &scriptPath, int terminalChoice) const;
+    void openConsole(const QString &scriptDir, const QString &appHome,
+                     const QString &dataBaseDir) const;
+    void openAdbShell(const QString &daddr, const QString &scriptDir,
+                      const QString &appHome, const QString &dataBaseDir) const;
+    void openScrcpy(QWidget *parent, const QString &daddr,
+                    const QString &scriptDir, const QString &appHome,
+                    const QString &dataBaseDir, const QString &adbfilesDir,
+                    const QString &scrcpyDir, const QString &scrcpyarg) const;
 
     static OSType detectOs();
 
