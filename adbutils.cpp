@@ -122,3 +122,43 @@ QString resolveKodiPath(const QString &adbPrefix, const QString &dataRoot,
 
     return dataRoot + "Android/data/" + xbmcpackage + "/files/.kodi";
 }
+
+bool ensureBusyboxInstalled(QWidget *parent, const QString &adbPrefix, const QString &msg)
+{
+    QString busybox = '"' + QCoreApplication::applicationDirPath() + "/adbfiles/busybox" + '"';
+    QString cstring;
+    QString command;
+
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(parent, "", msg,
+                                  QMessageBox::Yes | QMessageBox::No);
+    if (reply == QMessageBox::No)
+        return false;
+
+    cstring = adbPrefix + " shell rm -r /data/local/tmp/adblink";
+    ::getadbOutput(cstring);
+
+    cstring = adbPrefix + " shell mkdir -p /data/local/tmp/adblink";
+    ::getadbOutput(cstring);
+
+    cstring = adbPrefix + " push " + busybox + " /data/local/tmp/adblink/";
+    command = ::getadbOutput(cstring);
+
+    if (!command.contains("bytes")) {
+        logfile("busybox install failed ");
+        logfile(command);
+        QMessageBox::critical(nullptr, "", "busybox install failed. See log.");
+        return false;
+    }
+
+    logfile(command);
+    cstring = adbPrefix + " shell chmod 755 /data/local/tmp/adblink/busybox";
+    ::getadbOutput(cstring);
+
+    cstring = adbPrefix + " shell /data/local/tmp/adblink/busybox --install -s /data/local/tmp/adblink";
+    ::getadbOutput(cstring);
+
+    busybox_permissions(adbPrefix);
+    QMessageBox::information(parent, "", "Busybox installed.");
+    return true;
+}

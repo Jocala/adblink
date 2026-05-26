@@ -2082,12 +2082,12 @@
          fmdialog->setWindowModality(Qt::NonModal);
 
 
-         cstring = getadb() + " shell ls /data/local/tmp/adblink/busybox";
-         if (!getreturncode(cstring))
-         {
-            if (!on_actionReiinstall_Busybox_triggered("Busybox not found. Install?"))
-               return;
-         }
+          cstring = getadb() + " shell ls /data/local/tmp/adblink/busybox";
+          if (!getreturncode(cstring))
+          {
+             if (!ensureBusyboxInstalled(this, getadb(), "Busybox not found. Install?"))
+                return;
+          }
 
 
 
@@ -2779,96 +2779,10 @@
     }
 
 
-    ////////////////////////////////////////////////////////
-
-    bool MainWindow::on_actionReiinstall_Busybox_triggered(QString msg)
-    {
+    /////////////////////////////////////////////////////////
 
 
 
-     QString selectedDescription;
-     if (!validateDeviceSelection(selectedDescription)) {
-          return false;
-     }
-
-     DeviceRecord device = queryDeviceRecord(selectedDescription);
-
-
-
-
-        QString busybox = '"' + QCoreApplication::applicationDirPath() + "/adbfiles/busybox" + '"';
-        QString cstring;
-        QString command;
-
-
-        QMessageBox::StandardButton reply;
-         reply = QMessageBox::question(this, "",msg,
-                                       QMessageBox::Yes|QMessageBox::No);
-         if (reply == QMessageBox::No)
-         {
-
-             return false;
-         }
-
-
-
-
-
-        
-        cstring = getadb() + " shell rm -r /data/local/tmp/adblink";
-        command=getadbOutput(cstring);
-
-        cstring = getadb() + " shell mkdir -p /data/local/tmp/adblink";
-        command=getadbOutput(cstring);
-        cstring = getadb() + " push "+busybox+ " /data/local/tmp/adblink/";
-
-
-
-
-
-              command=getadbOutput(cstring);
-
-              if (!command.contains("bytes"))
-                {
-                   logfile("busybox install failed ");
-                   logfile(command);
-                   
-                   QMessageBox::critical(0,"","busybox install failed. See log.");
-                   return false;
-                  }
-             else
-              {
-                  logfile(command);
-                  cstring = getadb() + " shell chmod 755 /data/local/tmp/adblink/busybox";
-                  command=getadbOutput(cstring);
-
-                  // logfile(cstring);
-                  logfile(command);
-
-                   cstring = getadb() + " shell /data/local/tmp/adblink/busybox --install -s /data/local/tmp/adblink";
-                   command=getadbOutput(cstring);
-
-                   // logfile(cstring);
-                   logfile(command);
-              }
-
-           busybox_permissions(getadb());
-
-
-            QMessageBox::information(this,"","Busybox installed.");
-
-          return true;
-
-
-    }
-
-
-
-
-
-
-
-///////////////////////////////////////////////////////
     void MainWindow::infoArchitecture()
     {
     QString selectedDescription;
@@ -6336,10 +6250,8 @@ void MainWindow::setupMenus()
 
  connect(actionSwitch_View,          &QAction::triggered, this, &MainWindow::on_actionSwitch_View_triggered);
 
-// connect(actionReiinstall_Busybox,   &QAction::triggered, this, &MainWindow::on_actionReiinstall_Busybox_triggered);
-
  connect(actionReiinstall_Busybox, &QAction::triggered, this, [this](bool checked) {
-     on_actionReiinstall_Busybox_triggered("Your message here");
+     ensureBusyboxInstalled(this, getadb(), "Install Busybox?");
  });
 
  connect(infoArchitecture2,           &QAction::triggered, this, &MainWindow::on_infoArchitecture_triggered);
