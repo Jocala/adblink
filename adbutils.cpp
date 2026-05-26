@@ -162,3 +162,10 @@ bool ensureBusyboxInstalled(QWidget *parent, const QString &adbPrefix, const QSt
     QMessageBox::information(parent, "", "Busybox installed.");
     return true;
 }
+
+bool isPackageInstalled(const QString &adbPrefix, const QString &package)
+{
+    QString cstring = adbPrefix + " shell pm list packages";
+    QString result = getadbOutput(cstring);
+    return result.contains(package);
+}

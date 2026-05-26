@@ -25,4 +25,7 @@ QString resolveKodiPath(const QString &adbPrefix, const QString &dataRoot,
 // Install busybox on device if the user agrees
 bool ensureBusyboxInstalled(QWidget *parent, const QString &adbPrefix, const QString &msg);
 
+// Check if a package is installed on the device
+bool isPackageInstalled(const QString &adbPrefix, const QString &package);
+
 #endif // ADBUTILS_H

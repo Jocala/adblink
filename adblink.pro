@@ -70,6 +70,7 @@ SOURCES += main.cpp \
     datamovemanager.cpp \
     deviceeditor.cpp \
     filemanager.cpp \
+    splashscreenmanager.cpp \
     xmleditormanager.cpp
 
 HEADERS += mainwindow.h \
@@ -122,6 +123,7 @@ HEADERS += mainwindow.h \
     datamovemanager.h \
     deviceeditor.h \
     filemanager.h \
+    splashscreenmanager.h \
     xmleditormanager.h
 
 FORMS +=

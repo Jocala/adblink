@@ -33,6 +33,7 @@
 #include "consolemanager.h"
 #include "datamovemanager.h"
 #include "filemanager.h"
+#include "splashscreenmanager.h"
 #include "xmleditormanager.h"
 #include "kodidatamanager.h"
 #include "kodidownloader.h"
@@ -124,6 +125,7 @@
            , m_cacheManager(new CacheManager(this))
            , m_fileManager(new FileManager(this))
            , m_dataMoveManager(new DataMoveManager(this))
+           , m_splashScreenManager(new SplashScreenManager(this))
            , m_xmlEditor(new XmlEditorManager(this))
            , m_kodiDownloader(new KodiDownloader(this))
      {
@@ -742,35 +744,12 @@
      }
 
 
-    //////////////////////////////////////
-    bool MainWindow::start_server()
-    {
-
-        return m_adbConnection->startServer();
-
-    }
 
 
 
-    /////////////////////////////////////////////////////
-    bool MainWindow::is_package(QString package)
-    {
+     //////////////////////////////////
 
-
-        QString selectedDescription = deviceTable->item(deviceTable->currentRow(), 0)->text();
-        DeviceRecord device = queryDeviceRecord(selectedDescription);
-        AdbDevice adbDevice(device, this);
-
-        return adbDevice.isPackageInstalled(package);
-
-    }
-
-
-
-
-    //////////////////////////////////
-
-    bool MainWindow::isConnectedToNetwork()
+     bool MainWindow::isConnectedToNetwork()
     {
         QList<QNetworkInterface> ifaces = QNetworkInterface::allInterfaces();
         bool result = false;
@@ -1092,7 +1071,7 @@
 
 
 
-                if ( !is_package(package))
+                if ( !::isPackageInstalled(getadb(), package))
                    { QMessageBox::critical(
                          this,
                          "",
@@ -1402,7 +1381,7 @@
     DeviceRecord device = queryDeviceRecord(selectedDescription);
 
 
-    if (!is_package(device.xbmcpackage))
+    if (!::isPackageInstalled(getadb(), device.xbmcpackage))
     { QMessageBox::critical(
                    this,
                    "",
@@ -1749,70 +1728,6 @@
 
 
     ///////////////////////////////////////////////
-    bool MainWindow::is_busybox()
-    {
-
-    QString cstring;
-    QString command;
-
-
-    cstring = getadb() + " shell ls /data/local/tmp/adblink";
-    command=getadbOutput(cstring);
-
-
-    if (command.contains("No such file or directory"))
-       {
-        cstring = getadb() + " shell mkdir -p /data/local/tmp/adblink";
-        command=getadbOutput(cstring);
-       }
-
-      cstring = getadb() + " shell ls /data/local/tmp/adblink/busybox";
-      command=getadbOutput(cstring);
-
-
-      if (command.contains("No such file or directory"))
-         {
-
-      QString busybox = '"' + QCoreApplication::applicationDirPath() + "/adbfiles/busybox" + '"';
-
-          cstring = getadb() + " push "+busybox+ " /data/local/tmp/adblink/";
-
-          QString command=getadbOutput(cstring);
-          if (!command.contains("bytes"))
-            {
-               logfile("busybox install failed ");
-               logfile(command);
-               
-               QMessageBox::critical(0,"","busybox install failed. See log.");
-               return false;
-              }
-         else
-          {
-
-
-              logfile(command);
-
-              cstring = getadb() + " shell chmod 755 /data/local/tmp/adblink/busybox";
-              command=getadbOutput(cstring);
-
-              // logfile(cstring);
-              logfile(command);
-
-               cstring = getadb() + " shell /data/local/tmp/adblink/busybox --install -s /data/local/tmp/adblink";
-               command=getadbOutput(cstring);
-
-               // logfile(cstring);
-               logfile(command);
-
-          }
-
-
-      }
-
-      return true;
-
-    }
-
 
 
     //////////////////////////////////////////////////////////
@@ -3044,7 +2959,7 @@
       if ( getandroid() >= 11 )
         {
 
-        if ( is_package(device.xbmcpackage) )
+        if ( ::isPackageInstalled(getadb(), device.xbmcpackage) )
         {
         cstring = getadb()+ " shell appops set --uid "+  device.xbmcpackage +" MANAGE_EXTERNAL_STORAGE allow";
         if (!getreturncode(cstring))
@@ -3216,7 +3131,7 @@ void MainWindow::backupButton_clicked()
 
     DeviceRecord device = queryDeviceRecord(selectedDescription);
 
-    if (!is_package(device.xbmcpackage)) {
+    if (!::isPackageInstalled(getadb(), device.xbmcpackage)) {
         QMessageBox::critical(this, "", device.xbmcpackage + " not installed");
         logfile(device.daddr + ": Error: " + device.xbmcpackage + " not installed");
         m_isBusy = false;
@@ -3249,7 +3164,7 @@ void MainWindow::restoreButton_clicked() {
 
     DeviceRecord device = queryDeviceRecord(selectedDescription);
 
-    if (!is_package(device.xbmcpackage)) {
+    if (!::isPackageInstalled(getadb(), device.xbmcpackage)) {
         QMessageBox::critical(this, "", device.xbmcpackage + " not installed");
         logfile(device.daddr + ": Error: " + device.xbmcpackage + " not installed");
         m_isBusy = false;
@@ -3316,117 +3231,16 @@ QString MainWindow::checkslash(QString qpath)
 
 void MainWindow::on_actionSplash_Screen_triggered()
 {
-
     QString selectedDescription;
-    if (!validateDeviceSelection(selectedDescription)) {
-     return;
-    }
-
-
+    if (!validateDeviceSelection(selectedDescription))
+        return;
 
     DeviceRecord device = queryDeviceRecord(selectedDescription);
 
-
-    if(!is_busybox())
-    {
-     QMessageBox::critical(0,"","Busybox installation failed.");
-     return;
-    }
-
-    busybox_permissions(getadb());
-
-
-
-    if (!is_package(device.xbmcpackage))
-    { QMessageBox::critical(
-         this,
-         "",
-         device.xbmcpackage+" not installed");
-     return;
-    }
-
-
-    QString cstring;
-    QString command;
-    QString mcpath="";
-
-
-    mcpath = resolveKodiPath(getadb(), "/sdcard/", device.xbmcpackage, false);
-
-
-
-
-    mcpath=mcpath+"/media";
-
-    cstring = getadb() + " shell ls "+mcpath;
-    command=getadbOutput(cstring);
-
-
-    cstring = getadb() + " shell ls "+mcpath;
-    command=getadbOutput(cstring);
-
-
-
-
-    if (command.contains("No such file or directory"))
-    {
-     cstring = getadb() + " mkdir -p "+ mcpath;
-     command=getadbOutput(cstring);
-    }
-
-
-
-
-    QString fileName = QFileDialog::getOpenFileName(this,"Choose splash screen file", QDir::homePath(), tr("Files (*.png *.jpg *.jpeg)"));
-
-
-
-    if (!fileName.isEmpty() )
-    {
-
-
-     QMessageBox::StandardButton reply;
-     reply = QMessageBox::question(this, "Push", fileName+" selected. Continue?",
-                                   QMessageBox::Yes|QMessageBox::No);
-     if (reply == QMessageBox::Yes) {
-
-
-            cstring = getadb() + " push "+'"'+fileName+'"'+ " "+mcpath+"/splash.png";
-
-            command=RunLongProcess(cstring,"Splash Screen");
-
-            // logfile(cstring);
-            logfile(command);
-
-
-            if (command.contains("bytes"))
-
-
-            {
-
-
-
-              QMessageBox::information(
-                  this,
-                  "",
-                  "Splash screen installed." );
-            }
-            else
-
-            {
-
-              QMessageBox::critical(
-                  this,
-                  "",
-                  "Splash screen installation failed.");}
-
-
-     }
-
-    }
-
-
-
+    m_splashScreenManager->installSplashScreen(this, device, getadb(),
+        [this](const QString &cstring, const QString &jobname) {
+            return RunLongProcess(cstring, jobname);
+        });
 }
 
 

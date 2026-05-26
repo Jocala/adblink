@@ -40,6 +40,7 @@ class KodiDataManager;
 class KodiDownloader;
 class DataMoveManager;
 class DataMoveManager;
+class SplashScreenManager;
 class XmlEditorManager;
 
 /////////////////////////////////////////////////////
@@ -154,11 +155,8 @@ private slots:
     bool mount_system(QString mnt);
     bool fileExists(QString path);
     bool is_su();
-    bool is_busybox();
     QString strip(QString str);
     void kill_server();
-    bool start_server();
-    bool is_package(QString package);
     void androidLog();
     void on_actionReboot_triggered();
     void deleteRecord(QString descrip);
@@ -229,6 +227,7 @@ private:
     CacheManager *m_cacheManager;
     FileManager *m_fileManager;
     DataMoveManager *m_dataMoveManager;
+    SplashScreenManager *m_splashScreenManager;
     XmlEditorManager *m_xmlEditor;
     bool m_isBusy = false;
     KodiDownloader *m_kodiDownloader;
