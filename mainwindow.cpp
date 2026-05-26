@@ -417,100 +417,6 @@
 
 ///////////////////////////////////////
 
-    bool MainWindow::isScoped()
-    {
-
-
-       // Validate getadb()
-       QString adbPath = getadb();
-       if (adbPath.isEmpty()) {
-            logfile("Issue: getadb() returned empty path");
-            return false;
-       }
-
-       // Helper to run ADB commands
-       auto runAdbCommand = [adbPath](const QString& adbCommand) -> QString {
-           QString command = adbPath + " " + adbCommand;
-           QProcess process;
-           process.start(command);
-           if (!process.waitForFinished(5000)) {
-               logfile("Issue: ADB command timed out: " + command);
-               return QString();
-           }
-           QString output = process.readAllStandardOutput().trimmed();
-           QString error = process.readAllStandardError().trimmed();
-           if (process.exitCode() != 0 || !error.isEmpty()) {
-
-                // if (!command.contains("Permission denied"))
-                //   logfile("Issue: ADB command failed: " + command + " Error: " + error);
-
-               return error.isEmpty() ? "Unknown error" : error;
-           }
-           return output;
-       };
-
-       // Get API level
-       QString apiOutput = runAdbCommand("shell getprop ro.build.version.sdk");
-       bool ok;
-       int apiLevel = apiOutput.toInt(&ok);
-       if (!ok || apiOutput.isEmpty()) {
-            //logfile("Issue: Invalid or empty API level output: " + apiOutput);
-            return false;
-       }
-       if (apiLevel < 29) {
-         //   logfile("Issue: API level too low for scoped storage: " + QString::number(apiLevel));
-            return false;
-       }
-
-
-
-
-       // Test storage access
-       bool restrictedAccess = false;
-       QString touchOutput = runAdbCommand("shell touch /sdcard/Android/data/org.xbmc.kodi/files/test.txt");
-       if (touchOutput.isEmpty() && !restrictedAccess) {
-            // Touch succeeded, clean up
-            runAdbCommand("shell rm /sdcard/Android/data/org.xbmc.kodi/files/test.txt");
-       } else {
-            restrictedAccess = touchOutput.contains("Permission denied", Qt::CaseInsensitive);
-            if (!restrictedAccess && !touchOutput.isEmpty()) {
-              //   logfile("Issue: Unexpected touch output for primary path: " + touchOutput);
-            }
-       }
-
-       // Additional test for another path
-       if (!restrictedAccess) {
-            touchOutput = runAdbCommand("shell touch /sdcard/DCIM/test.txt");
-            if (touchOutput.isEmpty()) {
-                 // Touch succeeded, clean up
-                 runAdbCommand("shell rm /sdcard/DCIM/test.txt");
-            } else {
-                 restrictedAccess = touchOutput.contains("Permission denied", Qt::CaseInsensitive);
-                 if (!restrictedAccess && !touchOutput.isEmpty()) {
-                   // logfile("Issue: Unexpected touch output for DCIM path: " + touchOutput);
-                 }
-            }
-       }
-
-       // Check filesystem permissions
-       QString lsOutput = runAdbCommand("shell ls -ld /sdcard/");
-       if (lsOutput.isEmpty()) {
-           logfile("Issue: Failed to get /sdcard/ permissions");
-       } else {
-            bool permissiveFs = lsOutput.contains("rwxrwxrwx");
-            if (permissiveFs) {
-               logfile("Issue: Permissive /sdcard/ permissions, vendor may bypass scoped storage");
-                 restrictedAccess = false;
-            }
-       }
-
-       bool result = (apiLevel >= 30) || (apiLevel == 29 && restrictedAccess);
-  //   logfile(QString("scoped storage is %1").arg(result ? "in effect" : "not in effect"));
-       return result;
-    }
-
-
-
     //////////////////////////////////////////////
     int MainWindow::getandroid()
 
@@ -1458,7 +1364,7 @@
 
          DeviceRecord device = queryDeviceRecord(selectedDescription);
 
-         m_cacheManager->configureCache(this, device, getadb(), isScoped(), scriptdir);
+         m_cacheManager->configureCache(this, device, getadb(), ::isScopedStorage(getadb()), scriptdir);
      }
 
 
@@ -1497,7 +1403,7 @@
 
 
 
-          mcpath = resolveKodiPath(getadb(), device.data_root, device.xbmcpackage, isScoped());
+          mcpath = resolveKodiPath(getadb(), device.data_root, device.xbmcpackage, ::isScopedStorage(getadb()));
 
 
 
@@ -2372,7 +2278,7 @@
     QString adevice = devicename();
     QString bdevice = devicerelease();
     QString manufact = manufacturer();
-    QString scoped = isScoped() ? "true" : "false";
+    QString scoped = ::isScopedStorage(getadb()) ? "true" : "false";
     QString battinf = ::readBatteryLevel(getadb());
 
 
@@ -2455,7 +2361,7 @@
     QString adevice = devicename();
     QString bdevice = devicerelease();
     QString manufact = manufacturer();
-    QString scoped = isScoped() ? "true" : "false";
+    QString scoped = ::isScopedStorage(getadb()) ? "true" : "false";
     QString battinf = ::readBatteryLevel(getadb());
 
 
@@ -2710,7 +2616,7 @@ void MainWindow::backupButton_clicked()
 
     const QString adbPrefix = getadb() + " ";
 
-    m_backupManager->backupDevice(this, device, adbPrefix, isScoped(),
+    m_backupManager->backupDevice(this, device, adbPrefix, ::isScopedStorage(getadb()),
                                   m_dataManager->os, jsonstring, m_dataManager,
                                   [this](const QString &cmd, const QString &title) {
                                       return RunLongProcess(cmd, title);
@@ -2743,7 +2649,7 @@ void MainWindow::restoreButton_clicked() {
 
     const QString adbPrefix = getadb() + " ";
 
-    m_backupManager->restoreDevice(this, device, adbPrefix, isScoped(),
+    m_backupManager->restoreDevice(this, device, adbPrefix, ::isScopedStorage(getadb()),
                                    jsonstring, m_dataManager,
                                    [this](const QString &cmd, const QString &title) {
                                        return RunLongProcess(cmd, title);
@@ -2762,7 +2668,7 @@ void MainWindow::mvdataButton_clicked()
 
     DeviceRecord device = queryDeviceRecord(selectedDescription);
 
-    m_dataMoveManager->moveKodiData(this, device, getadb(), isScoped(),
+    m_dataMoveManager->moveKodiData(this, device, getadb(), ::isScopedStorage(getadb()),
         [this](const QString &cstring, const QString &jobname) {
             return RunLongProcess(cstring, jobname);
         });
@@ -2941,7 +2847,7 @@ void MainWindow::on_actionEdit_XML_triggered()
 
     DeviceRecord device = queryDeviceRecord(selectedDescription);
 
-    m_xmlEditor->editXml(this, device, getadb(), isScoped(), scriptdir, busypath);
+    m_xmlEditor->editXml(this, device, getadb(), ::isScopedStorage(getadb()), scriptdir, busypath);
 }
 
 

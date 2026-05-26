@@ -140,7 +140,6 @@ private slots:
     QString devicename();
     QString devicerelease();
     int getandroid();
-    bool isScoped();
     void writeBackup(QString dir);
     QString readBackup(QString databasedir);
     QString checkslash(QString qpath);

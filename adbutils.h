@@ -28,4 +28,7 @@ bool ensureBusyboxInstalled(QWidget *parent, const QString &adbPrefix, const QSt
 // Check if a package is installed on the device
 bool isPackageInstalled(const QString &adbPrefix, const QString &package);
 
+// Check if scoped storage restrictions are in effect on the device
+bool isScopedStorage(const QString &adbPrefix);
+
 #endif // ADBUTILS_H
