@@ -33,6 +33,7 @@
 class AdbConnection;
 class AdbDevice;
 class BackupManager;
+class CacheManager;
 class ConsoleManager;
 class KodiDataManager;
 class KodiDownloader;
@@ -225,6 +226,7 @@ private:
     KodiDataManager *m_dataManager;
     ConsoleManager *m_consoleManager;
     BackupManager *m_backupManager;
+    CacheManager *m_cacheManager;
     bool m_isBusy = false;
     KodiDownloader *m_kodiDownloader;
 

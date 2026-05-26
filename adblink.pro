@@ -29,6 +29,7 @@ SOURCES += main.cpp \
     adboutput.cpp \
     adbutils.cpp \
     backupmanager.cpp \
+    cachemanager.cpp \
     connectadb.cpp \
     consolemanager.cpp \
     customlistwidget.cpp \
@@ -75,6 +76,7 @@ HEADERS += mainwindow.h \
     adboutput.h \
     adbutils.h \
     backupmanager.h \
+    cachemanager.h \
     connectadb.h \
     consolemanager.h \
     customlistwidget.h \

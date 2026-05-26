@@ -9,7 +9,6 @@
     #include "keyboarddialog.h"
     #include "usbfiledialog.h"
     #include "listfiledialog.h"
-    #include "cachedialog.h"
     #include "datadialog.h"
     #include "forcequitdialog.h"
     #include "restdialog.h"
@@ -30,6 +29,7 @@
 #include "adbconnection.h"
 #include "adbdevice.h"
 #include "backupmanager.h"
+#include "cachemanager.h"
 #include "consolemanager.h"
 #include "kodidatamanager.h"
 #include "kodidownloader.h"
@@ -117,8 +117,9 @@
          , m_adbConnection(new AdbConnection(this))
          , m_dataManager(new KodiDataManager(this))
          , m_consoleManager(new ConsoleManager(this))
-         , m_backupManager(new BackupManager(this))
-         , m_kodiDownloader(new KodiDownloader(this))
+          , m_backupManager(new BackupManager(this))
+          , m_cacheManager(new CacheManager(this))
+          , m_kodiDownloader(new KodiDownloader(this))
      {
 
 
@@ -1654,264 +1655,17 @@
 
 
     ///////////////////////////////////////////
-    void MainWindow::cacheButton_clicked()
+     void MainWindow::cacheButton_clicked()
+     {
+         QString selectedDescription;
+         if (!validateDeviceSelection(selectedDescription))
+             return;
 
-    {
+         DeviceRecord device = queryDeviceRecord(selectedDescription);
 
+         m_cacheManager->configureCache(this, device, getadb(), isScoped(), scriptdir);
+     }
 
-
-    QString selectedDescription;
-    if (!validateDeviceSelection(selectedDescription)) {
-              return;
-    }
-
-    DeviceRecord device = queryDeviceRecord(selectedDescription);
-
-
-    QString buffersize = "";
-    QString bufferfactor = "";
-    int buffermode = 1;
-
-
-    bool oldxml = false;
-
-
-    QString line1;
-    QString line2;
-    QString line3;
-    QString line4;
-    QString line5;
-    QString line6;
-    QString line7;
-
-
-
-    QString cstring;
-    QString command;
-    QString hidden;
-    QString xpath = "";
-    QString mcpath="";
-
-
-
-    cstring = getadb() + " shell ls /sdcard/xbmc_env.properties";
-    if(getreturncode(cstring))
-    {  cstring = getadb() + " shell cat /sdcard/xbmc_env.properties";
-              command=getadbOutput(cstring);
-              command.replace(QRegularExpression("[\r\n]"), "");
-              mcpath = command.mid(command.indexOf("xbmc.data=") + 10);
-              mcpath=mcpath+"/.kodi";
-    }
-    else
-
-    {
-              if (isScoped())
-                   mcpath=device.data_root + "kodi_data/" + device.xbmcpackage+"/files/.kodi";
-              else
-                   mcpath=device.data_root + "Android/data/" + device.xbmcpackage+"/files/.kodi";
-
-    }
-
-
-
-
-
-
-
-    xpath = mcpath+"/userdata/";
-
-    cstring = getadb() + " shell ls "+mcpath;
-
-    command=getadbOutput(cstring);
-
-    if (command.contains("No such file or directory"))
-    {
-              QMessageBox::critical(
-                  this,
-                  "",
-                  "Cache folder missing. Run Kodi to create it.");
-              return;
-    }
-
-    cacheDialog dialog(this);
-    dialog.setWindowModality(Qt::WindowModal);
-    dialog.setxmlcheck(false);
-    dialog.setcbuffermode(buffermode);
-    dialog.setcbuffersize(buffersize);
-    dialog.setcbufferfactor(bufferfactor);
-
-    dialog.setModal(true);
-
-
-    if(dialog.exec() == QDialog::Accepted)
-    {
-
-              int x = dialog.returncval1();
-
-
-              buffermode = dialog.cbuffermode();
-              buffersize = dialog.cbuffersize();
-              bufferfactor = dialog.cbufferfactor();
-              oldxml = dialog.xmlcheck();
-
-              QString str1;
-              str1.setNum(buffermode-1);
-
-
-
-
-              if (oldxml)
-              {
-                   line1 ="<advancedsettings>";
-                   line2 ="  <network>";
-                   line3 ="    <buffermode>"+str1+"</buffermode>";
-                   line4 ="    <cachemembuffersize>"+buffersize+"</cachemembuffersize>";
-                   line5 ="    <readbufferfactor>"+bufferfactor+"</readbufferfactor>";
-                   line6 ="  </network>";
-                   line7 ="</advancedsettings>";
-              }
-
-              else
-
-              {
-                   line1 ="<advancedsettings>";
-                   line2 ="  <cache>";
-                   line3 ="    <buffermode>"+str1+"</buffermode>";
-                   line4 ="    <memorysize>"+buffersize+"</memorysize>";
-                   line5 ="    <readfactor>"+bufferfactor+"</readfactor>";
-                   line6 ="  </cache>";
-                   line7 ="</advancedsettings>";
-              }
-
-
-
-              if (x == 2)
-              {
-
-
-                   logfile("write advancedsettings.xml");
-
-
-
-                   cstring = getadb() + " shell ls "+mcpath;
-
-
-
-
-                   QString filename1 = "advancedsettings.xml";
-                   QString filename2 = scriptdir+filename1;
-
-
-                 //      cstr = QString("\"%1\"").arg(getadbpath()) + argument;
-
-                //   cstring = QString("\"%1\"").arg(getadb()) + " shell ls "+mcpath;
-
-                  cstring = getadb() + " shell ls "+mcpath;
-
-
-                   command=getadbOutput(cstring);
-                   if (command.contains("No such file or directory"))
-                   {
-                        QMessageBox::critical(this,"","Destination path missing");
-                        return;
-                   }
-
-
-                  //   cstring = QString("\"%1\"").arg(getadb()) + " shell ls "+xpath+filename1;
-
-                  cstring = getadb() + " shell ls "+xpath+filename1;
-
-
-
-
-
-                   command=getadbOutput(cstring);
-
-                   // logfile(cstring);
-                   logfile(command);
-
-                   if (!command.contains("No such file or directory"))
-                   {
-                        logfile("advancedsettings.xml exists");
-
-                        QMessageBox::StandardButton reply;
-                        reply = QMessageBox::question(this, "XML", "advancedsettings.xml exists. Overwrite?\n(will backup original)",
-                                                      QMessageBox::Yes|QMessageBox::No);
-                        if (reply == QMessageBox::No) {
-                            logfile("abort xml write");
-                            return;
-                        } else {
-                            logfile("continue xml write");
-                            logfile("backup advancedsettings.xml");
-
-                           cstring = getadb() + " shell cp "+xpath+filename1+" "+xpath+filename1+".old";
-
-                           // cstring = QString("\"%1\"").arg(getadb()) + " shell cp "+xpath+filename1+" "+xpath+filename1+".old";
-
-
-                            command=getadbOutput(cstring);
-                        }
-                   }  // end if exists
-
-
-                   QFile file(filename2);
-
-
-                   if(!file.open(QFile::WriteOnly))
-                   {
-                        logfile("error creating advancedsettings.xml.");
-                        QMessageBox::critical(this,"","Unknown error creating xml file!");
-                        return;
-                   }
-
-                   QTextStream out(&file);
-
-                   out  << line1 << Qt::endl;
-                   out  << line2 << Qt::endl;
-                   out  << line3 << Qt::endl;
-                   out  << line4 << Qt::endl;
-                   out  << line5 << Qt::endl;
-                   out  << line6 << Qt::endl;
-                   out  << line7 << Qt::endl;
-
-                   file.flush();
-                   file.close();
-
-
-                   // logfile( getadb());
-
-                  cstring = getadb() + " push "+filename2+ " "+xpath+filename1;
-
-
-
-                   command=getadbOutput(cstring);
-
-                   logfile("PUSH "+command);
-
-                   if (!command.contains("bytes"))
-                   {
-
-                       logfile("error pushing xml script to device!");
-                        logfile(cstring);
-                        logfile(command);
-                        logfile("=============");
-                        QMessageBox::critical(this,"","See log: error pushing xml from PC to device");
-                        return;
-                   }
-                   else {
-                        QMessageBox::information(this,"","advancedsettings.xml written");
-                   }
-
-
-
-              }
-
-
-    }
-
-
-
-    }
 
 
     //////////////////////////////////////////////////
