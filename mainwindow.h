@@ -38,6 +38,7 @@ class ConsoleManager;
 class FileManager;
 class KodiDataManager;
 class KodiDownloader;
+class KodiSetupManager;
 class DataMoveManager;
 class SplashScreenManager;
 class TimerManager;
@@ -235,6 +236,7 @@ private:
     XmlEditorManager *m_xmlEditor;
     bool m_isBusy = false;
     KodiDownloader *m_kodiDownloader;
+    KodiSetupManager *m_kodiSetupManager;
 
     const QString vqurl = "http://www.jocala.com/version.txt";
     const QString busypath = "/data/local/tmp/adblink/";

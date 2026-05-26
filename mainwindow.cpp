@@ -40,6 +40,7 @@
 #include "kodidatamanager.h"
 #include "kodidownloader.h"
 #include "kodiarchdialog.h"
+#include "kodisetupmanager.h"
     #include "oculusmanager.h"
     #include "preferencesmanager.h"
     #include "deviceeditor.h"
@@ -132,6 +133,7 @@
            , m_uninstallManager(new UninstallManager(this))
            , m_xmlEditor(new XmlEditorManager(this))
            , m_kodiDownloader(new KodiDownloader(this))
+           , m_kodiSetupManager(new KodiSetupManager(this))
      {
 
 
@@ -2669,130 +2671,17 @@
 ////////////////////////////////////////////////////////////////
 
     void MainWindow::on_actionCreate_kodi_data_triggered()
-
-     {
-
+    {
         QString selectedDescription;
-        if (!validateDeviceSelection(selectedDescription)) {
-           return;
-        }
+        if (!validateDeviceSelection(selectedDescription))
+            return;
 
         DeviceRecord device = queryDeviceRecord(selectedDescription);
 
-
-
-        QString cstring;
-        QString command;
-        QString mcpath;
-        QString kbase;
-
-        mcpath ="/sdcard/kodi_data/" + device.xbmcpackage;
-        kbase = "/sdcard/kodi_data/";
-
-        cstring = cstring = getadb() +  " shell ps | grep "+device.xbmcpackage;
-
-        command=getadbOutput(cstring);
-
-        if (command.contains(device.xbmcpackage))
-        {
-
-
-           QMessageBox::StandardButton reply;
-           reply = QMessageBox::question(this, "Stop Kodi", "Cannot create path while Kodi is running.\n Stop "+device.xbmcpackage+" on device?"  ,
-                                         QMessageBox::Yes|QMessageBox::No);
-           if (reply == QMessageBox::Yes)
-           {
-
-
-                    QString cstring = getadb() + " shell am force-stop "+device.xbmcpackage;
-                    QString command=getadbOutput(cstring);
-                    logfile(command);
-           }
-
-
-           else {
-
-
-                    logfile(device.xbmcpackage+" running. Path creation failed");
-                    return;
-           }
-
-
-
-
-        }
-
-
-         cstring = getadb() + " shell ls "+mcpath;
-         command=getadbOutput(cstring);
-
-      if (!command.contains("No such file or directory"))
-        {
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this, "Create Kodi Data", "This will overwrite /sdcard/kodi_data/\nProceed?",
-                                      QMessageBox::Yes|QMessageBox::No);
-        if (reply == QMessageBox::No)
-           return;
-
-        }
-
-      if ( getandroid() >= 11 )
-        {
-
-        if ( ::isPackageInstalled(getadb(), device.xbmcpackage) )
-        {
-        cstring = getadb()+ " shell appops set --uid "+  device.xbmcpackage +" MANAGE_EXTERNAL_STORAGE allow";
-        if (!getreturncode(cstring))
-          {
-             QMessageBox::critical(this, "", "Error setting Kodi permissions");
-           // return;
-          }
-        }
-      }
-
-
-        cstring = getadb() + " shell rm -r "+mcpath;
-        command=RunLongProcess(cstring,"Preparing target");
-        logfile(command);
-
-        cstring = getadb() + " shell ls "+mcpath;
-
-        command=getadbOutput(cstring);
-
-
-        if (command.contains("No such file or directory"))
-        {
-           cstring = getadb() + " shell mkdir -p "+mcpath+"/files/.kodi";
-           command=getadbOutput(cstring);
-           logfile(command);
-           QString errorp = command;
-           cstring = getadb() + " shell ls "+mcpath+"/files/.kodi";
-           command=getadbOutput(cstring);
-
-
-
-           if (command.contains("No such file or directory"))
-           {
-                    QMessageBox::critical(this,"","Error creating Kodi data folder");
-                    logfile("Restore error:"+ errorp);
-                    return;
-           }
-
-        } // nuke existing
-
-
-
-
-
-
-        cstring = getadb() + " shell echo xbmc.data="+mcpath+"/files > /sdcard/xbmc_env.properties";
-        command=getadbOutput(cstring);
-        logfile("create /sdcard/xbmc_env.properties");
-        logfile(command);
-
-
-        QMessageBox::information(this,"","Kodi data area created");
-
+        m_kodiSetupManager->createKodiData(this, device, getadb(),
+            [this](const QString &cstring, const QString &jobname) {
+                return RunLongProcess(cstring, jobname);
+            });
     }
 
 

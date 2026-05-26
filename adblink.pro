@@ -66,6 +66,7 @@ SOURCES += main.cpp \
     oculusmanager.cpp \
     kodidownloader.cpp \
     kodiarchdialog.cpp \
+    kodisetupmanager.cpp \
     preferencesmanager.cpp \
     datamovemanager.cpp \
     deviceeditor.cpp \
@@ -121,6 +122,7 @@ HEADERS += mainwindow.h \
     oculusmanager.h \
     kodidownloader.h \
     kodiarchdialog.h \
+    kodisetupmanager.h \
     preferencesmanager.h \
     datamovemanager.h \
     deviceeditor.h \
