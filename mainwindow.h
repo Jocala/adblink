@@ -157,7 +157,6 @@ private slots:
     void kill_server();
     bool start_server();
     bool is_package(QString package);
-    void createjson();
     void androidLog();
     void on_actionReboot_triggered();
     void deleteRecord(QString descrip);
