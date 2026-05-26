@@ -39,8 +39,9 @@ class FileManager;
 class KodiDataManager;
 class KodiDownloader;
 class DataMoveManager;
-class DataMoveManager;
 class SplashScreenManager;
+class UninstallManager;
+class UninstallManager;
 class XmlEditorManager;
 
 /////////////////////////////////////////////////////
@@ -228,6 +229,7 @@ private:
     FileManager *m_fileManager;
     DataMoveManager *m_dataMoveManager;
     SplashScreenManager *m_splashScreenManager;
+    UninstallManager *m_uninstallManager;
     XmlEditorManager *m_xmlEditor;
     bool m_isBusy = false;
     KodiDownloader *m_kodiDownloader;

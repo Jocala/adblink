@@ -34,6 +34,7 @@
 #include "datamovemanager.h"
 #include "filemanager.h"
 #include "splashscreenmanager.h"
+#include "uninstallmanager.h"
 #include "xmleditormanager.h"
 #include "kodidatamanager.h"
 #include "kodidownloader.h"
@@ -126,6 +127,7 @@
            , m_fileManager(new FileManager(this))
            , m_dataMoveManager(new DataMoveManager(this))
            , m_splashScreenManager(new SplashScreenManager(this))
+           , m_uninstallManager(new UninstallManager(this))
            , m_xmlEditor(new XmlEditorManager(this))
            , m_kodiDownloader(new KodiDownloader(this))
      {
@@ -1017,102 +1019,16 @@
     ///////////////////////////////////////////////////////////////////////////
     void MainWindow::uninstall_Button_clicked()
     {
-
-
-        QString port;
-        QString daddr;
-        QString package = "";
-        QString cstring;
-        QString command;
-        bool keepbox = false;
-
         QString selectedDescription;
-        if (!validateDeviceSelection(selectedDescription)) {
-              return;
-        }
-
+        if (!validateDeviceSelection(selectedDescription))
+            return;
 
         DeviceRecord device = queryDeviceRecord(selectedDescription);
 
-
-
-
-
-
-        logfile("open uninstall dialog");
-
-
-
-
-        uninstallDialog dialog(device.daddr,port,this);
-        dialog.setWindowModality(Qt::WindowModal);
-
-        // dialog.setModal(true);
-        if(dialog.exec() == QDialog::Accepted)
-        {
-
-        package = dialog.packageName();
-        keepbox = dialog.keepBox();
-
-        }
-
-        else return;
-
-        // qDebug() << package;
-
-        if (package.isEmpty())
-           {
-            QMessageBox::critical(this,"","No file selected");
-
-
-
-            return;
-            }
-
-
-
-                if ( !::isPackageInstalled(getadb(), package))
-                   { QMessageBox::critical(
-                         this,
-                         "",
-                         package +" not installed");
-                      return;
-
-                logfile("Error: "+ package +" not installed");
-                }
-
-
-                QMessageBox::StandardButton reply;
-                      reply = QMessageBox::question(this, "Uninstall", "Uninstall "+package+"?",
-                         QMessageBox::Yes|QMessageBox::No);
-                      if (reply == QMessageBox::Yes) {
-
-
-
-                         daddr=daddr+":"+port;
-
-                          if (!keepbox)
-                             cstring = getadb() + " shell pm uninstall " + package;
-                          else
-                             cstring = getadb() + " shell pm uninstall -k " + package;
-
-
-                          logfile("uninstall: "+cstring);
-
-                          QString command=RunLongProcess(cstring,"Uninstall APK");
-
-
-
-                          if (!command.contains("Success"))
-                              {
-                               QMessageBox::critical(this,"","Uninstall failed");
-                                logfile(package+" uninstalled");
-                                }
-                            else {
-                               QMessageBox::information(this,"","Uninstalled");
-                                logfile(package+" uninstalled");
-                               }
-         }
+        m_uninstallManager->uninstallPackage(this, device, getadb(),
+            [this](const QString &cstring, const QString &jobname) {
+                return RunLongProcess(cstring, jobname);
+            });
     }
 
 
