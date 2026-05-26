@@ -71,6 +71,7 @@ SOURCES += main.cpp \
     deviceeditor.cpp \
     filemanager.cpp \
     splashscreenmanager.cpp \
+    timermanager.cpp \
     uninstallmanager.cpp \
     xmleditormanager.cpp
 
@@ -125,6 +126,7 @@ HEADERS += mainwindow.h \
     deviceeditor.h \
     filemanager.h \
     splashscreenmanager.h \
+    timermanager.h \
     uninstallmanager.h \
     xmleditormanager.h
 
