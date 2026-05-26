@@ -6,6 +6,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QFile>
+#include <QRegularExpression>
 #include "getlocaladb.h"
 #include "logfile.h"
 #include "getadbdata.h"
@@ -101,4 +102,23 @@ void busybox_permissions(const QString &adbPrefix)
 {
     QString cstring = adbPrefix + " shell chmod 755 /data/local/tmp/adblink/busybox";
     ::getadbOutput(cstring);
+}
+
+QString resolveKodiPath(const QString &adbPrefix, const QString &dataRoot,
+                         const QString &xbmcpackage, bool scoped)
+{
+    QString cstring = adbPrefix + " shell ls /sdcard/xbmc_env.properties";
+    QString result = ::getadbOutput(cstring);
+
+    if (!result.contains("No such file")) {
+        cstring = adbPrefix + " shell cat /sdcard/xbmc_env.properties";
+        result = ::getadbOutput(cstring);
+        result.replace(QRegularExpression("[\r\n]"), "");
+        return result.mid(result.indexOf("xbmc.data=") + 10) + "/.kodi";
+    }
+
+    if (scoped)
+        return dataRoot + "kodi_data/" + xbmcpackage + "/files/.kodi";
+
+    return dataRoot + "Android/data/" + xbmcpackage + "/files/.kodi";
 }

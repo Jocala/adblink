@@ -1,7 +1,7 @@
 #include "cachemanager.h"
 #include "cachedialog.h"
+#include "adbutils.h"
 #include "getadbdata.h"
-#include "getreturncode.h"
 #include "logfile.h"
 
 #include <QFile>
@@ -23,20 +23,9 @@ bool CacheManager::configureCache(QWidget *parent, const DeviceRecord &device,
 
     QString mcpath;
     QString xpath;
+    QString cstring;
 
-    QString cstring = adbPrefix + " shell ls /sdcard/xbmc_env.properties";
-    if (getreturncode(cstring)) {
-        cstring = adbPrefix + " shell cat /sdcard/xbmc_env.properties";
-        QString command = getadbOutput(cstring);
-        command.replace(QRegularExpression("[\r\n]"), "");
-        mcpath = command.mid(command.indexOf("xbmc.data=") + 10);
-        mcpath += "/.kodi";
-    } else {
-        if (scoped)
-            mcpath = device.data_root + "kodi_data/" + device.xbmcpackage + "/files/.kodi";
-        else
-            mcpath = device.data_root + "Android/data/" + device.xbmcpackage + "/files/.kodi";
-    }
+    mcpath = resolveKodiPath(adbPrefix, device.data_root, device.xbmcpackage, scoped);
 
     xpath = mcpath + "/userdata/";
 

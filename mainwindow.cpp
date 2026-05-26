@@ -1405,20 +1405,7 @@
 
 
 
-    cstring = getadb() + " shell ls /sdcard/xbmc_env.properties";
-    if(getreturncode(cstring))
-    {  cstring = getadb() + " shell cat /sdcard/xbmc_env.properties";
-               command=getadbOutput(cstring);
-               command.replace(QRegularExpression("[\r\n]"), "");
-               mcpath = command.mid(command.indexOf("xbmc.data=") + 10);
-               mcpath=mcpath+"/.kodi";
-    }
-    else
-
-    {
-               mcpath="/sdcard/Android/data/" + device.xbmcpackage+"/files/.kodi";
-
-    }
+    mcpath = resolveKodiPath(getadb(), "/sdcard/", device.xbmcpackage, false);
 
 
 
@@ -1702,23 +1689,7 @@
 
 
 
-          cstring = getadb() + " shell ls /sdcard/xbmc_env.properties";
-          if(getreturncode(cstring))
-          {  cstring = getadb() + " shell cat /sdcard/xbmc_env.properties";
-            command=getadbOutput(cstring);
-            command.replace(QRegularExpression("[\r\n]"), "");
-            mcpath = command.mid(command.indexOf("xbmc.data=") + 10);
-            mcpath=mcpath+"/.kodi";
-          }
-          else
-
-          {
-            if (isScoped())
-                  mcpath=device.data_root + "kodi_data/" + device.xbmcpackage+"/files/.kodi";
-            else
-                  mcpath=device.data_root + "Android/data/" + device.xbmcpackage+"/files/.kodi";
-
-          }
+          mcpath = resolveKodiPath(getadb(), device.data_root, device.xbmcpackage, isScoped());
 
 
 
@@ -2121,22 +2092,7 @@
 
 
 
-         cstring = getadb() + " shell ls /sdcard/xbmc_env.properties";
-         if (getreturncode(cstring))
-         {
-            cstring = getadb() + " shell cat /sdcard/xbmc_env.properties";
-            command = getadbOutput(cstring);
-            command.replace(QRegularExpression("[\r\n]"), "");
-            mcpath = command.mid(command.indexOf("xbmc.data=") + 10);
-            mcpath = mcpath + "/.kodi";
-         }
-         else
-         {
-            if (isScoped())
-              mcpath = device.data_root + "kodi_data/" + device.xbmcpackage + "/files/.kodi";
-            else
-              mcpath = device.data_root + "Android/data/" + device.xbmcpackage + "/files/.kodi";
-         }
+         mcpath = resolveKodiPath(getadb(), device.data_root, device.xbmcpackage, isScoped());
 
 
 
@@ -3210,20 +3166,7 @@
 
 
 
-        cstring = getadb() + " shell ls /sdcard/xbmc_env.properties";
-        if(getreturncode(cstring))
-        {  cstring = getadb() + " shell cat /sdcard/xbmc_env.properties";
-            command=getadbOutput(cstring);
-            command.replace(QRegularExpression("[\r\n]"), "");
-            mcpath = command.mid(command.indexOf("xbmc.data=") + 10);
-            mcpath=mcpath+"/.kodi";
-        }
-        else
-
-        {
-            mcpath="/sdcard/Android/data/" + device.xbmcpackage+"/files/.kodi";
-
-        }
+        mcpath = resolveKodiPath(getadb(), "/sdcard/", device.xbmcpackage, false);
 
 
 
@@ -4489,20 +4432,7 @@ void MainWindow::on_actionSplash_Screen_triggered()
     QString mcpath="";
 
 
-    cstring = getadb() + " shell ls /sdcard/xbmc_env.properties";
-    if(getreturncode(cstring))
-    {  cstring = getadb() + " shell cat /sdcard/xbmc_env.properties";
-     command=getadbOutput(cstring);
-     command.replace(QRegularExpression("[\r\n]"), "");
-     mcpath = command.mid(command.indexOf("xbmc.data=") + 10);
-     mcpath=mcpath+"/.kodi";
-    }
-    else
-
-    {
-     mcpath="/sdcard/Android/data/" + device.xbmcpackage+"/files/.kodi";
-
-    }
+    mcpath = resolveKodiPath(getadb(), "/sdcard/", device.xbmcpackage, false);
 
 
 
@@ -4731,23 +4661,7 @@ void MainWindow::on_actionEdit_XML_triggered()
 
 
 
- cstring = getadb() + " shell ls /sdcard/xbmc_env.properties";
- if(getreturncode(cstring))
- {  cstring = getadb() + " shell cat /sdcard/xbmc_env.properties";
-           command=getadbOutput(cstring);
-           command.replace(QRegularExpression("[\r\n]"), "");
-           mcpath = command.mid(command.indexOf("xbmc.data=") + 10);
-           mcpath=mcpath+"/.kodi";
- }
- else
-
- {
-           if (isScoped())
-              mcpath=device.data_root + "kodi_data/" + device.xbmcpackage+"/files/.kodi";
-           else
-              mcpath=device.data_root + "Android/data/" + device.xbmcpackage+"/files/.kodi";
-
- }
+ mcpath = resolveKodiPath(getadb(), device.data_root, device.xbmcpackage, isScoped());
 
 
 
