@@ -177,8 +177,6 @@ private slots:
     void on_actionView_adbLink_Log_triggered();
     void stopapp_clicked();
 
-    void projectivyAccess();
-
     void on_actionPaste_path_triggered();
     void on_actionStop_Application_triggered();
     void on_actionStart_Application_triggered();
@@ -295,7 +293,6 @@ private:
     QAction *actionView_Kodi_Log;
     QAction *actionView_adbLink_Log;
     QAction *actionWireless_ADBD;
-    QAction *actionAccess;
     QAction *actionKodi_data_usage;
     QAction *actionKodi_version;
     QAction *actionPreferences;
