@@ -126,7 +126,6 @@ private slots:
     void dos_shell();
     void adbshellButton_clicked();
     void delay(int secs);
-    void busybox_permissions();
     void createTables();
     QString getadb();
     QString manufacturer();

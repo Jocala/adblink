@@ -96,3 +96,9 @@ void displayOff(const QString &adbPrefix)
     QString cstring = adbPrefix + " shell input keyevent 26 ";
     ::getadbOutput(cstring);
 }
+
+void busybox_permissions(const QString &adbPrefix)
+{
+    QString cstring = adbPrefix + " shell chmod 755 /data/local/tmp/adblink/busybox";
+    ::getadbOutput(cstring);
+}

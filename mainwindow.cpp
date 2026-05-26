@@ -2334,8 +2334,7 @@
          QString fmdaddr("");
          bool iskodi;
 
-         busybox_permissions();
-         fmdaddr = device.daddr;
+         busybox_permissions(getadb());
 
 
 
@@ -3143,10 +3142,10 @@
                    logfile(command);
               }
 
-          busybox_permissions();
+           busybox_permissions(getadb());
 
 
-           QMessageBox::information(this,"","Busybox installed.");
+            QMessageBox::information(this,"","Busybox installed.");
 
           return true;
 
@@ -3157,17 +3156,6 @@
 
 
 
-    ///////////////////////////////////////////////
-    void MainWindow::busybox_permissions()
-    {
-
-    QString cstring;
-    QString command;
-
-    cstring = getadb() + " shell chmod 755 /data/local/tmp/adblink/busybox";
-    command=getadbOutput(cstring);
-
-    }
 
 
 ///////////////////////////////////////////////////////
@@ -4729,7 +4717,7 @@ void MainWindow::on_actionSplash_Screen_triggered()
      return;
     }
 
-    busybox_permissions();
+    busybox_permissions(getadb());
 
 
 

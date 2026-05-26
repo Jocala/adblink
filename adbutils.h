@@ -13,4 +13,7 @@ QString readBatteryLevel(const QString &adbPrefix);
 // Turn off device display via keyevent 26
 void displayOff(const QString &adbPrefix);
 
+// Set busybox permissions on device
+void busybox_permissions(const QString &adbPrefix);
+
 #endif // ADBUTILS_H
