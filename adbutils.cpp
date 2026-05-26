@@ -90,3 +90,9 @@ QString readBatteryLevel(const QString &adbPrefix)
 
     return batteryPresent ? (batteryLevel + batteryStatus) : "Unknown";
 }
+
+void displayOff(const QString &adbPrefix)
+{
+    QString cstring = adbPrefix + " shell input keyevent 26 ";
+    ::getadbOutput(cstring);
+}

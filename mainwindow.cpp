@@ -6426,11 +6426,7 @@ void MainWindow::startapp_clicked()
 
 void MainWindow::displayOff()
 {
-
-
-   QString cstring = getadb() + " shell input keyevent 26 ";
-   QString command = getadbOutput(cstring);
-
+    ::displayOff(getadb());
 }
 
 
