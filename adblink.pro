@@ -62,6 +62,7 @@ SOURCES += main.cpp \
     sleepdialog.cpp \
     adbstring.cpp \
     oculusdialog.cpp \
+    oculusmanager.cpp \
     kodidownloader.cpp \
     kodiarchdialog.cpp
 
@@ -107,6 +108,7 @@ HEADERS += mainwindow.h \
     program.h \
     version.h \
     oculusdialog.h \
+    oculusmanager.h \
     kodidownloader.h \
     kodiarchdialog.h
 
