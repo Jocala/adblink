@@ -1339,23 +1339,6 @@
 
 
     //////////////////////////////////////////////////////////
-    void MainWindow::usbbuttons(bool isusb)
-    {
-
-     return;
-
-        if(!isusb)
-               {
-                 // ui->connButton->setDisabled(false);
-                 // ui->disButton->setDisabled(false);
-                  }
-              else
-                  {
-                  // ui->connButton->setDisabled(true);
-                   // ui->disButton->setDisabled(true);
-                  }
-
-    }
 
 
     //////////////////////////////////////////////////////
@@ -1613,56 +1596,6 @@
            //activityIcon(false);
            progressBar->setHidden(true);
             container->setHidden(false);
-           progressBar->setValue(0);
-           server_running->setText("");
-        }
-
-
-
-
-        serverlabel();
-
-        return command;
-    }
-
-
-
-    QString MainWindow::RunLongProcess2(QString cstring, QString jobname)
-    {
-        progressBar->setHidden(false);
-        progressBar->setValue(0);
-        QString command;
-        QString s = jobname;
-        RunProcessList << s;
-        container->setHidden(true);
-
-        if (RunProcessList.count() > 1)
-           server_running->setText("parallel processes running");
-        else
-           server_running->setText(s);
-
-        int tsvalue = 4000;
-
-        QTimer *timer = new QTimer(this);
-        connect(timer, SIGNAL(timeout()), this, SLOT(TimerEvent()));
-        timer->start(tsvalue);
-
-        command = getadbOutput(cstring);
-
-        RunProcessList.removeAll(s);
-
-        if (RunProcessList.count() > 0)
-        {
-           //activityIcon(true);
-           progressBar->setHidden(false);
-           progressBar->setValue(0);
-           server_running->setText("");
-        }
-        else
-        {
-           //activityIcon(false);
-           progressBar->setHidden(true);
-           container->setHidden(false);
            progressBar->setValue(0);
            server_running->setText("");
         }
