@@ -38,6 +38,7 @@ class ConsoleManager;
 class FileManager;
 class KodiDataManager;
 class KodiDownloader;
+class XmlEditorManager;
 
 /////////////////////////////////////////////////////
 
@@ -226,6 +227,7 @@ private:
     BackupManager *m_backupManager;
     CacheManager *m_cacheManager;
     FileManager *m_fileManager;
+    XmlEditorManager *m_xmlEditor;
     bool m_isBusy = false;
     KodiDownloader *m_kodiDownloader;
 

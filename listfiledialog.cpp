@@ -29,7 +29,16 @@ listfileDialog::listfileDialog(QWidget *parent) :
     mainLayout->addLayout(buttonLayout);
 
     connect(m_cancelButton, &QPushButton::clicked, this, &QDialog::reject);
-    connect(m_selectButton, &QPushButton::clicked, this, &QDialog::accept);
+    connect(m_selectButton, &QPushButton::clicked, this, [this]() {
+        if (m_flistWidget->selectedItems().isEmpty())
+            return;
+        fitem = m_flistWidget->selectedItems().first()->text();
+        accept();
+    });
+    connect(m_flistWidget, &QListWidget::itemDoubleClicked, this, [this](QListWidgetItem *item) {
+        fitem = item->text();
+        accept();
+    });
 }
 
 listfileDialog::~listfileDialog()
@@ -48,26 +57,6 @@ void listfileDialog::setFilelist(const QStringList &filelist)
 void listfileDialog::setDialogTitle(const QString &dtitle)
 {
     setWindowTitle(dtitle);
-}
-
-void listfileDialog::on_selectButton_clicked()
-{
-    QStringList mstringlist;
-
-    if(m_flistWidget->selectedItems().count() >= 1)
-    {
-        foreach(QListWidgetItem *item, m_flistWidget->selectedItems())
-            mstringlist << item->text();
-    }
-    else return;
-
-    fitem = mstringlist.at(0);
-}
-
-void listfileDialog::on_flistWidget_doubleClicked(const QModelIndex &index)
-{
-   fitem = index.data(Qt::DisplayRole).toString();
-   listfileDialog::accept();
 }
 
 QString listfileDialog::return_fitem() {

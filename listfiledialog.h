@@ -21,10 +21,6 @@ public:
 
     QString fitem;
 
-private slots:
-    void on_selectButton_clicked();
-    void on_flistWidget_doubleClicked(const QModelIndex &index);
-
 private:
     QListWidget *m_flistWidget;
     QPushButton *m_selectButton;

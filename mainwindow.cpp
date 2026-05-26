@@ -32,6 +32,7 @@
 #include "cachemanager.h"
 #include "consolemanager.h"
 #include "filemanager.h"
+#include "xmleditormanager.h"
 #include "kodidatamanager.h"
 #include "kodidownloader.h"
 #include "kodiarchdialog.h"
@@ -121,6 +122,7 @@
            , m_backupManager(new BackupManager(this))
            , m_cacheManager(new CacheManager(this))
            , m_fileManager(new FileManager(this))
+           , m_xmlEditor(new XmlEditorManager(this))
            , m_kodiDownloader(new KodiDownloader(this))
      {
 
@@ -4378,184 +4380,16 @@ void MainWindow::on_actionOculus_VR_triggered()
 
 void MainWindow::on_actionEdit_XML_triggered()
 {
+    QString selectedDescription;
+    if (!validateDeviceSelection(selectedDescription))
+        return;
 
+    DeviceRecord device = queryDeviceRecord(selectedDescription);
 
- QString selectedDescription;
- if (!validateDeviceSelection(selectedDescription)) {
-           return;
- }
-
-
-
- int selectedRow = deviceTable->currentRow();
- if (selectedRow >= 0 && deviceTable->item(selectedRow, 0)) {
-           selectedDescription = deviceTable->item(selectedRow, 0)->text();
- } else {
-           QMessageBox::critical(this, "", "No device selected in table");
-           return;
- }
- DeviceRecord device = queryDeviceRecord(selectedDescription);
-
-
- QString tempfile1;
- QString tempfile2;
- QString xpath = "";
- QString fileName;
- QString cstring;
- QString command;
- QString mcpath="";
-
-
-
- mcpath = resolveKodiPath(getadb(), device.data_root, device.xbmcpackage, isScoped());
-
-
-
-
- xpath = mcpath+"/userdata/";
-
- // qDebug() << xpath;
-
- cstring = getadb() + " shell "+busypath+"busybox find " +xpath+ " -maxdepth 1 -name *.xml ";
-
- command=getadbOutput(cstring);
-
-
-
-
- QStringList filelist=command.split(QRegularExpression("[\r\n]"),Qt::SkipEmptyParts);
-
- if (command.isEmpty() || command.contains("No such file or directory"))
- { QMessageBox::critical(this,"","No files found");
-
-           // logfile(cstring);
-           logfile(command);
-           logfile("no files found!");
-           return;
- }
-
-
-
- listfileDialog fdialog(this);
- fdialog.setWindowModality(Qt::WindowModal);
- fdialog.setFilelist(filelist);
- fdialog.setDialogTitle("XML Files");
-
- if(fdialog.exec() == QDialog::Accepted)
- {
-
-           fileName = fdialog.return_fitem();
-
-
-           if (fileName.isEmpty())
-           {
-              QMessageBox::critical(this,"","No file selected");
-              logfile("no file selected");
-              return;
-           }
-
-
-
-           QString filename(fileName.mid(fileName.lastIndexOf("/")+1,fileName.length()));
-
-           cstring = getadb() + " pull "+'"'+fileName+'"'+" "+'"'+scriptdir+'"'+"/"+filename;
-           command=getadbOutput(cstring);
-
-
-           if (!command.contains("bytes"))
-           {
-              logfile("edit failed");
-              logfile(command);
-              QMessageBox::critical(
-                  this,
-                  "",
-                  "Edit failed "+command);
-              return;
-           }
-
-
-
-           QFile file1(scriptdir+filename);
-
-           if(!file1.open(QIODevice::ReadOnly | QIODevice::Text))
-              return;
-
-           QString xmlfile = file1.readAll();
-           editorDialog dialog;
-           dialog.seteditor(xmlfile);
-           dialog.setfilename(filename);
-
-           tempfile2 = scriptdir+"/"+filename;
-           tempfile1 = scriptdir+"/"+filename+".bak";
-
-
-           dialog.setModal(true);
-
-           if(dialog.exec() == QDialog::Accepted)
-           {
-
-
-              QMessageBox::StandardButton reply;
-              reply = QMessageBox::question(this, "Save","Save "+ fileName+"?",
-                                            QMessageBox::Yes|QMessageBox::No);
-              if (reply == QMessageBox::No)
-               return;
-
-
-              xmlfile = dialog.xmlfile();
-
-
-              //QMessageBox::information(this,"",xmlfile);
-
-
-
-              QFile::copy(scriptdir+"/"+filename, scriptdir+filename+".bak");
-              QFile caFile( scriptdir+"/"+filename);
-              caFile.open(QIODevice::WriteOnly | QIODevice::Text);
-              QTextStream outStream(&caFile);
-              outStream << xmlfile;
-              caFile.close();
-
-              cstring = getadb() + " push "+'"'+tempfile1+'"'+ " "+xpath;
-              command=getadbOutput(cstring);
-              logfile(command);
-
-              if (!command.contains("bytes"))
-              {  QMessageBox::critical(this,"","Backup of "+filename+ "failed. Edit abandoned." );
-               logfile("Backup of "+filename+ "failed");
-               return;
-              }
-
-
-
-              cstring = getadb() + " push "+'"'+tempfile2+'"'+ " "+xpath;
-              command=getadbOutput(cstring);
-              logfile(command);
-
-              if (!command.contains("bytes"))
-              {  QMessageBox::critical(this,"","Problem replacing "+filename+ ". Edit abandoned." );
-               logfile("Problem replacing "+filename+ ". Edit abandoned." );
-               return;
-              }
-
-
-           }
-
-
-
-           QFile file2 (tempfile1);
-           file2.remove();
-
-           QFile file3 (tempfile2);
-           file3.remove();
-
-
- }
-
-
+    m_xmlEditor->editXml(this, device, getadb(), isScoped(), scriptdir, busypath);
 }
 
-//////////////////////////////////////////////
+
 
 void MainWindow::on_actionScreen_Capture_triggered()
 {
