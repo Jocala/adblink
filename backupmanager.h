@@ -3,11 +3,13 @@
 
 #include <QObject>
 #include <QStringList>
+#include <functional>
 
 #include "devicerecord.h"
 
 class AdbDevice;
 class KodiDataManager;
+class QWidget;
 
 class BackupManager : public QObject
 {
@@ -28,6 +30,19 @@ public:
 
     QString kodiDataRoot(const QString &dataRoot, bool scoped, const QString &package) const;
     QString kodiBaseRoot(const QString &dataRoot, bool scoped) const;
+
+    bool backupDevice(QWidget *parent, const DeviceRecord &device,
+                      const QString &adbPrefix, bool scoped,
+                      int osType,
+                      const QString &jsonstring,
+                      KodiDataManager *dataManager,
+                      std::function<QString(const QString&, const QString&)> runLongProcess);
+
+    bool restoreDevice(QWidget *parent, const DeviceRecord &device,
+                       const QString &adbPrefix, bool scoped,
+                       const QString &jsonstring,
+                       KodiDataManager *dataManager,
+                       std::function<QString(const QString&, const QString&)> runLongProcess);
 
 signals:
     void logMessage(const QString &msg) const;

@@ -226,6 +226,7 @@ private:
     KodiDataManager *m_dataManager;
     ConsoleManager *m_consoleManager;
     BackupManager *m_backupManager;
+    bool m_isBusy = false;
     KodiDownloader *m_kodiDownloader;
 
     const QString vqurl = "http://www.jocala.com/version.txt";
