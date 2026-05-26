@@ -36,6 +36,7 @@
 #include "kodiarchdialog.h"
     #include "oculusmanager.h"
     #include "preferencesmanager.h"
+    #include "deviceeditor.h"
 
     #ifdef __WIN32__
       #include "windows.h"
@@ -1602,248 +1603,54 @@
 
 //////////////////
 
-    void MainWindow::dataentry(bool isNewRecord)
-    {
-       QString cstring;
-       QString command;
-       QStringList mstringlist;
-       QStringList dstringlist;
-       QString selectedDescription;
-       DeviceRecord device;
+     void MainWindow::dataentry(bool isNewRecord)
+     {
+        QString command = getadbOutput("null devices");
+        QStringList mstringlist = command.split(QRegularExpression("[\t\n\r]"), Qt::SkipEmptyParts);
+        QStringList dstringlist;
 
-       cstring = "null devices";
-       command = getadbOutput(cstring);
+        if (command.contains("List of devices attached"))
+        {
+             mstringlist.removeFirst();
+             for (int a = 0; a < mstringlist.size(); a = a + 2)
+             {
+                    QStringList pieces = mstringlist.at(a).split(":", Qt::SkipEmptyParts);
+                    if (!mstringlist.at(a).contains("daemon"))
+                   dstringlist << pieces.at(0);
+             }
+        }
 
-       mstringlist = command.split(QRegularExpression("[\t\n\r]"), Qt::SkipEmptyParts);
+        DeviceRecord device;
+        QString selectedDescription;
 
-       if (command.contains("List of devices attached"))
-       {
-            mstringlist.removeFirst();
-            for (int a = 0; a < mstringlist.size(); a = a + 2)
-            {
-                   QStringList pieces = mstringlist.at(a).split(":", Qt::SkipEmptyParts);
-                   if (!mstringlist.at(a).contains("daemon"))
-                  dstringlist << pieces.at(0);
-            }
-       }
+        if (!isNewRecord)
+        {
+             int selectedRow = deviceTable->currentRow();
+             if (selectedRow >= 0 && deviceTable->item(selectedRow, 0))
+             {
+                    selectedDescription = deviceTable->item(selectedRow, 0)->text();
+                    device = queryDeviceRecord(selectedDescription);
+             }
+             else
+             {
+                    QMessageBox::critical(this, "", "No device selected in table");
+                    return;
+             }
+        }
 
-       // For update, get selected description from deviceTable
-       if (!isNewRecord)
-       {
-            int selectedRow = deviceTable->currentRow();
-            if (selectedRow >= 0 && deviceTable->item(selectedRow, 0))
-            {
-                   selectedDescription = deviceTable->item(selectedRow, 0)->text();
-                   device = queryDeviceRecord(selectedDescription);
-            }
-            else
-            {
-                   QMessageBox::critical(this, "", "No device selected in table");
-                   return;
-            }
-       }
+        DeviceEditor editor(this, stackedWidget->currentIndex() == 0,
+                            version,
+                            [this]() { on_Erase_adbLink_database_triggered(); });
+        editor.setDeviceList(dstringlist);
+        if (!isNewRecord)
+             editor.setExistingDevice(device, selectedDescription);
 
-       bool iskodi;
-
-       if (stackedWidget->currentIndex() == 0)
-            iskodi = true;
-       else
-            iskodi = false;
-
-       preferencesDialog dialog(this, iskodi);
-
-       dialog.setWindowModality(Qt::WindowModal);
-
-       dialog.setversionLabel(version);
-       dialog.setdevicelist(dstringlist);
-
-       // Initialize dialog fields based on insert or update
-       if (isNewRecord)
-       {
-            // Default values for new record (insert)
-            dialog.setPackagename("org.xbmc.kodi");
-            dialog.setPulldir("");
-            dialog.setfilepath("/files/.kodi");
-            dialog.setdataroot("/sdcard/");
-            dialog.setostype("0");
-            dialog.setdescription("");
-            dialog.setscrcpy("");
-            dialog.setdisableroot(0);
-            dialog.setport("5555");
-            dialog.setscope(false);
-            dialog.setwsa(false);
-            dialog.setdaddr("");
-            dialog.setisusb(false);
-       }
-       else
-       {
-            // Populate with database values for update
-            dialog.setPackagename(device.xbmcpackage);
-            dialog.setPulldir(device.pulldir);
-            dialog.setfilepath(device.filepath);
-            dialog.setscrcpy(device.scrcpyarg);
-            dialog.setdataroot(device.data_root);
-            dialog.setostype("0");
-            dialog.setdescription(device.description);
-            dialog.setdisableroot(device.disableroot);
-            if (device.isusb)
-                   dialog.setport("");
-            else
-                   dialog.setport(device.port);
-            dialog.setdaddr(device.daddr);
-            dialog.setisusb(device.isusb);
-       }
-
-       dialog.setModal(true);
-
-       int result = dialog.exec();
-       if (result == QDialog::Accepted)
-       {
-            // Retrieve values from dialog
-            QString data_root = dialog.data_root();
-            QString xbmcpackage = dialog.xbmcpackageName();
-            QString pulldir = dialog.pulldir();
-            QString description = dialog.description();
-            QString filepath = dialog.filepath();
-            QString port = dialog.port();
-            QString daddr = dialog.daddr();
-            bool isusb = dialog.isusb();
-            QString ostype = dialog.ostype();
-            int disableroot = dialog.disableroot();
-            QString scrcpy = dialog.scrcpy();
-
-            if (description.isEmpty())
-            {
-                   QMessageBox::critical(this, "", "Description cannot be empty.");
-                   return;
-            }
-
-            if (isNewRecord)
-            {
-                   QSqlQuery checkQuery;
-                   checkQuery.prepare("SELECT COUNT(*) FROM device WHERE description = ?");
-                   checkQuery.addBindValue(description);
-                   if (checkQuery.exec() && checkQuery.first() && checkQuery.value(0).toInt() > 0)
-                   {
-                  QMessageBox::critical(this, "", "A device with this description already exists.");
-                  return;
-                   }
-            }
-
-            QSqlQuery query;
-            QString sqlstatement;
-
-            if (isNewRecord)
-            {
-                   // Insert new record
-                   sqlstatement = "INSERT INTO device (description, daddr, port, isusb, ostype, "
-                                  "data_root, xbmcpackage, pulldir, disableroot, filepath, flag5) "
-                                  "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-                   query.prepare(sqlstatement);
-                   query.addBindValue(description);
-                   query.addBindValue(daddr);
-                   query.addBindValue(port);
-                   query.addBindValue(isusb);
-                   query.addBindValue(ostype);
-                   query.addBindValue(data_root);
-                   query.addBindValue(xbmcpackage);
-                   query.addBindValue(pulldir);
-                   query.addBindValue(disableroot);
-                   query.addBindValue(filepath);
-                   query.addBindValue(scrcpy); // Bind scrcpy to flag5
-            }
-            else
-            {
-                   // Update existing record
-                   sqlstatement = "UPDATE device SET description = ?, daddr = ?, port = ?, isusb = ?, ostype = ?, "
-                                  "data_root = ?, xbmcpackage = ?, pulldir = ?, disableroot = ?, filepath = ?, flag5 = ? "
-                                  "WHERE description = ?";
-                   query.prepare(sqlstatement);
-                   query.addBindValue(description);
-                   query.addBindValue(daddr);
-                   query.addBindValue(port);
-                   query.addBindValue(isusb);
-                   query.addBindValue(ostype);
-                   query.addBindValue(data_root);
-                   query.addBindValue(xbmcpackage);
-                   query.addBindValue(pulldir);
-                   query.addBindValue(disableroot);
-                   query.addBindValue(filepath);
-                   query.addBindValue(scrcpy); // Bind scrcpy to flag5
-                   query.addBindValue(selectedDescription);
-            }
-
-            if (!query.exec())
-            {
-                   QString errorMessage = query.lastError().text();
-                   logfile(QString("Query error: ") + errorMessage);
-                   logfile(QString("SQL statement: ") + sqlstatement);
-                   logfile(QString("Bound values: description=%1, daddr=%2, port=%3, isusb=%4, ostype=%5, data_root=%6, xbmcpackage=%7, pulldir=%8, disableroot=%9, filepath=%10, scrcpy=%11")
-                               .arg(description)
-                               .arg(daddr)
-                               .arg(port)
-                               .arg(isusb ? "true" : "false")
-                               .arg(ostype)
-                               .arg(data_root)
-                               .arg(xbmcpackage)
-                               .arg(pulldir)
-                               .arg(disableroot)
-                               .arg(filepath)
-                               .arg(scrcpy));
-
-                   if (errorMessage.contains("Parameter count mismatch"))
-                   {
-                  QMessageBox msgBox(this);
-                  msgBox.setWindowTitle("Parameter Mismatch Error");
-                  msgBox.setText("Parameter count mismatch detected. Would you like to re-initialize adblink?");
-                  msgBox.setIcon(QMessageBox::Question);
-
-                  QAbstractButton *yesButton = msgBox.addButton(QMessageBox::Yes);
-                  QAbstractButton *noButton = msgBox.addButton(QMessageBox::No);
-                //  QAbstractButton *logButton = msgBox.addButton("Logfile", QMessageBox::ActionRole);
-
-                  bool done = false;
-                  while (!done)
-                  {
-                        msgBox.exec();
-                        QAbstractButton *clicked = msgBox.clickedButton();
-                        if (clicked == yesButton)
-                        {
-                            on_Erase_adbLink_database_triggered();
-                            done = true;
-                        }
-                        else if (clicked == noButton)
-                        {
-                            done = true;
-                        }
-
-                     /*
-                          else if (clicked == logButton)
-                        {
-                             on_actionView_adbLink_Log_triggered();
-
-                        }
-                    */
-
-                  }
-                  return;
-                   }
-                   else
-                   {
-                  QMessageBox::critical(this, "",
-                                        (isNewRecord ? "Failed to insert into database: " : "Failed to update database: ") + errorMessage);
-                  return;
-                   }
-            }
-            else
-            {
-                   logfile(QString("Query executed successfully for ") + (isNewRecord ? "INSERT" : "UPDATE"));
-            }
-       }
-
-       QSqlDatabase::database().commit();
-       loadDeviceTableX(deviceTable);
-    }
+        if (editor.exec())
+        {
+             QSqlDatabase::database().commit();
+             loadDeviceTableX(deviceTable);
+        }
+     }
 
 
     ///////////////////////////////////////////
