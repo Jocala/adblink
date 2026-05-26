@@ -67,7 +67,8 @@ SOURCES += main.cpp \
     kodidownloader.cpp \
     kodiarchdialog.cpp \
     preferencesmanager.cpp \
-    deviceeditor.cpp
+    deviceeditor.cpp \
+    filemanager.cpp
 
 HEADERS += mainwindow.h \
     adbconnection.h \
@@ -116,7 +117,8 @@ HEADERS += mainwindow.h \
     kodidownloader.h \
     kodiarchdialog.h \
     preferencesmanager.h \
-    deviceeditor.h
+    deviceeditor.h \
+    filemanager.h
 
 FORMS +=
 

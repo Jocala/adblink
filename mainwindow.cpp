@@ -31,6 +31,7 @@
 #include "backupmanager.h"
 #include "cachemanager.h"
 #include "consolemanager.h"
+#include "filemanager.h"
 #include "kodidatamanager.h"
 #include "kodidownloader.h"
 #include "kodiarchdialog.h"
@@ -116,10 +117,11 @@
          , m_networkManager(new QNetworkAccessManager(this))
          , m_adbConnection(new AdbConnection(this))
          , m_dataManager(new KodiDataManager(this))
-         , m_consoleManager(new ConsoleManager(this))
-          , m_backupManager(new BackupManager(this))
-          , m_cacheManager(new CacheManager(this))
-          , m_kodiDownloader(new KodiDownloader(this))
+          , m_consoleManager(new ConsoleManager(this))
+           , m_backupManager(new BackupManager(this))
+           , m_cacheManager(new CacheManager(this))
+           , m_fileManager(new FileManager(this))
+           , m_kodiDownloader(new KodiDownloader(this))
      {
 
 
@@ -2026,201 +2028,31 @@
     ///////////////////////////////////////////////////////
 
 
-    void MainWindow::fmButton_clicked()
-    {
-
-
-
+     void MainWindow::fmButton_clicked()
+     {
          QString selectedDescription;
-         if (!validateDeviceSelection(selectedDescription)) {
-            return;
-         }
+         if (!validateDeviceSelection(selectedDescription))
+             return;
 
          DeviceRecord device = queryDeviceRecord(selectedDescription);
 
-
-
-
-         QJsonObject obj;
-         QJsonDocument doc(obj);
          QFile file(databasedir + "adblink.json");
          file.open(QIODevice::ReadOnly);
-         doc = QJsonDocument::fromJson(file.readAll());
-         obj = doc.object();
+         QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
          QString download = doc.object()["download"].toString();
-         QString cstring;
-         QString command;
-         QString mcpath;
-         QString fmpullpath;
-         QString pulldir;
-         QString port;
-         QString daddr;
-         QString ostypefm("");
-         QString fmdaddr("");
-         bool iskodi;
 
-         busybox_permissions(getadb());
+         FileManager::Context ctx;
+         ctx.adbPrefix = getadb();
+         ctx.apphome = apphome;
+         ctx.fmfont = ffontsize;
+         ctx.isKodiTab = (stackedWidget->currentIndex() == 0);
+         ctx.downloadDir = download;
+
+         m_fileManager->openFileManager(this, device, ctx);
+     }
 
 
 
-         if (device.isusb) {
-          port = "";
-          daddr = device.daddr;
-         } else {
-          port = device.port.isEmpty() ? "5555" : device.port;
-          daddr = device.daddr + ":" + port;
-         }
-
-
-         if (stackedWidget->currentIndex() == 0)
-            iskodi=true;
-         else
-            iskodi=false;
-
-         fmdialog = new usbfileDialog(iskodi,ffontsize, this);
-
-         fmdialog->setWindowModality(Qt::NonModal);
-
-
-          cstring = getadb() + " shell ls /data/local/tmp/adblink/busybox";
-          if (!getreturncode(cstring))
-          {
-             if (!ensureBusyboxInstalled(this, getadb(), "Busybox not found. Install?"))
-                return;
-          }
-
-
-
-
-         mcpath = resolveKodiPath(getadb(), device.data_root, device.xbmcpackage, isScoped());
-
-
-
-         fmdialog->setkodiPath(mcpath);        
-         fmdialog->setfmfont(ffontsize);
-
-/*
-         if (!adhoc_ip->text().isEmpty())
-         {
-            fmdialog->setData(adhoc_ip->text());
-            // fmdialog->setADB(getadbpath());
-            fmdialog->setADB(QString("\"%1\" -s %2").arg(getadbpath(), adhoc_ip->text()));
-
-         }
-         else
-         {
-
-
-
-          //  fmdialog->setADB(getadbpath() + " -s " + daddr);
-
-            fmdialog->setADB(QString("\"%1\" -s %2").arg(getadbpath(), daddr));
-            fmdialog->setData(selectedDescription);
-         }
-
-*/
-
-         fmdialog->setADB(QString("\"%1\" -s %2").arg(getadbpath(), daddr));
-         fmdialog->setData(selectedDescription);
-
-
-         QString kp = device.data_root;
-
-/*
-         if (device.pulldir.isEmpty() && download.isEmpty())
-            fmpullpath = QDir::homePath();
-
-
-
-         if (device.pulldir.isEmpty() || device.pulldir == download)
-            fmpullpath = download;
-         else
-            fmpullpath = pulldir;
-
-         QDir directory(fmpullpath);
-
-         if (!directory.exists()) {
-            logfile("Pull path: " + fmpullpath + " not found");
-            logfile("Defaulting to home directory: " + QDir::homePath());
-            fmpullpath = QDir::homePath();
-         }
-
-         fmpullpath = device.pulldir;
-*/
-
-         // Initialize fmpullpath
-         fmpullpath = QDir::homePath(); // Default fallback
-
-         // Check if device.pulldir is non-empty and exists
-         if (!device.pulldir.isEmpty()) {
-            QDir pulldir(device.pulldir);
-            if (pulldir.exists()) {
-              fmpullpath = device.pulldir;
-            } else {
-              logfile("Pull path: " + device.pulldir + " not found");
-            }
-         }
-         // If device.pulldir is empty or invalid, try download
-         else if (!download.isEmpty()) {
-            QDir downloaddir(download);
-            if (downloaddir.exists()) {
-              fmpullpath = download;
-            } else {
-              logfile("Download path: " + download + " not found");
-            }
-         }
-
-         // If neither device.pulldir nor download is valid, fmpullpath remains QDir::homePath()
-         if (fmpullpath == QDir::homePath() && (device.pulldir.isEmpty() && download.isEmpty())) {
-            logfile("Defaulting to home directory: " + QDir::homePath());
-         }
-
-
-          fmdialog->setPath1("/sdcard/");
-          fmdialog->setPath2("/sdcard/");
-
-
-         fmdialog->setuProgram(kp);
-         fmdialog->setPulldir(fmpullpath);
-
-
-         fmdialog->setAdbdir(apphome);
-
-
-
-
-
-         connect(fmdialog, &QDialog::finished, this, &MainWindow::handleFilemanagerFinished);
-
-         QSettings settings("jocala", "adblink");
-
-         QByteArray savedGeometry = settings.value("fmdialogGeometry").toByteArray();
-         if (!savedGeometry.isEmpty()) {
-            // qDebug() << "Restoring geometry";
-            fmdialog->restoreGeometry(savedGeometry);
-         } else {
-            // qDebug() << "No saved geometry found";
-         }
-
-
-
-         fmdialog->show();
-    }
-
-
-
-/////////////////////////////////////////////////
- void MainWindow::handleFilemanagerFinished()
-    {
-        if (fmdialog) {
-           QByteArray geometryData = fmdialog->saveGeometry();
-           // qDebug() << "Geometry data:" << geometryData;
-           QSettings settings("jocala", "adblink");
-           settings.setValue("fmdialogGeometry", geometryData);
-        }
-    }
-
- ////////////////////////////////////////////////////////////
 
 
     QString MainWindow::RunLongProcess(QString cstring, QString jobname)

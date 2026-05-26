@@ -35,6 +35,7 @@ class AdbDevice;
 class BackupManager;
 class CacheManager;
 class ConsoleManager;
+class FileManager;
 class KodiDataManager;
 class KodiDownloader;
 
@@ -108,7 +109,6 @@ private slots:
     bool validateDeviceSelection(QString& selectedDescription);
     bool usbConnected(QString daddr);
     void loadDeviceTableX(QTableWidget* table);
-    void handleFilemanagerFinished();
     void onReqCompleted();
     void adhocip();
     void on_actionAbout_triggered();
@@ -215,7 +215,6 @@ private slots:
 
 private:
     QNetworkAccessManager *m_networkManager;
-    usbfileDialog *fmdialog;
     QStringList RunProcessList;
     QPushButton* setupDonateButton(QWidget* parent);
     QPushButton* donateButton;
@@ -226,6 +225,7 @@ private:
     ConsoleManager *m_consoleManager;
     BackupManager *m_backupManager;
     CacheManager *m_cacheManager;
+    FileManager *m_fileManager;
     bool m_isBusy = false;
     KodiDownloader *m_kodiDownloader;
 
