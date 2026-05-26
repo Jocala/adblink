@@ -62,6 +62,7 @@ SOURCES += main.cpp \
     tcpipdialog.cpp \
     forcequitdialog.cpp \
     adbprefdialog.cpp \
+    sideloadmanager.cpp \
     sleepdialog.cpp \
     adbstring.cpp \
     oculusdialog.cpp \
@@ -123,6 +124,7 @@ HEADERS += mainwindow.h \
     tcpipdialog.h \
     forcequitdialog.h \
     adbprefdialog.h \
+    sideloadmanager.h \
     sleepdialog.h \
     adbstring.h \
     program.h \

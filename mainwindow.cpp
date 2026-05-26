@@ -20,8 +20,9 @@
     #include "returncode.h"
     #include "oculusdialog.h"
      #include "scpdialog.h"
-     #include "screencapmanager.h"
-     #include "program.h"
+      #include "screencapmanager.h"
+      #include "sideloadmanager.h"
+      #include "program.h"
     #include "getadbdata.h"
     #include "logfile.h"
     #include "adbutils.h"
@@ -138,6 +139,7 @@
            , m_dataMoveManager(new DataMoveManager(this))
            , m_dataUsageManager(new DataUsageManager(this))
            , m_screenCapManager(new ScreenCapManager(this))
+           , m_sideloadManager(new SideloadManager(this))
            , m_splashScreenManager(new SplashScreenManager(this))
            , m_timerManager(new TimerManager(this))
            , m_uninstallManager(new UninstallManager(this))
@@ -877,67 +879,18 @@
     ////////////////////////////////////////////////////////////////////////////
     void MainWindow::sideload_Button_clicked()
     {
-
-
-
-
-
         QString selectedDescription;
-        if (!validateDeviceSelection(selectedDescription)) {
+        if (!validateDeviceSelection(selectedDescription))
             return;
-        }
-
-
 
         DeviceRecord device = queryDeviceRecord(selectedDescription);
 
-
-         bool installer=false;
-
-
-         QString install = readInstall(databasedir);
-
-         QStringList filenames = QFileDialog::getOpenFileNames(this, tr("APK files (*.apk);;All files (.*)"), install);
-
-
-
-        if( !filenames.isEmpty() )
-        {
-
-            QMessageBox::StandardButton reply;
-              reply = QMessageBox::question(this, "Install", "Install APKs?",
-                                            QMessageBox::Yes|QMessageBox::No);
-              if (reply == QMessageBox::Yes)
-              {
-
-                logfile("starting APK installation(s)");
-                for (int i =0;i<filenames.count();i++)
-                  installer = installAPK(filenames.at(i));
-
-              }
-
-
-
-          //    getadbpath() install --bypass-low-target-sdk-block someapp.apk
-
-              if (installer)
-              {
-
-
-                  writeInstall(filenames[0].left(filenames[0].lastIndexOf('/')));
-                  QMessageBox::information(this,"","APK(s) installed.\nSee log for details.");
-
-                  install = filenames[0].left(filenames[0].lastIndexOf('/'));
-                  writeInstall(install);
-
-
-              }
-
-
-        }
-
-
+        m_sideloadManager->sideloadApks(this, device,
+            [this]() { return readInstall(databasedir); },
+            [this](const QString &filePath) { return installAPK(filePath); },
+            [this](const QString &dir) { writeInstall(dir); });
     }
+
 
 
     ///////////////////////////////////////////////////////////////////////////
