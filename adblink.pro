@@ -64,7 +64,8 @@ SOURCES += main.cpp \
     oculusdialog.cpp \
     oculusmanager.cpp \
     kodidownloader.cpp \
-    kodiarchdialog.cpp
+    kodiarchdialog.cpp \
+    preferencesmanager.cpp
 
 HEADERS += mainwindow.h \
     adbconnection.h \
@@ -110,7 +111,8 @@ HEADERS += mainwindow.h \
     oculusdialog.h \
     oculusmanager.h \
     kodidownloader.h \
-    kodiarchdialog.h
+    kodiarchdialog.h \
+    preferencesmanager.h
 
 FORMS +=
 

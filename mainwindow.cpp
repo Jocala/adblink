@@ -34,7 +34,8 @@
 #include "kodidatamanager.h"
 #include "kodidownloader.h"
 #include "kodiarchdialog.h"
-#include "oculusmanager.h"
+    #include "oculusmanager.h"
+    #include "preferencesmanager.h"
 
     #ifdef __WIN32__
       #include "windows.h"
@@ -3125,170 +3126,44 @@
 
     void MainWindow::on_actionPreferences_triggered()
     {
-         adbprefDialog dialog(this);
-         dialog.setWindowModality(Qt::WindowModal);
-         QJsonObject obj;
+         PreferencesManager mgr(databasedir + "adblink.json", os);
+         if (!mgr.exec(this))
+             return;
 
+         PreferencesResult r = mgr.result();
+         setDonateButtonActive(r.donationValue != "jocala.com");
 
-         QJsonDocument doc(obj);
-         QFile file(databasedir + "adblink.json");
-         file.open(QIODevice::ReadOnly);
-         doc = QJsonDocument::fromJson(file.readAll());
-         obj = doc.object();
-
-      //   QString dropdown = obj["dropdown"].toString();
-
-         QString download = obj["download"].toString();
-         int mcheck = obj["dropdown"].toInt();
-         QString install = obj["install"].toString();
-         QString backup = obj["backup"].toString();
-         QString donation = obj["donation"].toString();
-         QString localadb = obj["localadb"].toString();
-
-
-
-         bool checkversion = doc.object()["checkversion"].toBool();
-         bool scrcpy = doc.object()["scrcpy"].toBool();
-         bool startview = doc.object()["startview"].toBool();
-         int defaultwindow = doc.object()["defaultwindow"].toInt();
-
-         int fmfont = doc.object()["fmfont"].toInt();
-         int lgfont = doc.object()["lgfont"].toInt();
-         int smfont = doc.object()["smfont"].toInt();
-         int mdfont = doc.object()["mdfont"].toInt();
-
-
-         file.close();
-
-
-         if (checkversion)
-             dialog.setversioncheck(true);
-         else
-             dialog.setversioncheck(false);
-
-
-
-         if (scrcpy)
-             dialog.setscrcpyargs(true);
-         else
-             dialog.setscrcpyargs(false);
-
-
-
-
-         if (startview)
-             dialog.setstartview(true);
-         else
-             dialog.setstartview(false);
-
-
-
-
-         dialog.setdefaultwindow(defaultwindow);
-
-         //dialog.setlinterm(dropdown.toInt());
-        // dialog.setmacterm(dropdown.toInt());
-
-
-         dialog.setlinterm(mcheck);
-         dialog.setmacterm(mcheck);
-
-         dialog.setdownloaddir(download);
-         dialog.setlocaladb(localadb);
-         dialog.setinstalldir(install);
-         dialog.setbackupdir(backup);
-         dialog.setdonation(donation);
-
-         dialog.setfmfont(fmfont);
-         dialog.setlgfont(lgfont);
-         dialog.setmdfont(mdfont);
-         dialog.setsmfont(smfont);
-
-
-         dialog.setModal(true);
-
-         if (dialog.exec() == QDialog::Accepted)
-         {
-
-             if (os == 0)
-                obj["dropdown"] = dialog.linterm();
-             if (os == 2)
-                obj["dropdown"] = dialog.macterm();
-
-             obj["checkversion"] = dialog.versioncheck();
-
-             obj["scrcpy"] = dialog.scrcpyargs();
-
-             obj["startview"] = dialog.startview();
-
-              obj["defaultwindow"] = dialog.defaultwindow();
-
-             obj["donation"] = dialog.donation();
-             obj["download"] = dialog.downloaddir();
-             obj["install"] = dialog.installdir();
-             obj["backup"] = dialog.backupdir();
-             obj["localadb"] = dialog.localadb();
-
-             // Update font values in the JSON object
-
-             obj["fmfont"] = dialog.fmfont();
-             obj["lgfont"] = dialog.lgfont();
-             obj["mdfont"] = dialog.mdfont();
-             obj["smfont"] = dialog.smfont();
-
-
-
-             QJsonDocument doc(obj);
-
-             QFile file(databasedir + "adblink.json");
-             file.open(QIODevice::WriteOnly);
-             file.write(doc.toJson());
-             file.close();
-
-
-              setDonateButtonActive(dialog.donation() != "jocala.com");
-
-
-
-            switch (dialog.lgfont()) {
-              case 0:lfontsize=16; break;
-              case 1:lfontsize=18; break;
-              case 2:lfontsize=20; break;
-              case 3:lfontsize=22; break;
-              default:lfontsize=16; break;
-              }
-
-
-            switch (dialog.mdfont()) {
-              case 0:mfontsize=12; break;
-              case 1:mfontsize=14; break;
-              case 2:mfontsize=16; break;
-              case 3:mfontsize=18; break;
-              default:mfontsize=14; break;
-              }
-
-
-            switch (dialog.smfont()) {
-              case 0:sfontsize=10; break;
-              case 1:sfontsize=12; break;
-              case 2:sfontsize=14; break;
-              case 3:sfontsize=16; break;
-              default:sfontsize=12; break;
-              }
-
-              switch (dialog.fmfont()) {
-              case 0:ffontsize=12; break;
-              case 1:ffontsize=16; break;
-              case 2:ffontsize=18; break;
-              case 3:ffontsize=22; break;
-              default:ffontsize=16; break;
-              }
-
-
-   setWindowSize();
-
+         switch (r.lgFontIndex) {
+         case 0: lfontsize = 16; break;
+         case 1: lfontsize = 18; break;
+         case 2: lfontsize = 20; break;
+         case 3: lfontsize = 22; break;
+         default: lfontsize = 16; break;
          }
-    }
+         switch (r.mdFontIndex) {
+         case 0: mfontsize = 12; break;
+         case 1: mfontsize = 14; break;
+         case 2: mfontsize = 16; break;
+         case 3: mfontsize = 18; break;
+         default: mfontsize = 14; break;
+         }
+         switch (r.smFontIndex) {
+         case 0: sfontsize = 10; break;
+         case 1: sfontsize = 12; break;
+         case 2: sfontsize = 14; break;
+         case 3: sfontsize = 16; break;
+         default: sfontsize = 12; break;
+         }
+         switch (r.fmFontIndex) {
+         case 0: ffontsize = 12; break;
+         case 1: ffontsize = 16; break;
+         case 2: ffontsize = 18; break;
+         case 3: ffontsize = 22; break;
+         default: ffontsize = 16; break;
+         }
+
+          setWindowSize();
+     }
 
 
 
