@@ -18,8 +18,9 @@
     #include "sleepdialog.h"
     #include "returncode.h"
     #include "oculusdialog.h"
-    #include "scpdialog.h"
-    #include "program.h"
+     #include "scpdialog.h"
+     #include "screencapmanager.h"
+     #include "program.h"
     #include "getadbdata.h"
     #include "logfile.h"
     #include "adbutils.h"
@@ -131,6 +132,7 @@
            , m_fileManager(new FileManager(this))
            , m_dataMoveManager(new DataMoveManager(this))
            , m_dataUsageManager(new DataUsageManager(this))
+           , m_screenCapManager(new ScreenCapManager(this))
            , m_splashScreenManager(new SplashScreenManager(this))
            , m_timerManager(new TimerManager(this))
            , m_uninstallManager(new UninstallManager(this))
@@ -2933,81 +2935,15 @@ bool MainWindow::validateDeviceSelection(QString& selectedDescription) {
 
 void MainWindow::screenCap()
 {
+    QString selectedDescription;
+    if (!validateDeviceSelection(selectedDescription))
+        return;
 
+    DeviceRecord device = queryDeviceRecord(selectedDescription);
 
-      QString selectedDescription;
-      if (!validateDeviceSelection(selectedDescription)) {
-               return;
-      }
-
-      QJsonObject obj;
-      QJsonDocument doc(obj);
-      QFile file(databasedir + "adblink.json");
-      file.open(QIODevice::ReadOnly);
-      doc = QJsonDocument::fromJson(file.readAll());
-      obj = doc.object();
-      QString pulldir = obj["download"].toString();
-      file.close();
-
-      QString daddr;
-
-      DeviceRecord device = queryDeviceRecord(selectedDescription);
-      QString port = device.port.isEmpty() ? "5555" : device.port;
-
-      if (device.isusb)
-          daddr = device.daddr;
-      else  daddr = device.daddr + ":" + port;
-
-      QDateTime dateTime = QDateTime::currentDateTime();
-      QString dtstr = dateTime.toString("yyyyMMdd_HHmmss");
-      dtstr = dtstr + ".png";
-
-      QString cstring = "null -s " + daddr + " shell screencap -p " + "/data/local/tmp/"+dtstr;
-
-
-      QString command = getadbOutput(cstring);
-
-      logfile(cstring);
-
-      if (!command.isEmpty()) {
-               logfile(command);
-               QMessageBox::critical(this, "", "Screenshot failed: " + command);
-               return;
-      }
-
-      if (!device.pulldir.isEmpty())
-               pulldir = device.pulldir;
-
-
-
-
-      cstring = "null -s " + device.daddr +  " pull "+ "/data/local/tmp/"+dtstr + " " + pulldir;
-
-      command = getadbOutput(cstring);
-
-      logfile(cstring);
-      logfile(command);
-
-
-      QString localFilePath = pulldir + "/" + dtstr;
-      QFileInfo fileInfo(localFilePath);
-      if (!fileInfo.exists()) {
-               logfile("Error: Pulled file does not exist at " + localFilePath);
-               QMessageBox::critical(this, "", "Failed to pull screenshot: File not found at " + localFilePath);
-               return;
-      }
-
-      cstring =  cstring = "null -s " + device.daddr +   " shell rm " + "/data/local/tmp/"+dtstr;
-
-      command = getadbOutput(cstring);
-
-      logfile(cstring);
-      logfile(command);
-
-      QMessageBox::information(this, "", "Screenshot " + dtstr + " copied to " + pulldir);
-
-
+    m_screenCapManager->captureScreenshot(this, device, getadb(), databasedir);
 }
+
 
 
 //////////////////////////////////////

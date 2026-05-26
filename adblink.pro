@@ -44,6 +44,7 @@ SOURCES += main.cpp \
     helpdialog.cpp \
     returncode.cpp \
     scpdialog.cpp \
+    screencapmanager.cpp \
     uninstalldialog.cpp \
     preferencesdialog.cpp \
     usbfiledialog.cpp \
@@ -100,6 +101,7 @@ HEADERS += mainwindow.h \
     point.h \
     returncode.h \
     scpdialog.h \
+    screencapmanager.h \
     uninstalldialog.h \
     preferencesdialog.h \
     usbfiledialog.h \
