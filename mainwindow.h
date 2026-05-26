@@ -124,7 +124,6 @@ private slots:
     void backupButton_clicked();
     void restoreButton_clicked();
     void dos_shell();
-    QString battery();
     void adbshellButton_clicked();
     void delay(int secs);
     void busybox_permissions();
