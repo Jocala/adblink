@@ -228,6 +228,14 @@ private:
     QPushButton* donateButton;
     void setDonateButtonActive(bool active);
 
+    void setupMenuBar();
+    void setupFileMenu();
+    void setupKodiMenu();
+    void setupUtilityMenu();
+    void setupAboutMenu();
+    void setupHelpMenu();
+    void setupMenuConnections();
+
     AdbConnection *m_adbConnection;
     AppManager *m_appManager;
     ApkUidManager *m_apkUidManager;
