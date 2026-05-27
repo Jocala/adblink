@@ -2183,10 +2183,6 @@ void MainWindow::on_actionEdit_XML_triggered()
 
 
 
-void MainWindow::on_actionScreen_Capture_triggered()
-{
-
-}
 
 //////////////////////////
 

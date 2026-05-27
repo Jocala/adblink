@@ -213,7 +213,6 @@ private slots:
     void on_actionSend_text_triggered();
     void setupUI();
     void on_actionEdit_XML_triggered();
-    void on_actionScreen_Capture_triggered();
     void on_actionKeypad_triggered();
     void on_actionSwitch_View_triggered();
     void switchSize();
