@@ -80,9 +80,12 @@ SOURCES += main.cpp \
     preferencesmanager.cpp \
     remotepushmanager.cpp \
     datausagemanager.cpp \
+    databaseresetmanager.cpp \
+    deleterecordmanager.cpp \
     datamovemanager.cpp \
     deviceeditor.cpp \
     deviceeditormanager.cpp \
+    devicetableloader.cpp \
     disconnectmanager.cpp \
     filemanager.cpp \
     splashscreenmanager.cpp \
@@ -151,9 +154,12 @@ HEADERS += mainwindow.h \
     preferencesmanager.h \
     remotepushmanager.h \
     datausagemanager.h \
+    databaseresetmanager.h \
+    deleterecordmanager.h \
     datamovemanager.h \
     deviceeditor.h \
     deviceeditormanager.h \
+    devicetableloader.h \
     disconnectmanager.h \
     filemanager.h \
     splashscreenmanager.h \

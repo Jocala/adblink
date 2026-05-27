@@ -8,6 +8,7 @@
       #include "connectmanager.h"
       #include "disconnectmanager.h"
       #include "deviceeditormanager.h"
+      #include "devicetableloader.h"
       #include "uninstalldialog.h"
     #include "getreturncode.h"
     #include "editordialog.h"
@@ -39,6 +40,8 @@
 #include "cachemanager.h"
 #include "consolemanager.h"
 #include "datamovemanager.h"
+#include "databaseresetmanager.h"
+#include "deleterecordmanager.h"
 #include "datausagemanager.h"
 #include "filemanager.h"
 #include "installmanager.h"
@@ -146,9 +149,12 @@
            , m_connectManager(new ConnectManager(this))
            , m_disconnectManager(new DisconnectManager(this))
            , m_deviceEditorManager(new DeviceEditorManager(this))
+           , m_deviceTableLoader(new DeviceTableLoader(this))
            , m_fileManager(new FileManager(this))
            , m_installManager(new InstallManager(this))
            , m_dataMoveManager(new DataMoveManager(this))
+           , m_deleteRecordManager(new DeleteRecordManager(this))
+           , m_databaseResetManager(new DatabaseResetManager(this))
            , m_dataUsageManager(new DataUsageManager(this))
            , m_screenCapManager(new ScreenCapManager(this))
            , m_sideloadManager(new SideloadManager(this))
@@ -2100,40 +2106,7 @@ QString MainWindow::getadb()
 ///////////////////////////////////////////////////
 
 DeviceRecord MainWindow::queryDeviceRecord(const QString& description) {
- DeviceRecord record;
- QString quotedDescription = "\"" + description + "\"";
- QSqlQuery query;
-
- QString sqlstatement = "SELECT Id, daddr, pulldir, xbmcpackage, data_root, buffermode, buffersize, "
-                        "bufferfactor, description, filepath, port, isusb, disableroot, flag1, flag2, ostype, flag5 "
-                        "FROM device WHERE description=" + quotedDescription;
- query.exec(sqlstatement);
- while (query.next()) {
-               record.id = query.value("Id").toInt();
-               record.daddr = query.value("daddr").toString();
-               record.pulldir = query.value("pulldir").toString();
-               record.xbmcpackage = query.value("xbmcpackage").toString();
-               record.data_root = query.value("data_root").toString();
-               record.buffermode = query.value("buffermode").toInt();
-               record.buffersize = query.value("buffersize").toString();
-               record.bufferfactor = query.value("bufferfactor").toString();
-               record.description = query.value("description").toString();
-               record.filepath = query.value("filepath").toString();
-               record.port = query.value("port").toString();
-               record.isusb = query.value("isusb").toBool();
-               record.disableroot = query.value("disableroot").toBool();
-               record.scoped = query.value("flag1").toBool();
-               record.wsa = query.value("flag2").toBool();
-               record.ostype = query.value("ostype").toString();
-               record.scrcpyarg = query.value("flag5").toString(); // Map flag5 to scrcpyarg
- }
- if (query.lastError().isValid()) {
-               logfile(sqlstatement);
-               logfile("SqLite error:" + query.lastError().text());
-               logfile("SqLite error code:" + query.lastError().nativeErrorCode());
- }
-
- return record;
+    return m_dataManager->queryDeviceRecord(description);
 }
 ///////////////////////////////////////
 
@@ -2234,48 +2207,10 @@ bool MainWindow::validateIPAddress(const QString& ipAddress) {
 
 void MainWindow::delRecordButton_clicked()
 {
-
-   QString descrip;
-   QString daddr;
-
-   int selectedRow = deviceTable->currentRow();
-   if (selectedRow >= 0 && deviceTable->item(selectedRow, 0)) {
-                      descrip = deviceTable->item(selectedRow, 0)->text();
-   } else {
-                      QMessageBox::critical(this, "", "No device selected in table");
-                      return;
-   }
-
-   if (!descrip.isEmpty())
-   {
-                      QMessageBox::StandardButton reply;
-                      reply = QMessageBox::question(this, "", "Delete " + descrip + "?",
-                                                    QMessageBox::Yes | QMessageBox::No);
-
-                      if (reply == QMessageBox::No)
-                      {
-                          return;
-                      }
-
-
-                      deleteRecord(descrip);
-
-
-                      selectedRow = deviceTable->currentRow();
-                      daddr = deviceTable->item(selectedRow, 1)->text();
-
-
-
-                      QString cstring = getadbpath() + " disconnect "+daddr;
-                      QString command=getadbOutput(cstring);
-                      logfile (command);
-                      logfile("disconnect: "+daddr);
-
-                      deviceTable->removeRow(selectedRow);
-                      logfile(descrip + " is deleted");
-
-   }
+    m_deleteRecordManager->deleteSelectedDevice(this, deviceTable,
+        [this](const QString &descrip) { deleteRecord(descrip); });
 }
+
 
 
 ///////////////////////////////////////////////////
@@ -2283,141 +2218,21 @@ void MainWindow::delRecordButton_clicked()
 
 void MainWindow::createTables()
 {
-   logfile("Attempting to create tables for: " + dbstring);
-
-   QSqlDatabase db = QSqlDatabase::database();
-   if (!db.isOpen()) {
-                      logfile("Error: Database not open");
-                      return;
-   }
-
-   logfile("Database opened successfully: " + db.databaseName());
-
-   // Check if the device table already exists
-   QSqlQuery checkQuery(db);
-   bool tableExists = false;
-   if (checkQuery.exec("SELECT name FROM sqlite_master WHERE type='table' AND name='device';") && checkQuery.next()) {
-                      tableExists = true;
-                      //logfile("Device table already exists");
-   } else if (checkQuery.lastError().isValid()) {
-                      logfile("Error checking for device table: " + checkQuery.lastError().text());
-                      return;
-   }
-
-   if (!tableExists) {
-                      // Create the device table
-                      QString sqlstatement = "CREATE TABLE IF NOT EXISTS device ("
-                                             "Id INTEGER PRIMARY KEY, "
-                                             "daddr TEXT, "
-                                             "description TEXT NOT NULL UNIQUE, "
-                                             "pulldir TEXT, "
-                                             "xbmcpackage TEXT, "
-                                             "data_root TEXT, "
-                                             "buffermode INTEGER, "
-                                             "buffersize TEXT, "
-                                             "bufferfactor TEXT, "
-                                             "filepath TEXT, "
-                                             "port TEXT, "
-                                             "isusb INTEGER, "
-                                             "ostype TEXT, "
-                                             "logfilename TEXT, "
-                                             "disableroot INTEGER, "
-                                             "flag1 TEXT, "
-                                             "flag2 TEXT, "
-                                             "flag3 TEXT, "
-                                             "flag4 TEXT, "
-                                             "flag5 TEXT)"; // scrcpy arg
-
-                      QSqlQuery query(db);
-                      if (!query.exec(sqlstatement)) {
-                          logfile("SQL statement: " + sqlstatement);
-                          logfile("SQLite error: " + query.lastError().text());
-                           logfile("SQLite error code: " + query.lastError().nativeErrorCode());
-                          logfile("Database file path: " + db.databaseName());
-                      } else {
-                          logfile("Successfully created new device table");
-                          // Verify table creation
-                          QSqlQuery verifyQuery(db);
-                          if (verifyQuery.exec("SELECT name FROM sqlite_master WHERE type='table' AND name='device';") && verifyQuery.next()) {
-               logfile("Device table creation confirmed");
-                          } else {
-               logfile("Error: Device table not found after creation attempt");
-                          }
-                      }
-   }
+    m_dataManager->createTables();
 }
 
 
 
-//////////////////////////////////////////////
-
 void MainWindow::deleteRecord(QString descrip)
-
 {
-
-
-   QString sqlstatement;
-
-   QString quote = "\"";
-
-   descrip = quote+descrip+quote;
-   QSqlQuery query;
-
-
-   sqlstatement= "DELETE FROM device WHERE description=" + descrip;
-   query.exec(sqlstatement);
-
-
-
+    m_dataManager->deleteRecord(descrip);
 }
 
 void MainWindow::on_Erase_adbLink_database_triggered()
 {
-   QMessageBox msgBox;
-   msgBox.setTextFormat(Qt::PlainText);
-   msgBox.setText("Initialize adblink?\nWARNING: This action will delete all device records and settings, then close and restart adblink. Are you sure you want to proceed?");
-   msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-   msgBox.setIcon(QMessageBox::Critical);
-
-   QMessageBox::StandardButton reply = static_cast<QMessageBox::StandardButton>(msgBox.exec());
-
-   if (reply == QMessageBox::Yes)
-   {
-
-
-                      QStringList connections = QSqlDatabase::connectionNames();
-                      for (const QString& conn : connections) {
-                          QSqlDatabase db = QSqlDatabase::database(conn, false);
-                          if (db.isOpen()) {
-               QSqlQuery query(db);
-               query.clear();
-               if (db.transaction()) {
-              db.commit();
-               }
-               db.close();
-                          }
-                          QSqlDatabase::removeDatabase(conn);
-                      }
-
-
-                      QDir dir(databasedir);
-                      if (dir.exists() && !dir.removeRecursively()) {
-
-                  /* #ifdef Q_OS_WIN
-                          QString command = QString("cmd.exe /C rmdir /S /Q \"%1\"").arg(databasedir.replace("/", "\\"));
-                          QProcess::startDetached(command, QStringList());
-                     #endif  */
-
-                      }
-
-
-                      QCoreApplication::quit();
-                      QString program = QCoreApplication::applicationFilePath();
-                      QStringList arguments = QCoreApplication::arguments();
-                      QProcess::startDetached(program, arguments);
-   }
-
+    m_databaseResetManager->resetDatabase(this, databasedir);
 }
+
 
 
 //////////////////////////////////////////
@@ -2960,117 +2775,14 @@ deviceTable->viewport()->update();
 
 
 void MainWindow::loadDeviceTableX(QTableWidget* table) {
-// Preserve connected devices
-QSet<QString> connectedDeviceIds;
-for (int row = 0; row < table->rowCount(); ++row) {
-        if (table->item(row, 2) &&
-            table->item(row, 2)->text() == "Connected" &&
-            table->item(row, 0)) {
-            connectedDeviceIds.insert(table->item(row, 0)->data(Qt::UserRole).toString());
-        }
-}
-
-// Reset table
-table->clearContents();
-table->setRowCount(0);
-table->setColumnCount(3);
-table->setHorizontalHeaderLabels(QStringList() << "Device" << "IP" << "Status");
-table->verticalHeader()->setVisible(false);
-table->setEditTriggers(QAbstractItemView::NoEditTriggers);
-table->setShowGrid(true);
-table->setSortingEnabled(false);
-table->setSelectionMode(QAbstractItemView::SingleSelection);
-table->setSelectionBehavior(QAbstractItemView::SelectRows);
-
-// Set font size based on windowSizeSelector
-QFont tableFont = table->font();
-switch (windowSizeSelector) {
-case 0: tableFont.setPixelSize(sfontsize); break;
-case 1: tableFont.setPixelSize(mfontsize); break;
-case 2: tableFont.setPixelSize(lfontsize); break;
-default: tableFont.setPixelSize(sfontsize); break;
-}
-table->setFont(tableFont);
-
-// Populate table from database
-QString sqlstatement = "SELECT id, description, daddr, isusb FROM device";
-QSqlQuery query;
-if (!query.exec(sqlstatement)) {
-        logfile("Query failed: " + query.lastError().text());
-        return;
-}
-
-int row = 0;
-while (query.next()) {
-        table->insertRow(row);
-
-        QString deviceId = query.value(0).toString();
-        QString description = query.value(1).toString();
-
-        QTableWidgetItem* descItem = new QTableWidgetItem(description);
-        descItem->setData(Qt::UserRole, deviceId);
-        descItem->setTextAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-        table->setItem(row, 0, descItem);
-
-        bool isUsb = query.value(3).toBool();
-        QString ip = isUsb ? "USB" : (query.value(2).toString().isEmpty() ? "N/A" : query.value(2).toString());
-        table->setItem(row, 1, new IpTableWidgetItem(ip));
-
-        QString status;
-        if (isUsb)
-            status = usbConnected(query.value(2).toString()) ? "Connected" : "Disconnected";
-        else
-            status = connectedDeviceIds.contains(deviceId) ? "Connected" : "Disconnected";
-
-        table->setItem(row, 2, new QTableWidgetItem(status));
-        row++;
-}
-
-// Adjust column widths
-int tableWidth;
-switch (windowSizeSelector) {
-case 0: tableWidth = sMainWindowSize.width() * 0.63; break;
-case 1: tableWidth = mMainWindowSize.width() * 0.63; break;
-case 2: tableWidth = lMainWindowSize.width() * 0.55; break;
-default: tableWidth = sMainWindowSize.width() * 0.63; break;
-}
-int colWidth = tableWidth / 3;
-for (int i = 0; i < 3; ++i) table->setColumnWidth(i, colWidth);
-
-// Make sure row heights match font
-table->resizeRowsToContents();
-
-// Let QTableWidget manage scrollbars automatically
-table->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-table->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
-table->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-table->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-table->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-
-// Restore saved sort
-QSettings settings("YourCompany", "YourApp");
-int sortColumn = settings.value("DeviceTableSortColumn", 0).toInt();
-Qt::SortOrder sortOrder = static_cast<Qt::SortOrder>(settings.value("DeviceTableSortOrder", Qt::AscendingOrder).toInt());
-table->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-table->setSortingEnabled(true);
-table->sortItems(sortColumn, sortOrder);
-
-// Update geometry
-table->updateGeometry();
-table->viewport()->update();
-table->update();
-if (centralWidget) {
+    m_deviceTableLoader->loadTable(table, windowSizeSelector,
+        sfontsize, mfontsize, lfontsize,
+        sMainWindowSize, mMainWindowSize, lMainWindowSize,
+        [this](const QString &daddr) { return usbConnected(daddr); });
+    if (centralWidget) {
         centralWidget->updateGeometry();
         centralWidget->update();
-}
-
-// Persist header click sort
-disconnect(table->horizontalHeader(), &QHeaderView::sectionClicked, nullptr, nullptr);
-connect(table->horizontalHeader(), &QHeaderView::sectionClicked, this, [table](int logicalIndex) {
-    QSettings settings("YourCompany", "YourApp");
-    settings.setValue("DeviceTableSortColumn", logicalIndex);
-    settings.setValue("DeviceTableSortOrder", table->horizontalHeader()->sortIndicatorOrder());
-});
+    }
 }
 
 
