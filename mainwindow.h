@@ -31,6 +31,7 @@
 #include "devicerecord.h"
 
 class AdbConnection;
+class AppManager;
 class AdbDevice;
 class BackupManager;
 class CacheManager;
@@ -42,6 +43,7 @@ class KodiDownloadCoordinator;
 class KodiDownloader;
 class KodiLogManager;
 class KodiSetupManager;
+class KeypadManager;
 class RemotePushManager;
 class ScreenCapManager;
 class SideloadManager;
@@ -226,6 +228,7 @@ private:
     void setDonateButtonActive(bool active);
 
     AdbConnection *m_adbConnection;
+    AppManager *m_appManager;
     KodiDataManager *m_dataManager;
     ConsoleManager *m_consoleManager;
     BackupManager *m_backupManager;
@@ -246,6 +249,7 @@ private:
     KodiDownloadCoordinator *m_kodiDownloadCoordinator;
     KodiLogManager *m_kodiLogManager;
     KodiSetupManager *m_kodiSetupManager;
+    KeypadManager *m_keypadManager;
     RemotePushManager *m_remotePushManager;
 
     const QString vqurl = "http://www.jocala.com/version.txt";

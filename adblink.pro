@@ -41,6 +41,7 @@ SOURCES += main.cpp \
     kodidatamanager.cpp \
     logfile.cpp \
     mainwindow.cpp \
+    appmanager.cpp \
     about.cpp \
     helpdialog.cpp \
     returncode.cpp \
@@ -55,6 +56,7 @@ SOURCES += main.cpp \
     backupdialog.cpp \
     cachedialog.cpp \
     keyboarddialog.cpp \
+    keypadmanager.cpp \
     listfiledialog.cpp \
     logdialog.cpp \
     editordialog.cpp \
@@ -85,6 +87,7 @@ SOURCES += main.cpp \
     xmleditormanager.cpp
 
 HEADERS += mainwindow.h \
+    appmanager.h \
     adbconnection.h \
     adbdevice.h \
     about.h \
@@ -118,6 +121,7 @@ HEADERS += mainwindow.h \
     backupdialog.h \
     cachedialog.h \
     keyboarddialog.h \
+    keypadmanager.h \
     logdialog.h \
     editordialog.h \
     searchdialog.h \
