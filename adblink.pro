@@ -79,6 +79,7 @@ SOURCES += main.cpp \
     kodisetupmanager.cpp \
     preferencesmanager.cpp \
     remotepushmanager.cpp \
+    rebootmanager.cpp \
     datausagemanager.cpp \
     databaseresetmanager.cpp \
     deleterecordmanager.cpp \
@@ -153,6 +154,7 @@ HEADERS += mainwindow.h \
     kodisetupmanager.h \
     preferencesmanager.h \
     remotepushmanager.h \
+    rebootmanager.h \
     datausagemanager.h \
     databaseresetmanager.h \
     deleterecordmanager.h \

@@ -61,6 +61,7 @@
     #include "oculusmanager.h"
     #include "preferencesmanager.h"
 #include "remotepushmanager.h"
+#include "rebootmanager.h"
     #include "deviceeditor.h"
 
     #ifdef __WIN32__
@@ -158,6 +159,7 @@
            , m_dataUsageManager(new DataUsageManager(this))
            , m_screenCapManager(new ScreenCapManager(this))
            , m_sideloadManager(new SideloadManager(this))
+           , m_rebootManager(new RebootManager(this))
            , m_splashScreenManager(new SplashScreenManager(this))
            , m_thumbnailManager(new ThumbnailManager(this))
            , m_timerManager(new TimerManager(this))
@@ -586,90 +588,8 @@
      }
 
 
-    /////////////////////////////////////////
-    void MainWindow::rebootDevice(QString reboot)
-    {
-
-     QElapsedTimer rtimer;
-     int nMilliseconds;
-
-    QProcess reboot_device;
-    rtimer.start();
-    reboot_device.setProcessChannelMode(QProcess::MergedChannels);
-
-    QString cstring = getadb() + " " + reboot;
-
-    reboot_device.start(cstring);
-    reboot_device.waitForStarted();
-    while(reboot_device.state() != QProcess::NotRunning)
-      {
-        qApp->processEvents();
-         nMilliseconds = rtimer.elapsed();
-       if (nMilliseconds >= 5000)
-           break;
-    }
 
 
-    }
-
-
-    /////////////////////////////////////////////////////
-    bool MainWindow::mount_system(QString mnt)
-    {
-
-
-
-        QString cstring;
-        QString command;
-
-
-        cstring = getadb() + " shell /data/local/tmp/adblink/which su";
-        command=getadbOutput(cstring);
-
-
-
-          cstring = getadb() + " shell su -c /data/local/tmp/adblink/mount  -o "+ mnt + ",remount /";
-
-          command=getadbOutput(cstring);
-
-
-
-            if (command.isEmpty())
-              {
-
-                return true;
-              }
-                else
-              {
-
-                return false;
-              }
-
-    }
-
-
-
-    /////////////////////////////
-    bool MainWindow::is_su()
-    {
-
-    QString cstring = getadb() + " shell /data/local/tmp/adblink/which su";
-    QString command=getadbOutput(cstring);
-
-
-
-    if (!command.contains("su"))
-      {
-
-        return false;
-       }
-        else
-      {
-         return true;
-       }
-
-
-    }
 
 
 
@@ -1029,46 +949,15 @@
     ////////////////////////////////////////////////////////////////////////////////
     void MainWindow::on_actionReboot_triggered()
     {
+        QString selectedDescription;
+        if (!validateDeviceSelection(selectedDescription))
+            return;
 
+        DeviceRecord device = queryDeviceRecord(selectedDescription);
 
-          QString selectedDescription;
-          if (!validateDeviceSelection(selectedDescription)) {
-           return;
-          }
-
-          DeviceRecord device = queryDeviceRecord(selectedDescription);
-
-
-
-       QMessageBox::StandardButton reply;
-         reply = QMessageBox::question(this, "Reboot Device", "Reboot Device?",
-             QMessageBox::Yes|QMessageBox::No);
-         if (reply == QMessageBox::Yes) {
-            logfile("rebooting device");
-           rebootDevice(" reboot");
-
-            QString daddr;
-            int selectedRow = deviceTable->currentRow();
-            daddr = deviceTable->item(selectedRow, 1)->text();
-
-            QString cstring =  "null disconnect " + daddr;
-
-            if (!device.isusb)
-            {
-            QString command=getadbOutput(cstring);
-            logfile(command);
-            logfile("disconnect: " + daddr);
-            }
-
-
-
-            if (selectedRow >= 0 && deviceTable->item(selectedRow, 2)) {
-                   deviceTable->setItem(selectedRow, 2, new QTableWidgetItem("Disconnected"));
-            }
-
-         }
-
+        m_rebootManager->rebootDevice(this, deviceTable, device.isusb, getadb());
     }
+
 
 
     /////////////////////////////////////////
@@ -1311,89 +1200,7 @@
 
    ////////////////////////////////////////////////////////
 
-    void MainWindow::on_actionMount_system_RO_triggered()
-    {
 
-
-            QString selectedDescription;
-            if (!validateDeviceSelection(selectedDescription)) {
-             return;
-            }
-
-            DeviceRecord device = queryDeviceRecord(selectedDescription);
-
-
-
-        if (!is_su())
-           {
-             QMessageBox::critical(this,"","Root required!");
-            return;
-           }
-
-
-        if (mount_system("ro"))
-         {
-
-            logfile("/system partition is read-only");
-
-            QMessageBox::information(this,"","/ partition is read-only");
-         }
-
-         else
-
-        {
-            logfile("filesystem not remounted r/o!");
-
-             QMessageBox::critical(this,"","filesystem not remounted r/o!");
-        }
-
-
-    }
-
-    ////////////////////////////////////////////////////////
-
-    void MainWindow::on_actionMount_system_RW_triggered()
-    {
-
-        QString selectedDescription;
-        if (!validateDeviceSelection(selectedDescription)) {
-             return;
-        }
-
-        DeviceRecord device = queryDeviceRecord(selectedDescription);
-
-
-
-
-
-        if (!is_su())
-        {
-            QMessageBox::critical(this,"","Root required!");
-        return;
-        }
-
-
-
-        if (mount_system("rw"))
-
-           {
-
-            logfile("/system partition is read-only");
-
-            QMessageBox::information(this,"","/ partition is read-write");
-        }
-         else
-
-        {
-            logfile("filesystem not remounted r/o!");
-
-                QMessageBox::critical(this,"","filesystem not mounted read-write");
-        }
-
-
-    }
-
-    ///////////////////////////////////////////////////////
 
 
     void MainWindow::on_actionWireless_ADBD_triggered()

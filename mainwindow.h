@@ -50,6 +50,7 @@ class KodiLogManager;
 class KodiSetupManager;
 class KeypadManager;
 class RemotePushManager;
+class RebootManager;
 class ScreenCapManager;
 class SideloadManager;
 class DataUsageManager;
@@ -165,10 +166,7 @@ private slots:
     QString readDonationValue();
     void rotate_logfile();
     void logfile2(QString line);
-    void rebootDevice(QString reboot);
-    bool mount_system(QString mnt);
     bool fileExists(QString path);
-    bool is_su();
     void kill_server();
     QString strip(QString str);
     void on_actionReboot_triggered();
@@ -193,8 +191,6 @@ private slots:
     void on_actionStart_Application_triggered();
     void keypadButton_clicked();
     void fmButton_clicked();
-    void on_actionMount_system_RO_triggered();
-    void on_actionMount_system_RW_triggered();
     void on_actionWireless_ADBD_triggered();
     void on_actionKodi_data_usage_triggered();
     void on_actionKodi_version();
@@ -251,6 +247,7 @@ private:
     DeleteRecordManager *m_deleteRecordManager;
     SideloadManager *m_sideloadManager;
     ScreenCapManager *m_screenCapManager;
+    RebootManager *m_rebootManager;
     SplashScreenManager *m_splashScreenManager;
     ThumbnailManager *m_thumbnailManager;
     TimerManager *m_timerManager;
