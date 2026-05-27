@@ -63,6 +63,7 @@ SOURCES += main.cpp \
     editordialog.cpp \
     searchdialog.cpp \
     tcpipdialog.cpp \
+    thumbnailmanager.cpp \
     forcequitdialog.cpp \
     adbprefdialog.cpp \
     sideloadmanager.cpp \
@@ -128,6 +129,7 @@ HEADERS += mainwindow.h \
     editordialog.h \
     searchdialog.h \
     tcpipdialog.h \
+    thumbnailmanager.h \
     forcequitdialog.h \
     adbprefdialog.h \
     sideloadmanager.h \

@@ -51,6 +51,7 @@ class SideloadManager;
 class DataUsageManager;
 class DataMoveManager;
 class SplashScreenManager;
+class ThumbnailManager;
 class TimerManager;
 class UninstallManager;
 class WirelessAdbManager;
@@ -241,6 +242,7 @@ private:
     SideloadManager *m_sideloadManager;
     ScreenCapManager *m_screenCapManager;
     SplashScreenManager *m_splashScreenManager;
+    ThumbnailManager *m_thumbnailManager;
     TimerManager *m_timerManager;
     UninstallManager *m_uninstallManager;
     WirelessAdbManager *m_wirelessAdbManager;

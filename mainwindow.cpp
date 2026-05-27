@@ -40,6 +40,7 @@
 #include "filemanager.h"
 #include "installmanager.h"
 #include "splashscreenmanager.h"
+#include "thumbnailmanager.h"
 #include "timermanager.h"
 #include "uninstallmanager.h"
 #include "wirelessadbmanager.h"
@@ -146,6 +147,7 @@
            , m_screenCapManager(new ScreenCapManager(this))
            , m_sideloadManager(new SideloadManager(this))
            , m_splashScreenManager(new SplashScreenManager(this))
+           , m_thumbnailManager(new ThumbnailManager(this))
            , m_timerManager(new TimerManager(this))
            , m_uninstallManager(new UninstallManager(this))
            , m_wirelessAdbManager(new WirelessAdbManager(this))
@@ -1788,69 +1790,18 @@
 
     void MainWindow::on_actiondelthumb_triggered()
     {
-            QString selectedDescription;
-            if (!validateDeviceSelection(selectedDescription)) {
-                return;
-            }
+        QString selectedDescription;
+        if (!validateDeviceSelection(selectedDescription))
+            return;
 
-            DeviceRecord device = queryDeviceRecord(selectedDescription);
+        DeviceRecord device = queryDeviceRecord(selectedDescription);
 
-        QString cstring;
-        QString command;
-        QString mcpath;
-
-
-
-
-        mcpath = resolveKodiPath(getadb(), "/sdcard/", device.xbmcpackage, false);
-
-
-
-
-
-        QString thumb = mcpath+"/userdata/Thumbnails";
-        QString textures = mcpath+"/userdata/Database/Textures*.db";
-
-        cstring = getadb() +" shell ls "+thumb;
-        command=getadbOutput(cstring);
-
-
-
-       if (command.contains("No such file or directory"))
-        {
-              QMessageBox::critical(this,"","Thumbnails not found!");
-              return;
-       }
-
-
-
-
-
-
-
-        QMessageBox::StandardButton reply2;
-           reply2 = QMessageBox::question(this, "", "Delete Thumbnails?",
-                                        QMessageBox::Yes|QMessageBox::No);
-           if (reply2 == QMessageBox::Yes)
-             {
-               logfile("Removing Thumbnails");
-               cstring = getadb() +" shell rm -r " + thumb;
-               command=RunLongProcess(cstring,"Removing Thumbnails");
-               if (command.length() > 0)
-                  logfile("Thumbnail directory issue: "+command);
-               cstring = getadb() +" shell rm -r " + textures;
-               command=getadbOutput(cstring);
-               if (command.length() > 0)
-                  logfile("Textures database issue: "+command);
-           }
-
-           if (command.length() > 0)
-              QMessageBox::critical(this,"","Errors. See log");
-            else
-              QMessageBox::information(this,"","Thumnails deleted");
-
-
+        m_thumbnailManager->deleteThumbnails(this, device, getadb(),
+            [this](const QString &cstring, const QString &jobname) {
+                return RunLongProcess(cstring, jobname);
+            });
     }
+
 
 
 
