@@ -5,8 +5,9 @@
     #include "about.h"
     #include "helpdialog.h"
      #include "connectadb.h"
-     #include "connectmanager.h"
-     #include "uninstalldialog.h"
+      #include "connectmanager.h"
+      #include "disconnectmanager.h"
+      #include "uninstalldialog.h"
     #include "getreturncode.h"
     #include "editordialog.h"
     #include "keyboarddialog.h"
@@ -142,6 +143,7 @@
            , m_backupManager(new BackupManager(this))
            , m_cacheManager(new CacheManager(this))
            , m_connectManager(new ConnectManager(this))
+           , m_disconnectManager(new DisconnectManager(this))
            , m_fileManager(new FileManager(this))
            , m_installManager(new InstallManager(this))
            , m_dataMoveManager(new DataMoveManager(this))
@@ -952,60 +954,9 @@
 
     void MainWindow::disButton_clicked()
     {
-
-
-             QString daddr;
-             int selectedRow = deviceTable->currentRow();
-
-             // Validate selection and connection status
-             if (selectedRow < 0 || !deviceTable->item(selectedRow, 2) || !deviceTable->item(selectedRow, 1)) {
-            QMessageBox::critical(this, "", "No valid device selected");
-            return;
-             }
-             if (deviceTable->item(selectedRow, 2)->text() != "Connected") {
-            QMessageBox::critical(this, "", "Selected device is not connected");
-            return;
-             }
-
-             if (deviceTable->item(selectedRow, 1)->text().contains("USB")) {
-            QMessageBox::critical(this, "", "Inactive for USB connections");
-            return;
-             }
-
-
-
-             daddr = deviceTable->item(selectedRow, 1)->text();
-
-
-
-             // Confirm disconnection
-             QMessageBox::StandardButton reply;
-             reply = QMessageBox::question(this, "Disconnect", "Disconnect device?",
-                                           QMessageBox::Yes | QMessageBox::No);
-             if (reply == QMessageBox::No) {
-            return;
-             }
-
-
-             QString cstring =  "null disconnect " + daddr;
-
-             QString command=getadbOutput(cstring);
-
-             logfile(command);
-             logfile("disconnect: " + daddr);
-
-
-
-
-
-
-             // Update status column (column 2) to "Disconnected"
-             if (selectedRow >= 0 && deviceTable->item(selectedRow, 2)) {
-            deviceTable->setItem(selectedRow, 2, new QTableWidgetItem("Disconnected"));
-             }
-
-
+        m_disconnectManager->disconnectDevice(this, deviceTable);
     }
+
 
 
 
