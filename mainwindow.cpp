@@ -1,6 +1,7 @@
     #include "mainwindow.h"
     #include <QRegularExpression>
     #include "appmanager.h"
+    #include "apkuidmanager.h"
     #include "about.h"
     #include "helpdialog.h"
      #include "connectadb.h"
@@ -135,6 +136,7 @@
          , m_networkManager(new QNetworkAccessManager(this))
          , m_adbConnection(new AdbConnection(this))
          , m_appManager(new AppManager(this))
+         , m_apkUidManager(new ApkUidManager(this))
          , m_dataManager(new KodiDataManager(this))
           , m_consoleManager(new ConsoleManager(this))
            , m_backupManager(new BackupManager(this))
@@ -2065,61 +2067,9 @@ void MainWindow::on_View_Changelog_triggered()
 
 void MainWindow::on_actionGet_UID_from_APK_file_triggered()
 {
-
-
- QString command;
- QString cstring;
- QStringList mstringlist;
-
-
-
- QString filename = QFileDialog::getOpenFileName(
-    this,
-    "Open APK File",
-    QDir::homePath(),
-     "APK Files (*.apk);;All Files (*)"
-     );
-
-
- if( !filename.isEmpty() )
- {
-
-            cstring = aapt + " dump badging  " + '"'+ filename+'"';
-        //    command=getadbOutput(cstring);
-
-            QProcess run_command;
-            run_command.setProcessChannelMode(QProcess::MergedChannels);
-            run_command.start(cstring);
-            run_command.waitForStarted();
-            while(run_command.state() != QProcess::NotRunning)
-            qApp->processEvents();
-            QString command=run_command.readAll();
-
-
-
-            mstringlist=command.split(QRegularExpression("[\t\n\r]"),Qt::SkipEmptyParts);
-
-
-            for (QStringList::iterator it = mstringlist.begin();
-                 it != mstringlist.end(); ++it)
-            {
-              QString item=*it;
-              if (item.contains("package"))
-              {
-              QRegularExpression rx("(\\')");
-              QStringList query = item.split(rx);
-              QString packagename = query.at(1);
-              logfile("package name query: "+packagename);
-              QMessageBox::information(this, "",packagename);
-              }
-            }
-
- }
-
-
-
-
+    m_apkUidManager->getApkPackageName(this, aapt);
 }
+
 
 
 void MainWindow::on_actionSend_text_triggered()

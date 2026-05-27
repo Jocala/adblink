@@ -42,6 +42,7 @@ SOURCES += main.cpp \
     logfile.cpp \
     mainwindow.cpp \
     appmanager.cpp \
+    apkuidmanager.cpp \
     about.cpp \
     helpdialog.cpp \
     installmanager.cpp \
@@ -90,6 +91,7 @@ SOURCES += main.cpp \
 
 HEADERS += mainwindow.h \
     appmanager.h \
+    apkuidmanager.h \
     adbconnection.h \
     adbdevice.h \
     about.h \

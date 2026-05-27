@@ -32,6 +32,7 @@
 
 class AdbConnection;
 class AppManager;
+class ApkUidManager;
 class AdbDevice;
 class BackupManager;
 class CacheManager;
@@ -229,6 +230,7 @@ private:
 
     AdbConnection *m_adbConnection;
     AppManager *m_appManager;
+    ApkUidManager *m_apkUidManager;
     KodiDataManager *m_dataManager;
     ConsoleManager *m_consoleManager;
     BackupManager *m_backupManager;
