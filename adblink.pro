@@ -41,9 +41,11 @@ SOURCES += main.cpp \
     kodidatamanager.cpp \
     logfile.cpp \
     mainwindow.cpp \
+    adhocmanager.cpp \
     appmanager.cpp \
     apkuidmanager.cpp \
     about.cpp \
+    aboutmanager.cpp \
     helpdialog.cpp \
     installmanager.cpp \
     returncode.cpp \
@@ -59,10 +61,12 @@ SOURCES += main.cpp \
     cachedialog.cpp \
     keyboarddialog.cpp \
     keypadmanager.cpp \
+    killservermanager.cpp \
     listfiledialog.cpp \
     logdialog.cpp \
     editordialog.cpp \
     searchdialog.cpp \
+    sendtextmanager.cpp \
     tcpipdialog.cpp \
     thumbnailmanager.cpp \
     forcequitdialog.cpp \
@@ -92,15 +96,18 @@ SOURCES += main.cpp \
     splashscreenmanager.cpp \
     timermanager.cpp \
     uninstallmanager.cpp \
+    versioncheckmanager.cpp \
     wirelessadbmanager.cpp \
     xmleditormanager.cpp
 
 HEADERS += mainwindow.h \
+    adhocmanager.h \
     appmanager.h \
     apkuidmanager.h \
     adbconnection.h \
     adbdevice.h \
     about.h \
+    aboutmanager.h \
     adboutput.h \
     adbutils.h \
     backupmanager.h \
@@ -133,9 +140,11 @@ HEADERS += mainwindow.h \
     cachedialog.h \
     keyboarddialog.h \
     keypadmanager.h \
+    killservermanager.h \
     logdialog.h \
     editordialog.h \
     searchdialog.h \
+    sendtextmanager.h \
     tcpipdialog.h \
     thumbnailmanager.h \
     forcequitdialog.h \
@@ -167,6 +176,7 @@ HEADERS += mainwindow.h \
     splashscreenmanager.h \
     timermanager.h \
     uninstallmanager.h \
+    versioncheckmanager.h \
     wirelessadbmanager.h \
     xmleditormanager.h
 
@@ -175,7 +185,7 @@ FORMS +=
 RESOURCES = adbLink.qrc
 
 # ==================== Build flags ====================
-QMAKE_CXXFLAGS += -Wno-deprecated -Wno-deprecated-declarations -Wno-implicit-function-declaration
+QMAKE_CXXFLAGS += -Wno-deprecated -Wno-deprecated-declarations -Wno-implicit-function-declaration -std=c++17 -std=c++17
 
 linux {
     QMAKE_LFLAGS += -no-pie

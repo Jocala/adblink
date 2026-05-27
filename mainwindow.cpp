@@ -1,8 +1,10 @@
     #include "mainwindow.h"
     #include <QRegularExpression>
     #include "appmanager.h"
+    #include "adhocmanager.h"
     #include "apkuidmanager.h"
     #include "about.h"
+    #include "aboutmanager.h"
     #include "helpdialog.h"
      #include "connectadb.h"
       #include "connectmanager.h"
@@ -26,6 +28,7 @@
     #include "oculusdialog.h"
      #include "scpdialog.h"
       #include "screencapmanager.h"
+      #include "sendtextmanager.h"
       #include "sideloadmanager.h"
       #include "program.h"
     #include "getadbdata.h"
@@ -49,6 +52,7 @@
 #include "thumbnailmanager.h"
 #include "timermanager.h"
 #include "uninstallmanager.h"
+#include "versioncheckmanager.h"
 #include "wirelessadbmanager.h"
 #include "xmleditormanager.h"
 #include "kodidatamanager.h"
@@ -57,6 +61,7 @@
 #include "kodidownloadcoordinator.h"
 #include "kodilogmanager.h"
 #include "keypadmanager.h"
+#include "killservermanager.h"
 #include "kodisetupmanager.h"
     #include "oculusmanager.h"
     #include "preferencesmanager.h"
@@ -141,6 +146,8 @@
          : QMainWindow(parent)
          , m_networkManager(new QNetworkAccessManager(this))
          , m_adbConnection(new AdbConnection(this))
+         , m_aboutManager(new AboutManager(this))
+         , m_adhocManager(new AdhocManager(this))
          , m_appManager(new AppManager(this))
          , m_apkUidManager(new ApkUidManager(this))
          , m_dataManager(new KodiDataManager(this))
@@ -154,23 +161,26 @@
            , m_fileManager(new FileManager(this))
            , m_installManager(new InstallManager(this))
            , m_dataMoveManager(new DataMoveManager(this))
-           , m_deleteRecordManager(new DeleteRecordManager(this))
-           , m_databaseResetManager(new DatabaseResetManager(this))
            , m_dataUsageManager(new DataUsageManager(this))
-           , m_screenCapManager(new ScreenCapManager(this))
+           , m_databaseResetManager(new DatabaseResetManager(this))
+           , m_deleteRecordManager(new DeleteRecordManager(this))
            , m_sideloadManager(new SideloadManager(this))
+           , m_screenCapManager(new ScreenCapManager(this))
+           , m_sendTextManager(new SendTextManager(this))
            , m_rebootManager(new RebootManager(this))
            , m_splashScreenManager(new SplashScreenManager(this))
            , m_thumbnailManager(new ThumbnailManager(this))
            , m_timerManager(new TimerManager(this))
            , m_uninstallManager(new UninstallManager(this))
+           , m_versionCheckManager(new VersionCheckManager(this))
            , m_wirelessAdbManager(new WirelessAdbManager(this))
            , m_xmlEditor(new XmlEditorManager(this))
            , m_kodiDownloader(new KodiDownloader(this))
            , m_kodiDownloadCoordinator(new KodiDownloadCoordinator(this))
            , m_kodiLogManager(new KodiLogManager(this))
-           , m_keypadManager(new KeypadManager(this))
            , m_kodiSetupManager(new KodiSetupManager(this))
+           , m_killServerManager(new KillServerManager(this))
+           , m_keypadManager(new KeypadManager(this))
            , m_remotePushManager(new RemotePushManager(this))
      {
 
@@ -527,27 +537,6 @@
     }
 
     /////////////////////////////////////////
-    void MainWindow::delayTimer(int rdelay)
-    {
-
-     QElapsedTimer rtimer;
-
-    int nMilliseconds;
-     int i = 0;
-
-     rtimer.start();
-
-    while(i == 0)
-      {
-        qApp->processEvents();
-         nMilliseconds = rtimer.elapsed();
-       if (nMilliseconds >= rdelay)
-           break;
-    }
-
-
-    }
-
 
     //////////////////////////////////////////////
     void MainWindow::rotate_logfile()
@@ -617,40 +606,6 @@
 
      //////////////////////////////////
 
-     bool MainWindow::isConnectedToNetwork()
-    {
-        QList<QNetworkInterface> ifaces = QNetworkInterface::allInterfaces();
-        bool result = false;
-
-        for (int i = 0; i < ifaces.count(); i++)
-        {
-            QNetworkInterface iface = ifaces.at(i);
-            if ( iface.flags().testFlag(QNetworkInterface::IsUp)
-                 && !iface.flags().testFlag(QNetworkInterface::IsLoopBack) )
-            {
-
-
-                // this loop is important
-                for (int j=0; j<iface.addressEntries().count(); j++)
-                {
-
-                    // we have an interface that is up, and has an ip address
-                    // therefore the link is present
-
-                    // we will only enable this check on first positive,
-                    // all later results are incorrect
-
-                    if (result == false)
-                        result = true;
-                }
-            }
-
-        }
-
-        return result;
-    }
-
-
 
 
     /////////////////////////////////////
@@ -669,43 +624,13 @@
 
     void MainWindow::do_versioncheck()
     {
-        QJsonObject obj;
-        QJsonDocument doc(obj);
-        QFile file(databasedir + "adblink.json");
-        if (file.open(QIODevice::ReadOnly)) {
-            doc = QJsonDocument::fromJson(file.readAll());
-            obj = doc.object();
-            file.close();
-        }
-        bool checkversion = obj["checkversion"].toBool();
-        bool startview = obj["startview"].toBool();
-
-        if (startview) {
-            stackedWidget->setCurrentIndex(0);
-            currentStack=0;
-            menuKodi->menuAction()->setVisible(true);
-            infoArchitecture2->setEnabled(true);
-            infoArchitecture2->setVisible(true);
-
-        } else {
-            stackedWidget->setCurrentIndex(1);
-            currentStack=1;
-            menuKodi->menuAction()->setVisible(false);
-            infoArchitecture2->setEnabled(false);
-            infoArchitecture2->setVisible(false);
-        }
-
-        if (checkversion) {
-            if (!QUrl(vqurl).isValid()) {
-                QMessageBox::critical(this, "", "Invalid URL for version check", QMessageBox::Cancel);
-                return;
-            }
-            QNetworkRequest request;
-            request.setUrl(QUrl(vqurl));
-            QNetworkReply *reply = m_networkManager->get(request);
-            connect(reply, &QNetworkReply::finished, this, &MainWindow::onReqCompleted);
-        }
+        m_versionCheckManager->checkVersion(this, databasedir, vqurl,
+            stackedWidget, menuKodi, infoArchitecture2,
+            m_networkManager,
+            [this]() { onReqCompleted(); },
+            currentStack);
     }
+
 
     void MainWindow::onReqCompleted()
     {
@@ -828,55 +753,10 @@
 
     void MainWindow::adhocip()
     {
-                      QString cstring;
-                      QString command;
-                      QString daddr;
-                      QString port;
-
-                      if (!adhoc_ip->text().isEmpty())
-                      {
-                            QString adhocIPText = adhoc_ip->text().trimmed();
-                            int colonIndex = adhocIPText.indexOf(':');
-                            QString daddr, port;
-
-                            if (colonIndex != -1) {
-                              daddr = adhocIPText.left(colonIndex).trimmed();
-                              port = adhocIPText.mid(colonIndex + 1).trimmed();
-                            } else {
-                              daddr = adhocIPText;
-                              port = "5555";
-}
-
-
-//////////////////////////////////////////
-
-                            bool ok;
-                            int portNum = port.toInt(&ok);
-                            if (!ok || portNum < 1 || portNum > 65535) {
-                              logfile("Invalid port: " + port);
-                              QMessageBox::critical(this, "", "Invalid port: " + port);
-                              return;
-                        }
-
-                            QSqlQuery query;
-                            query.prepare("INSERT OR REPLACE INTO device (description, daddr, port, isusb, data_root, xbmcpackage, filepath) "
-                                          "VALUES (:description, :daddr, :port, :isusb, :data_root, :xbmcpackage, :filepath)");
-                            query.bindValue(":description", "Ad hoc");
-                            query.bindValue(":daddr", daddr);
-                            query.bindValue(":port", port);
-                            query.bindValue(":isusb", 0);
-                            query.bindValue(":data_root", "/sdcard/");
-                            query.bindValue(":xbmcpackage", "org.xbmc.kodi");
-                            query.bindValue(":filepath", "/files/.kodi");
-                            if (!query.exec()) {
-                              logfile("Failed to insert temporary device: " + query.lastError().text());
-                            } else {
-                              logfile("Temporary device record inserted: Ad hoc IP, " + daddr + ":" + port);
-                            }
-                      }
-
-                      loadDeviceTableX(deviceTable);;
+        m_adhocManager->createAdhocRecord(this, adhoc_ip,
+            [this]() { loadDeviceTableX(deviceTable); });
     }
+
 
     ////////////////////////////////////////////////////////////////
 
@@ -892,28 +772,9 @@
     /////////////////////////////////////////////////////////////////////////
     void MainWindow::on_actionAbout_triggered()
     {
-             // Read donation value from adblink.json
-             QString donation;
-             QFile file(databasedir + "adblink.json");
-             if (file.open(QIODevice::ReadOnly)) {
-            QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-            if (!doc.isNull()) {
-                              QJsonObject obj = doc.object();
-                              donation = obj["donation"].toString();
-            } else {
-                              // qDebug() << "Error: Invalid JSON in adblink.json";
-            }
-            file.close();
-             } else {
-            // qDebug() << "Error: Could not open adblink.json at" << databasedir;
-             }
-
-             // Create Dialog2 and pass the donation value
-             Dialog2 dialog2(this, donation);
-             dialog2.setWindowModality(Qt::WindowModal);
-             dialog2.setaLabel(program + " " + version+point);
-             dialog2.exec();
+        m_aboutManager->showAbout(this, databasedir, program + " " + version + point);
     }
+
 
     //////////////////////////////////////////////
     void MainWindow::on_actionHelp_triggered()
@@ -974,37 +835,9 @@
 
     void MainWindow::killServer_clicked()
     {
-       if (QMessageBox::question(this, "Disconnect", "Disconnect all IPs?", QMessageBox::Cancel | QMessageBox::Ok) == QMessageBox::Cancel) {
-            return;
-       }
-
-       // Kill the ADB server
-       QString cstring = getadbpath() + " kill-server";
-       QString command = getadbOutput(cstring);
-
-
-       // Update device table
-       for (int row = 0; row < deviceTable->rowCount(); ++row) {
-            QTableWidgetItem* descItem = deviceTable->item(row, 0);
-            if (!descItem) continue; // Skip if no item
-
-            // Get the current status from column 2
-            QTableWidgetItem* statusItem = deviceTable->item(row, 2);
-            QString currentStatus = statusItem ? statusItem->text() : "";
-
-            // Check if the device is USB based on stored data
-            bool isUsb = descItem->data(Qt::UserRole + 1).toBool();
-
-            // Only update status to "Disconnected" if it's not already "USB"
-            if (currentStatus != "USB") {
-                   QString status = isUsb ? "USB" : "Disconnected";
-                   QTableWidgetItem* newStatusItem = new QTableWidgetItem(status);
-                   deviceTable->setItem(row, 2, newStatusItem);
-            }
-       }
-
-       deviceTable->viewport()->update();
+        m_killServerManager->killServer(this, deviceTable);
     }
+
 
 
 //////////////////
@@ -1800,35 +1633,15 @@ void MainWindow::on_actionGet_UID_from_APK_file_triggered()
 
 void MainWindow::on_actionSend_text_triggered()
 {
+    QString selectedDescription;
+    if (!validateDeviceSelection(selectedDescription))
+        return;
 
- QString selectedDescription;
- if (!validateDeviceSelection(selectedDescription)) {
-            return;
- }
+    DeviceRecord device = queryDeviceRecord(selectedDescription);
 
- DeviceRecord device = queryDeviceRecord(selectedDescription);
-
-
- QString command;
- QString cstring;
-
- bool ok;
- QString text = QInputDialog::getText(this, tr("Text to Device"),
-                                      tr("Send text:"), QLineEdit::Normal,
-                                      QString(), &ok);
- if (ok && !text.isEmpty()) {
-
-            text.replace(" ", "%s");
-            cstring = "null -s " +device.daddr+ " shell input text " + text;
-
-            command = getadbOutput(cstring);
-            logfile(cstring);
-            logfile(command);
- }
-
- return;
-
+    m_sendTextManager->sendText(this, device, getadb());
 }
+
 
 
 
@@ -2874,7 +2687,7 @@ void MainWindow::setupMenuConnections()
     connect(actionKodi_version   ,      &QAction::triggered, this, &MainWindow::on_actionKodi_version);
     connect(actionCreate_kodi_data,     &QAction::triggered, this, &MainWindow::on_actionCreate_kodi_data_triggered);
     connect(actionSwitch_View,          &QAction::triggered, this, &MainWindow::on_actionSwitch_View_triggered);
-    connect(actionReiinstall_Busybox, &QAction::triggered, this, [this](bool checked) {
+    connect(actionReiinstall_Busybox, &QAction::triggered, this, [this](bool) {
         ensureBusyboxInstalled(this, getadb(), "Install Busybox?");
     });
     connect(infoArchitecture2,           &QAction::triggered, this, &MainWindow::on_infoArchitecture_triggered);

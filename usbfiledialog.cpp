@@ -1598,13 +1598,7 @@ void usbfileDialog::on_copyButton_clicked()
 
        //qDebug() << "mstringlist:" << mstringlist;
        //qDebug() << "usblistWidget1 selected items:" << usblistWidget1->selectedItems().size();
-       for (const auto *item : usblistWidget1->selectedItems()) {
-         //qDebug() << "usblistWidget1 selected:" << item->text();
-       }
        //qDebug() << "usblistWidget2 selected items:" << usblistWidget2->selectedItems().size();
-       for (const auto *item : usblistWidget2->selectedItems()) {
-         //qDebug() << "usblistWidget2 selected:" << item->text();
-       }
 
        if (mstringlist.count() < 1) {
          //qDebug() << "No valid files selected, exiting do_xcopy";
@@ -1736,13 +1730,7 @@ void usbfileDialog::on_copyButton_clicked()
        //qDebug() << "Updated directories: current_directory1:" << current_directory1 << "current_directory2:" << current_directory2;
        //qDebug() << "hasfocus:" << hasfocus;
        //qDebug() << "usblistWidget1 selected items:" << usblistWidget1->selectedItems().size();
-       for (const auto *item : usblistWidget1->selectedItems()) {
-         //qDebug() << "usblistWidget1 selected:" << item->text();
-       }
        //qDebug() << "usblistWidget2 selected items:" << usblistWidget2->selectedItems().size();
-       for (const auto *item : usblistWidget2->selectedItems()) {
-         //qDebug() << "usblistWidget2 selected:" << item->text();
-       }
 
        // Call do_xcopy
        //qDebug() << "Calling do_xcopy";

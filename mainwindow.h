@@ -31,6 +31,8 @@
 #include "devicerecord.h"
 
 class AdbConnection;
+class AboutManager;
+class AdhocManager;
 class AppManager;
 class ApkUidManager;
 class AdbDevice;
@@ -48,10 +50,12 @@ class KodiDownloadCoordinator;
 class KodiDownloader;
 class KodiLogManager;
 class KodiSetupManager;
+class KillServerManager;
 class KeypadManager;
 class RemotePushManager;
 class RebootManager;
 class ScreenCapManager;
+class SendTextManager;
 class SideloadManager;
 class DataUsageManager;
 class DatabaseResetManager;
@@ -61,6 +65,7 @@ class SplashScreenManager;
 class ThumbnailManager;
 class TimerManager;
 class UninstallManager;
+class VersionCheckManager;
 class WirelessAdbManager;
 class XmlEditorManager;
 
@@ -161,7 +166,6 @@ private slots:
     void writeInstall(QString dir);
     QString readInstall(QString databasedir);
     void TimerEvent();
-    void delayTimer(int rdelay);
     QString RunLongProcess(QString cstring, QString jobname);
     QString readDonationValue();
     void rotate_logfile();
@@ -171,7 +175,6 @@ private slots:
     QString strip(QString str);
     void on_actionReboot_triggered();
     void deleteRecord(QString descrip);
-    bool isConnectedToNetwork();
     void on_donate_clicked();
     void do_versioncheck();
     void on_actionDownload_Kodi_triggered();
@@ -237,6 +240,8 @@ private:
     void setupMenuConnections();
 
     AdbConnection *m_adbConnection;
+    AboutManager *m_aboutManager;
+    AdhocManager *m_adhocManager;
     AppManager *m_appManager;
     ApkUidManager *m_apkUidManager;
     KodiDataManager *m_dataManager;
@@ -255,11 +260,13 @@ private:
     DeleteRecordManager *m_deleteRecordManager;
     SideloadManager *m_sideloadManager;
     ScreenCapManager *m_screenCapManager;
+    SendTextManager *m_sendTextManager;
     RebootManager *m_rebootManager;
     SplashScreenManager *m_splashScreenManager;
     ThumbnailManager *m_thumbnailManager;
     TimerManager *m_timerManager;
     UninstallManager *m_uninstallManager;
+    VersionCheckManager *m_versionCheckManager;
     WirelessAdbManager *m_wirelessAdbManager;
     XmlEditorManager *m_xmlEditor;
     bool m_isBusy = false;
@@ -267,6 +274,7 @@ private:
     KodiDownloadCoordinator *m_kodiDownloadCoordinator;
     KodiLogManager *m_kodiLogManager;
     KodiSetupManager *m_kodiSetupManager;
+    KillServerManager *m_killServerManager;
     KeypadManager *m_keypadManager;
     RemotePushManager *m_remotePushManager;
 

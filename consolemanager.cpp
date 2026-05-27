@@ -73,42 +73,6 @@ QString ConsoleManager::adbShellScript(const QString &scriptDir, const QString &
     return path;
 }
 
-QString ConsoleManager::consoleScript(const QString &scriptDir, const QString &serial, const QString &adbfilesDir) const
-{
-    if (m_os == Windows) {
-        QString path = scriptDir + QStringLiteral("/cpath.bat");
-        QFile file(path);
-        if (!file.open(QFile::WriteOnly | QFile::Text)) {
-            logfile(QStringLiteral("error creating cpath.bat!"));
-            return QString();
-        }
-        QTextStream out(&file);
-        out << QStringLiteral("echo off") << Qt::endl;
-        out << QStringLiteral("set PATH=") + adbfilesDir + QStringLiteral(";%PATH%") << Qt::endl;
-        file.flush();
-        file.close();
-        return path;
-    }
-
-    QString path = scriptDir + QStringLiteral("/cpath.sh");
-    QFile file(path);
-    if (!file.open(QFile::WriteOnly | QFile::Text)) {
-        logfile(QStringLiteral("error creating cpath.sh!"));
-        return QString();
-    }
-    QTextStream out(&file);
-    out << QStringLiteral("#!/bin/sh") << Qt::endl;
-    out << QStringLiteral("export PATH=\"") + adbfilesDir + QStringLiteral("\":$PATH") << Qt::endl;
-    out << QStringLiteral("/bin/sh") << Qt::endl;
-    file.flush();
-    file.close();
-
-    file.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner |
-                        QFileDevice::ReadGroup | QFileDevice::ExeGroup |
-                        QFileDevice::ReadOther | QFileDevice::ExeOther);
-    return path;
-}
-
 QString ConsoleManager::scrcpyScript(const QString &scriptDir, const QString &adbfilesDir, const QString &scrcpyDir) const
 {
     if (m_os == Windows) {
