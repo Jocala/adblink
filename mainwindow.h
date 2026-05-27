@@ -123,9 +123,8 @@ public:
     DeviceRecord queryDeviceRecord(const QString& description);
 
 private slots:
-    bool validateIPAddress(const QString& ipAddress);
-    bool renameColumn(const QString& oldColumnName, const QString& newColumnName);
     void onApplicationQuit();
+    bool validateIPAddress(const QString& ipAddress);
     void serverlabel();
     bool validateDeviceSelection(QString& selectedDescription);
     bool usbConnected(QString daddr);

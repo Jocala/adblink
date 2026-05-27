@@ -2194,52 +2194,6 @@ void MainWindow::screenCap()
 
 //////////////////////////////////////
 
-bool MainWindow::renameColumn(const QString& oldColumnName, const QString& newColumnName)
-{
-
-
-
-      QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-      db.setDatabaseName(dbstring);
-
-      QSqlQuery query(db);
-      query.prepare("PRAGMA table_info(device)");
-
-      if (!query.exec()) {
-               // qDebug() << "Failed to query table info for device table:" << query.lastError().text();
-               return false;
-      }
-
-      bool oldColumnExists = false;
-      bool newColumnExists = false;
-
-      while (query.next()) {
-               QString columnName = query.value("name").toString();
-               if (columnName == oldColumnName) {
-              oldColumnExists = true;
-               }
-               if (columnName == newColumnName) {
-              newColumnExists = true;
-               }
-      }
-
-      if (oldColumnExists && !newColumnExists) {
-               QString sql = QString("ALTER TABLE device RENAME COLUMN %1 TO %2")
-                                 .arg(oldColumnName, newColumnName);
-               if (!query.exec(sql)) {
-              // qDebug() << "Failed to rename column:" << query.lastError().text();
-              return false;
-               }
-               // qDebug() << "Successfully renamed column" << oldColumnName << "to" << newColumnName << "in device table";
-      } else if (!oldColumnExists) {
-               // qDebug() << "Column" << oldColumnName << "does not exist in device table";
-      } else if (newColumnExists) {
-               // qDebug() << "Column" << newColumnName << "already exists in device table";
-      }
-
-      return true;
-}
-
 
 ////////////////////////////////////////////////////////////
 
