@@ -38,6 +38,7 @@ class BackupManager;
 class CacheManager;
 class ConnectManager;
 class DisconnectManager;
+class DeviceEditorManager;
 class ConsoleManager;
 class FileManager;
 class InstallManager;
@@ -238,6 +239,7 @@ private:
     CacheManager *m_cacheManager;
     ConnectManager *m_connectManager;
     DisconnectManager *m_disconnectManager;
+    DeviceEditorManager *m_deviceEditorManager;
     FileManager *m_fileManager;
     InstallManager *m_installManager;
     DataMoveManager *m_dataMoveManager;

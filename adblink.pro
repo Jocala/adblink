@@ -82,6 +82,7 @@ SOURCES += main.cpp \
     datausagemanager.cpp \
     datamovemanager.cpp \
     deviceeditor.cpp \
+    deviceeditormanager.cpp \
     disconnectmanager.cpp \
     filemanager.cpp \
     splashscreenmanager.cpp \
@@ -152,6 +153,7 @@ HEADERS += mainwindow.h \
     datausagemanager.h \
     datamovemanager.h \
     deviceeditor.h \
+    deviceeditormanager.h \
     disconnectmanager.h \
     filemanager.h \
     splashscreenmanager.h \

@@ -7,6 +7,7 @@
      #include "connectadb.h"
       #include "connectmanager.h"
       #include "disconnectmanager.h"
+      #include "deviceeditormanager.h"
       #include "uninstalldialog.h"
     #include "getreturncode.h"
     #include "editordialog.h"
@@ -144,6 +145,7 @@
            , m_cacheManager(new CacheManager(this))
            , m_connectManager(new ConnectManager(this))
            , m_disconnectManager(new DisconnectManager(this))
+           , m_deviceEditorManager(new DeviceEditorManager(this))
            , m_fileManager(new FileManager(this))
            , m_installManager(new InstallManager(this))
            , m_dataMoveManager(new DataMoveManager(this))
@@ -1114,51 +1116,11 @@
 
      void MainWindow::dataentry(bool isNewRecord)
      {
-        QString command = getadbOutput("null devices");
-        QStringList mstringlist = command.split(QRegularExpression("[\t\n\r]"), Qt::SkipEmptyParts);
-        QStringList dstringlist;
-
-        if (command.contains("List of devices attached"))
-        {
-             mstringlist.removeFirst();
-             for (int a = 0; a < mstringlist.size(); a = a + 2)
-             {
-                    QStringList pieces = mstringlist.at(a).split(":", Qt::SkipEmptyParts);
-                    if (!mstringlist.at(a).contains("daemon"))
-                   dstringlist << pieces.at(0);
-             }
-        }
-
-        DeviceRecord device;
-        QString selectedDescription;
-
-        if (!isNewRecord)
-        {
-             int selectedRow = deviceTable->currentRow();
-             if (selectedRow >= 0 && deviceTable->item(selectedRow, 0))
-             {
-                    selectedDescription = deviceTable->item(selectedRow, 0)->text();
-                    device = queryDeviceRecord(selectedDescription);
-             }
-             else
-             {
-                    QMessageBox::critical(this, "", "No device selected in table");
-                    return;
-             }
-        }
-
-        DeviceEditor editor(this, stackedWidget->currentIndex() == 0,
-                            version,
-                            [this]() { on_Erase_adbLink_database_triggered(); });
-        editor.setDeviceList(dstringlist);
-        if (!isNewRecord)
-             editor.setExistingDevice(device, selectedDescription);
-
-        if (editor.exec())
-        {
-             QSqlDatabase::database().commit();
-             loadDeviceTableX(deviceTable);
-        }
+         m_deviceEditorManager->openEditor(this, isNewRecord, deviceTable,
+             stackedWidget->currentIndex() == 0, version,
+             [this](const QString &desc) { return queryDeviceRecord(desc); },
+             [this]() { on_Erase_adbLink_database_triggered(); },
+             [this]() { loadDeviceTableX(deviceTable); });
      }
 
 
