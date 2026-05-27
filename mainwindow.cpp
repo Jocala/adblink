@@ -1264,148 +1264,29 @@
 
     void MainWindow::on_actionStop_Application_triggered()
     {
-                  QString selectedDescription;
-                  if (!validateDeviceSelection(selectedDescription)) {
-                    return;
-                  }
+        QString selectedDescription;
+        if (!validateDeviceSelection(selectedDescription))
+            return;
 
-                  DeviceRecord device = queryDeviceRecord(selectedDescription);
+        DeviceRecord device = queryDeviceRecord(selectedDescription);
 
-
-
-
-          bool startstop;
-
-          QString stopapp;
-
-          if (QFileInfo::exists(databasedir+"/stopapp.json"))
-                 startstop = true;
-          else
-                 startstop = false;
-
-          if (!startstop)
-          {
-
-
-
-                 QJsonObject obj;
-                 obj["stopapp"] = "org.xbmc.kodi";
-                 QJsonDocument doc(obj);
-                 QFile file(databasedir+"stopapp.json");
-                 file.open(QIODevice::WriteOnly);
-                 file.write(doc.toJson());
-                 file.close();
-
-
-          }
-
-
-
-          QJsonObject obj;
-          QJsonDocument doc(obj);
-          QFile file(databasedir+"stopapp.json");
-          file.open(QIODevice::ReadOnly);
-          doc = QJsonDocument::fromJson(file.readAll());
-          obj = doc.object();
-          stopapp=obj["stopapp"].toString();
-          file.close();
-
-
-        forcequitDialog dialog(false,stopapp,this);
-        dialog.setWindowModality(Qt::WindowModal);
-
-        if(dialog.exec() == QDialog::Accepted)
-        {
-
-
-        QString cstring = getadb() + " shell am force-stop "+dialog.packagename();
-        QString command=getadbOutput(cstring);
-         logfile(cstring);
-         logfile(command);
-
-        QJsonObject obj;
-        obj["stopapp"] = dialog.packagename();
-        QJsonDocument doc(obj);
-        QFile file(databasedir+"stopapp.json");
-        file.open(QIODevice::WriteOnly);
-        file.write(doc.toJson());
-        file.close();
-
-        }
-
-
+        m_appManager->stopApp(this, device, getadb(), databasedir,
+                              QStringLiteral("stopapp.json"));
     }
+
 
     /////////////////////////////////////////////////////////
 
     void MainWindow::on_actionStart_Application_triggered()
     {
-
         QString selectedDescription;
-        if (!validateDeviceSelection(selectedDescription)) {
-        return;
-        }
+        if (!validateDeviceSelection(selectedDescription))
+            return;
 
         DeviceRecord device = queryDeviceRecord(selectedDescription);
 
-
-
-
-                bool startstop;
-                QString startapp;
-
-
-                if (QFileInfo::exists(databasedir+"/startapp.json"))
-                  startstop = true;
-                else
-                 startstop = false;
-
-                if (!startstop)
-                {
-                  QJsonObject obj;
-                  obj["startapp"] = "org.xbmc.kodi/org.xbmc.kodi.Splash";
-                  QJsonDocument doc(obj);
-                  QFile file(databasedir+"startapp.json");
-                  file.open(QIODevice::WriteOnly);
-                  file.write(doc.toJson());
-                  file.close();
-                }
-
-
-
-                QJsonObject obj;
-                QJsonDocument doc(obj);
-                QFile file(databasedir+"startapp.json");
-                file.open(QIODevice::ReadOnly);
-                doc = QJsonDocument::fromJson(file.readAll());
-                obj = doc.object();
-                startapp=obj["startapp"].toString();
-                file.close();
-
-
-
-         forcequitDialog dialog(true,startapp, this);
-         dialog.setWindowModality(Qt::WindowModal);
-
-
-        if(dialog.exec() == QDialog::Accepted)
-        {
-
-            QString cstring = getadb() + " shell am start -n "+dialog.packagename();
-            QString command=getadbOutput(cstring);
-            logfile(cstring);
-            logfile(command);
-
-            QJsonObject obj;
-            obj["startapp"] = dialog.packagename();
-            QJsonDocument doc(obj);
-            QFile file(databasedir+"startapp.json");
-            file.open(QIODevice::WriteOnly);
-            file.write(doc.toJson());
-            file.close();
-
-        }
-
+        m_appManager->startApp(this, device, getadb(), databasedir,
+                               QStringLiteral("startapp.json"));
     }
 
 

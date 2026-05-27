@@ -17,16 +17,17 @@ AppManager::AppManager(QObject *parent)
 }
 
 void AppManager::stopApp(QWidget *parentWidget, const DeviceRecord & /*device*/,
-                          const QString &adbPrefix, const QString &databaseDir)
+                          const QString &adbPrefix, const QString &databaseDir,
+                          const QString &configBasename)
 {
-    QString jsonPath = QDir(databaseDir).filePath("adblink.json");
+    QString jsonPath = QDir(databaseDir).filePath(configBasename);
     QString stopapp = "org.xbmc.kodi";
     QJsonObject jsonObj;
 
     QFile file(jsonPath);
     if (file.exists()) {
         if (!file.open(QIODevice::ReadOnly)) {
-            QMessageBox::critical(parentWidget, "Error", "Cannot read adblink.json.");
+            QMessageBox::critical(parentWidget, "Error", "Cannot read " + configBasename + ".");
             return;
         }
         QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
@@ -36,6 +37,8 @@ void AppManager::stopApp(QWidget *parentWidget, const DeviceRecord & /*device*/,
             if (jsonObj.contains("stopapp"))
                 stopapp = jsonObj["stopapp"].toString();
         }
+    } else {
+        jsonObj["stopapp"] = stopapp;
     }
 
     forcequitDialog dialog(false, stopapp, parentWidget);
@@ -68,16 +71,17 @@ void AppManager::stopApp(QWidget *parentWidget, const DeviceRecord & /*device*/,
 }
 
 void AppManager::startApp(QWidget *parentWidget, const DeviceRecord & /*device*/,
-                           const QString &adbPrefix, const QString &databaseDir)
+                           const QString &adbPrefix, const QString &databaseDir,
+                           const QString &configBasename)
 {
-    QString jsonPath = QDir(databaseDir).filePath("adblink.json");
+    QString jsonPath = QDir(databaseDir).filePath(configBasename);
     QString startapp = "org.xbmc.kodi/org.xbmc.kodi.Splash";
     QJsonObject jsonObj;
 
     QFile file(jsonPath);
     if (file.exists()) {
         if (!file.open(QIODevice::ReadOnly)) {
-            QMessageBox::critical(parentWidget, "Error", "Cannot read adblink.json.");
+            QMessageBox::critical(parentWidget, "Error", "Cannot read " + configBasename + ".");
             return;
         }
         QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
@@ -87,6 +91,8 @@ void AppManager::startApp(QWidget *parentWidget, const DeviceRecord & /*device*/
             if (jsonObj.contains("startapp"))
                 startapp = jsonObj["startapp"].toString();
         }
+    } else {
+        jsonObj["startapp"] = startapp;
     }
 
     forcequitDialog dialog(true, startapp, parentWidget);
