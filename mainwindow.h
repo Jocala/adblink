@@ -38,6 +38,7 @@ class CacheManager;
 class ConnectManager;
 class ConsoleManager;
 class FileManager;
+class InstallManager;
 class KodiDataManager;
 class KodiDownloadCoordinator;
 class KodiDownloader;
@@ -136,7 +137,6 @@ private slots:
     void disButton_clicked();
     void on_actionQuit_triggered();
     void uninstall_Button_clicked();
-    bool installAPK(QString filename);
     void on_actionHelp_triggered();
     void backupButton_clicked();
     void restoreButton_clicked();
@@ -235,6 +235,7 @@ private:
     CacheManager *m_cacheManager;
     ConnectManager *m_connectManager;
     FileManager *m_fileManager;
+    InstallManager *m_installManager;
     DataMoveManager *m_dataMoveManager;
     DataUsageManager *m_dataUsageManager;
     SideloadManager *m_sideloadManager;

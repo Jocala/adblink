@@ -44,6 +44,7 @@ SOURCES += main.cpp \
     appmanager.cpp \
     about.cpp \
     helpdialog.cpp \
+    installmanager.cpp \
     returncode.cpp \
     scpdialog.cpp \
     screencapmanager.cpp \
@@ -105,6 +106,7 @@ HEADERS += mainwindow.h \
     getlocaladb.h \
     getreturncode.h \
     helpdialog.h \
+    installmanager.h \
     kodidatamanager.h \
     logfile.h \
     point.h \

@@ -38,6 +38,7 @@
 #include "datamovemanager.h"
 #include "datausagemanager.h"
 #include "filemanager.h"
+#include "installmanager.h"
 #include "splashscreenmanager.h"
 #include "timermanager.h"
 #include "uninstallmanager.h"
@@ -139,6 +140,7 @@
            , m_cacheManager(new CacheManager(this))
            , m_connectManager(new ConnectManager(this))
            , m_fileManager(new FileManager(this))
+           , m_installManager(new InstallManager(this))
            , m_dataMoveManager(new DataMoveManager(this))
            , m_dataUsageManager(new DataUsageManager(this))
            , m_screenCapManager(new ScreenCapManager(this))
@@ -838,49 +840,9 @@
 
 
 
-    ////////////////////////////////////////////////////////////////////////////
-    bool MainWindow::installAPK(QString filename)
-    {
 
 
-        QString command;
-        QString cstring;
-        QString port;
-        QString daddr;
-        QString selectedDescription = deviceTable->item(deviceTable->currentRow(), 0)->text();
-
-
-
-
-        DeviceRecord device = queryDeviceRecord(selectedDescription);
-
-
-
-
-        logfile("Installing "+filename);
-
-
-         cstring = getadb() + " install -r " + '"'+ filename+'"';
-
-        command=RunLongProcess(cstring,"installing apk(s)");
-        logfile(cstring);
-        logfile(command);
-
-
-
-        if (!command.contains("uccess") || command.contains("Failure"))
-        {
-            QMessageBox::critical(this,"",filename+" install failed.\nSee log.");
-            return false;
-        }
-        else return true;
-
-
-
-
-    }
-
-    ////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////
     void MainWindow::sideload_Button_clicked()
     {
         QString selectedDescription;
@@ -891,7 +853,7 @@
 
         m_sideloadManager->sideloadApks(this, device,
             [this]() { return readInstall(databasedir); },
-            [this](const QString &filePath) { return installAPK(filePath); },
+            [this](const QString &filePath) { return m_installManager->installApk(this, getadb(), filePath, [this](const QString &cmd, const QString &title) { return RunLongProcess(cmd, title); }); },
             [this](const QString &dir) { writeInstall(dir); });
     }
 
@@ -1786,7 +1748,8 @@
             [this](const QString &filePath) {
                 QString desc;
                 if (validateDeviceSelection(desc))
-                    installAPK(filePath);
+                    m_installManager->installApk(this, getadb(), filePath,
+                        [this](const QString &cmd, const QString &title) { return RunLongProcess(cmd, title); });
                 return true;
             },
             [this]() { on_actionView_adbLink_Log_triggered(); },
