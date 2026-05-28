@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=adbLink
+GenericName=adbLink
+Comment=adbLink
+Exec=/home/name/adblink/adbLink
+Icon=/home/name/.local/share/icons/adblink.png
+Categories=Media;X-Gnome-Other;
+
