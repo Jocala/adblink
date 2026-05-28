@@ -111,8 +111,11 @@ QString ConsoleManager::scrcpyScript(const QString &scriptDir, const QString &ad
 void ConsoleManager::launchTerminal(const QString &scriptPath, int terminalChoice) const
 {
     QString cmd = terminalCommand(scriptPath, terminalChoice);
-    if (!cmd.isEmpty())
-        QProcess::startDetached(cmd);
+    if (!cmd.isEmpty()) {
+        QStringList parts = QProcess::splitCommand(cmd);
+        if (!parts.isEmpty())
+            QProcess::startDetached(parts.takeFirst(), parts);
+    }
 }
 
 QString ConsoleManager::terminalCommand(const QString &scriptPath, int terminalChoice) const
@@ -256,7 +259,11 @@ void ConsoleManager::openConsole(const QString &scriptDir, const QString &appHom
         }
     }
 
-    QProcess::startDetached(cstring);
+    {
+        QStringList parts = QProcess::splitCommand(cstring);
+        if (!parts.isEmpty())
+            QProcess::startDetached(parts.takeFirst(), parts);
+    }
 }
 
 void ConsoleManager::openAdbShell(const QString &daddr, const QString &scriptDir,
@@ -381,7 +388,11 @@ void ConsoleManager::openAdbShell(const QString &daddr, const QString &scriptDir
         }
     }
 
-    QProcess::startDetached(cstring);
+    {
+        QStringList parts = QProcess::splitCommand(cstring);
+        if (!parts.isEmpty())
+            QProcess::startDetached(parts.takeFirst(), parts);
+    }
 }
 
 void ConsoleManager::openScrcpy(QWidget *parent, const QString &daddr,
@@ -543,5 +554,9 @@ void ConsoleManager::openScrcpy(QWidget *parent, const QString &daddr,
         }
     }
 
-    QProcess::startDetached(cstring);
+    {
+        QStringList parts = QProcess::splitCommand(cstring);
+        if (!parts.isEmpty())
+            QProcess::startDetached(parts.takeFirst(), parts);
+    }
 }
