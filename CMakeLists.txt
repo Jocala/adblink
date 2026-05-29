@@ -20,6 +20,13 @@ if(UNIX AND NOT APPLE)
     set(OPENSSL_USE_STATIC_LIBS ON CACHE BOOL "Use static OpenSSL libs")
 endif()
 
+if(APPLE)
+    set(CMAKE_PREFIX_PATH "/Users/jeff/Qt/Qt.6.11.1-static" CACHE PATH "Qt 6.11.1 static installation")
+    set(OPENSSL_ROOT_DIR "/Users/jeff/openssl/openssl-universal" CACHE PATH "Static OpenSSL path")
+    set(OPENSSL_USE_STATIC_LIBS ON CACHE BOOL "Use static OpenSSL libs")
+    set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "Build universal binary")
+endif()
+
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Sql Network Concurrent)
 
 set(SOURCES
@@ -220,6 +227,21 @@ endif()
 
 if(UNIX AND NOT APPLE)
     target_link_options(adblink PRIVATE -no-pie)
+endif()
+
+if(APPLE)
+    find_library(COCOA_FRAMEWORK Cocoa)
+    find_library(CARBON_FRAMEWORK Carbon)
+    find_library(IOKIT_FRAMEWORK IOKit)
+    find_library(SECURITY_FRAMEWORK Security)
+    find_library(SYSTEMCONFIGURATION_FRAMEWORK SystemConfiguration)
+    target_link_libraries(adblink PRIVATE
+        ${COCOA_FRAMEWORK}
+        ${CARBON_FRAMEWORK}
+        ${IOKIT_FRAMEWORK}
+        ${SECURITY_FRAMEWORK}
+        ${SYSTEMCONFIGURATION_FRAMEWORK}
+    )
 endif()
 
 set(ADBLINK_COMMON_PLUGINS
