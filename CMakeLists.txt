@@ -8,6 +8,16 @@ set(CMAKE_AUTORCC ON)
 
 if(WIN32)
     set(CMAKE_WIN32_EXECUTABLE ON)
+    set(OPENSSL_ROOT_DIR "C:/openssl-static" CACHE PATH "Static OpenSSL path")
+    set(OPENSSL_INCLUDE_DIR "C:/openssl-static/include" CACHE PATH "OpenSSL include dir")
+    set(OPENSSL_SSL_LIBRARY "C:/openssl-static/lib/libssl.lib" CACHE FILEPATH "OpenSSL SSL library")
+    set(OPENSSL_CRYPTO_LIBRARY "C:/openssl-static/lib/libcrypto.lib" CACHE FILEPATH "OpenSSL Crypto library")
+    set(OPENSSL_USE_STATIC_LIBS ON CACHE BOOL "Use static OpenSSL libs")
+endif()
+
+if(UNIX AND NOT APPLE)
+    set(OPENSSL_ROOT_DIR "/home/jeff/openssl-static" CACHE PATH "Static OpenSSL path")
+    set(OPENSSL_USE_STATIC_LIBS ON CACHE BOOL "Use static OpenSSL libs")
 endif()
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Sql Network Concurrent)
@@ -254,6 +264,7 @@ elseif(APPLE)
     )
 elseif(UNIX)
     qt_import_plugins(adblink
+        INCLUDE Qt6::QXcbIntegrationPlugin
         INCLUDE ${ADBLINK_COMMON_PLUGINS}
         INCLUDE Qt6::QTlsBackendOpenSSLPlugin
     )
