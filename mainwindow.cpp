@@ -962,7 +962,7 @@
          DeviceRecord device = queryDeviceRecord(selectedDescription);
 
          QFile file(databasedir + "adblink.json");
-         file.open(QIODevice::ReadOnly);
+         (void)file.open(QIODevice::ReadOnly);
          QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
          QString download = doc.object()["download"].toString();
 
@@ -1149,11 +1149,11 @@
          setDonateButtonActive(r.donationValue != "jocala.com");
 
          switch (r.lgFontIndex) {
-         case 0: lfontsize = 16; break;
-         case 1: lfontsize = 18; break;
-         case 2: lfontsize = 20; break;
-         case 3: lfontsize = 22; break;
-         default: lfontsize = 16; break;
+         case 0: lfontsize = 14; break;
+         case 1: lfontsize = 16; break;
+         case 2: lfontsize = 18; break;
+         case 3: lfontsize = 20; break;
+         default: lfontsize = 14; break;
          }
          switch (r.mdFontIndex) {
          case 0: mfontsize = 12; break;
@@ -2492,6 +2492,41 @@ void MainWindow::setWindowSize()
                }
         }
    }
+
+   int lg = obj["lgfont"].toInt(0);
+   int md = obj["mdfont"].toInt(0);
+   int sm = obj["smfont"].toInt(0);
+   int fm = obj["fmfont"].toInt(0);
+
+   switch (lg) {
+   case 0: lfontsize = 14; break;
+   case 1: lfontsize = 16; break;
+   case 2: lfontsize = 18; break;
+   case 3: lfontsize = 20; break;
+   default: lfontsize = 14; break;
+   }
+   switch (md) {
+   case 0: mfontsize = 12; break;
+   case 1: mfontsize = 14; break;
+   case 2: mfontsize = 16; break;
+   case 3: mfontsize = 18; break;
+   default: mfontsize = 14; break;
+   }
+   switch (sm) {
+   case 0: sfontsize = 10; break;
+   case 1: sfontsize = 12; break;
+   case 2: sfontsize = 14; break;
+   case 3: sfontsize = 16; break;
+   default: sfontsize = 12; break;
+   }
+   switch (fm) {
+   case 0: ffontsize = 12; break;
+   case 1: ffontsize = 16; break;
+   case 2: ffontsize = 18; break;
+   case 3: ffontsize = 22; break;
+   default: ffontsize = 16; break;
+   }
+
  } else {
    logfile("Failed to read adblink.json");
    defaultWindow = 0;

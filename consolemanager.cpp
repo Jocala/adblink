@@ -149,7 +149,7 @@ void ConsoleManager::openConsole(const QString &scriptDir, const QString &appHom
     QJsonObject obj;
     QJsonDocument doc(obj);
     QFile file(dataBaseDir + "adblink.json");
-    file.open(QIODevice::ReadOnly);
+    (void)file.open(QIODevice::ReadOnly);
     doc = QJsonDocument::fromJson(file.readAll());
     obj = doc.object();
     int mcheck = obj["dropdown"].toInt();
@@ -275,7 +275,7 @@ void ConsoleManager::openAdbShell(const QString &daddr, const QString &scriptDir
     QJsonObject obj;
     QJsonDocument doc(obj);
     QFile file(dataBaseDir + "adblink.json");
-    file.open(QIODevice::ReadOnly);
+    (void)file.open(QIODevice::ReadOnly);
     doc = QJsonDocument::fromJson(file.readAll());
     obj = doc.object();
     int mcheck = obj["dropdown"].toInt();
@@ -405,7 +405,7 @@ void ConsoleManager::openScrcpy(QWidget *parent, const QString &daddr,
     QJsonObject obj;
     QJsonDocument doc(obj);
     QFile file(dataBaseDir + "adblink.json");
-    file.open(QIODevice::ReadOnly);
+    (void)file.open(QIODevice::ReadOnly);
     doc = QJsonDocument::fromJson(file.readAll());
     obj = doc.object();
     bool scrcpy = doc.object()["scrcpy"].toBool();

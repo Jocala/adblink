@@ -320,7 +320,7 @@ void usbfileDialog::on_pullButton_clicked()
 
         if (command.contains("true")) {
             int r = fileName.lastIndexOf("/");
-            dirname = fileName.mid(r, fileName.count());
+            dirname = fileName.mid(r, fileName.length());
             dirname = fix_directory(dirname);
             dtest = true;
         } else {
@@ -1258,7 +1258,7 @@ if (dialog.exec() == QDialog::Accepted)
 
     QFile::copy(tempfile1, tempfile2);
     QFile caFile(tempfile1);
-    caFile.open(QIODevice::WriteOnly | QIODevice::Text);
+    (void)caFile.open(QIODevice::WriteOnly | QIODevice::Text);
     QTextStream outStream(&caFile);
     outStream << xmlfile;
     caFile.close();

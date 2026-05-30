@@ -36,7 +36,7 @@ void getlog()
         return;
     }
 
-    file.open(QIODevice::ReadOnly);
+    (void)file.open(QIODevice::ReadOnly);
     QTextStream stream(&file);
     content = stream.readAll();
     file.close();

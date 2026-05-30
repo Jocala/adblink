@@ -91,7 +91,7 @@ void XmlEditorManager::editXml(QWidget *parent, const DeviceRecord &device,
 
     QFile::copy(scriptDir + "/" + filename, scriptDir + filename + ".bak");
     QFile caFile(scriptDir + "/" + filename);
-    caFile.open(QIODevice::WriteOnly | QIODevice::Text);
+    (void)caFile.open(QIODevice::WriteOnly | QIODevice::Text);
     QTextStream outStream(&caFile);
     outStream << xmlfile;
     caFile.close();

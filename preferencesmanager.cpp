@@ -19,7 +19,7 @@ bool PreferencesManager::exec(QWidget *parent)
     QJsonObject obj;
     QJsonDocument doc(obj);
     QFile file(m_configPath);
-    file.open(QIODevice::ReadOnly);
+    (void)file.open(QIODevice::ReadOnly);
     doc = QJsonDocument::fromJson(file.readAll());
     obj = doc.object();
 
@@ -84,7 +84,7 @@ bool PreferencesManager::exec(QWidget *parent)
 
     QJsonDocument writeDoc(obj);
     QFile writeFile(m_configPath);
-    writeFile.open(QIODevice::WriteOnly);
+    (void)writeFile.open(QIODevice::WriteOnly);
     writeFile.write(writeDoc.toJson());
     writeFile.close();
 

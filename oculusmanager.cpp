@@ -158,7 +158,7 @@ void OculusManager::readOrCreateConfig()
 
         QJsonDocument doc(obj);
         QFile file(path);
-        file.open(QIODevice::WriteOnly);
+        (void)file.open(QIODevice::WriteOnly);
         file.write(doc.toJson());
         file.close();
     }
@@ -166,7 +166,7 @@ void OculusManager::readOrCreateConfig()
     QJsonObject obj;
     QJsonDocument doc;
     QFile file(path);
-    file.open(QIODevice::ReadOnly);
+    (void)file.open(QIODevice::ReadOnly);
     doc = QJsonDocument::fromJson(file.readAll());
     obj = doc.object();
     file.close();
@@ -223,7 +223,7 @@ void OculusManager::saveConfig()
 
     QJsonDocument doc(obj);
     QFile file(m_dbDir + "quest.json");
-    file.open(QIODevice::WriteOnly);
+    (void)file.open(QIODevice::WriteOnly);
     file.write(doc.toJson());
     file.close();
 }

@@ -242,7 +242,7 @@ void cacheDialog::on_copyxml_clicked()
 
     QString cacheFilename = "temp.txt";
     QFile cacheFile(cacheFilename);
-    cacheFile.open(QIODevice::ReadWrite);
+    (void)cacheFile.open(QIODevice::ReadWrite);
     QTextStream out1(&cacheFile);
 
        out1  << line1 << Qt::endl;

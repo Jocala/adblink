@@ -24,7 +24,7 @@ void ScreenCapManager::captureScreenshot(QWidget *parentWidget,
 {
     QJsonObject obj;
     QFile file(databaseDir + "adblink.json");
-    file.open(QIODevice::ReadOnly);
+    (void)file.open(QIODevice::ReadOnly);
     QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
     obj = doc.object();
     QString pulldir = obj["download"].toString();
