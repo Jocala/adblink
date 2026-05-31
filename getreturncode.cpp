@@ -1,9 +1,8 @@
 #include "getreturncode.h"
 
 #include "logfile.h"
-#include <QDebug>
 #include <QProcess>
-#include <QCoreApplication>
+#include <QEventLoop>
 
 bool getreturncode(const QString &cstring)
 {
@@ -13,11 +12,12 @@ bool getreturncode(const QString &cstring)
   QProcess run_command;
   run_command.setProcessChannelMode(QProcess::MergedChannels);
   run_command.start(program, args);
-
   run_command.waitForStarted();
 
-  while(!run_command.waitForFinished(50))
-      qApp->processEvents();
+  QEventLoop loop;
+  QObject::connect(&run_command, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), &loop, &QEventLoop::quit);
+  QObject::connect(&run_command, &QProcess::errorOccurred, &loop, &QEventLoop::quit);
+  loop.exec();
 
   return (run_command.exitCode() == 0);
 }

@@ -2,8 +2,8 @@
 #include "adbutils.h"
 #include "logfile.h"
 
-#include <QCoreApplication>
 #include <QProcess>
+#include <QEventLoop>
 #include <QRegularExpression>
 
 AdbConnection::AdbConnection(QObject *parent)
@@ -66,8 +66,10 @@ QString AdbConnection::runCommand(const QString &args) const
     process.setProcessChannelMode(QProcess::MergedChannels);
     process.start(m_adbPath, QStringList() << QProcess::splitCommand(args));
     process.waitForStarted();
-    while (!process.waitForFinished(50))
-        QCoreApplication::processEvents();
+    QEventLoop loop;
+    QObject::connect(&process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), &loop, &QEventLoop::quit);
+    QObject::connect(&process, &QProcess::errorOccurred, &loop, &QEventLoop::quit);
+    loop.exec();
     return QString::fromUtf8(process.readAll());
 }
 
@@ -77,8 +79,10 @@ QString AdbConnection::runCommand(const QStringList &args) const
     process.setProcessChannelMode(QProcess::MergedChannels);
     process.start(m_adbPath, args);
     process.waitForStarted();
-    while (!process.waitForFinished(50))
-        QCoreApplication::processEvents();
+    QEventLoop loop;
+    QObject::connect(&process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), &loop, &QEventLoop::quit);
+    QObject::connect(&process, &QProcess::errorOccurred, &loop, &QEventLoop::quit);
+    loop.exec();
     return QString::fromUtf8(process.readAll());
 }
 

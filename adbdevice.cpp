@@ -1,13 +1,14 @@
 #include "adbdevice.h"
 #include "adbutils.h"
 
-#include <QCoreApplication>
 #include <QDateTime>
 #include <QDir>
 #include <QElapsedTimer>
+#include <QEventLoop>
 #include <QFileInfo>
 #include <QProcess>
 #include <QRegularExpression>
+#include <QTimer>
 
 AdbDevice::AdbDevice(const DeviceRecord &device, QObject *parent)
     : QObject(parent)
@@ -35,8 +36,10 @@ QString AdbDevice::runCommand(const QString &binary, const QStringList &args) co
     process.setProcessChannelMode(QProcess::MergedChannels);
     process.start(binary, args);
     process.waitForStarted();
-    while (!process.waitForFinished(50))
-        QCoreApplication::processEvents();
+    QEventLoop loop;
+    QObject::connect(&process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), &loop, &QEventLoop::quit);
+    QObject::connect(&process, &QProcess::errorOccurred, &loop, &QEventLoop::quit);
+    loop.exec();
     return QString::fromUtf8(process.readAll());
 }
 
@@ -82,21 +85,21 @@ bool AdbDevice::mountSystem(const QString &mountOption) const
 
 bool AdbDevice::reboot(const QString &rebootMode) const
 {
-    QElapsedTimer timer;
-    timer.start();
-
     QProcess process;
     process.setProcessChannelMode(QProcess::MergedChannels);
     QStringList args = QProcess::splitCommand(adbPrefix() + QStringLiteral(" ") + rebootMode);
     process.start(args.takeFirst(), args);
     process.waitForStarted();
-    while (!process.waitForFinished(50)) {
-        QCoreApplication::processEvents();
-        if (timer.elapsed() >= 5000) {
-            process.kill();
-            break;
-        }
-    }
+    QTimer timeoutTimer;
+    timeoutTimer.setSingleShot(true);
+    QEventLoop loop;
+    QObject::connect(&process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), &loop, &QEventLoop::quit);
+    QObject::connect(&process, &QProcess::errorOccurred, &loop, &QEventLoop::quit);
+    QObject::connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
+    timeoutTimer.start(5000);
+    loop.exec();
+    if (process.state() != QProcess::NotRunning)
+        process.kill();
     return true;
 }
 
@@ -109,8 +112,10 @@ bool AdbDevice::installApk(const QString &apkPath) const
         << QStringLiteral("install") << QStringLiteral("-r")
         << apkPath);
     process.waitForStarted();
-    while (!process.waitForFinished(50))
-        QCoreApplication::processEvents();
+    QEventLoop loop;
+    QObject::connect(&process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), &loop, &QEventLoop::quit);
+    QObject::connect(&process, &QProcess::errorOccurred, &loop, &QEventLoop::quit);
+    loop.exec();
 
     QString output = QString::fromUtf8(process.readAll());
     return output.contains(QStringLiteral("uccess")) && !output.contains(QStringLiteral("Failure"));

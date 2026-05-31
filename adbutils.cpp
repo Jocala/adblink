@@ -1,6 +1,7 @@
 #include "adbutils.h"
 #include <QCoreApplication>
 #include <QDir>
+#include <QEventLoop>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QJsonDocument>
@@ -181,8 +182,10 @@ static QString scopedAdbOutput(const QString &adbPrefix, const QString &adbComma
     process.setProcessChannelMode(QProcess::MergedChannels);
     process.start(program, args);
     process.waitForStarted();
-    while (!process.waitForFinished(50))
-        QCoreApplication::processEvents();
+    QEventLoop loop;
+    QObject::connect(&process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), &loop, &QEventLoop::quit);
+    QObject::connect(&process, &QProcess::errorOccurred, &loop, &QEventLoop::quit);
+    loop.exec();
     return process.readAll().trimmed();
 }
 

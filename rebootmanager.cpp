@@ -6,8 +6,8 @@
 #include <QMessageBox>
 #include <QTableWidget>
 #include <QProcess>
-#include <QElapsedTimer>
-#include <QApplication>
+#include <QEventLoop>
+#include <QTimer>
 #include <QWidget>
 
 RebootManager::RebootManager(QObject *parent)
@@ -24,20 +24,21 @@ void RebootManager::rebootDevice(QWidget *parentWidget, QTableWidget *deviceTabl
     if (reply == QMessageBox::Yes) {
         logfile("rebooting device");
 
-        QElapsedTimer rtimer;
-        rtimer.start();
         QProcess reboot_device;
         reboot_device.setProcessChannelMode(QProcess::MergedChannels);
         QStringList args = QProcess::splitCommand(adbPrefix + " reboot");
         reboot_device.start(args.takeFirst(), args);
         reboot_device.waitForStarted();
-        while (!reboot_device.waitForFinished(50)) {
-            qApp->processEvents();
-            if (rtimer.elapsed() >= 5000) {
-                reboot_device.kill();
-                break;
-            }
-        }
+        QTimer timeoutTimer;
+        timeoutTimer.setSingleShot(true);
+        QEventLoop loop;
+        QObject::connect(&reboot_device, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), &loop, &QEventLoop::quit);
+        QObject::connect(&reboot_device, &QProcess::errorOccurred, &loop, &QEventLoop::quit);
+        QObject::connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
+        timeoutTimer.start(5000);
+        loop.exec();
+        if (reboot_device.state() != QProcess::NotRunning)
+            reboot_device.kill();
 
         int selectedRow = deviceTable->currentRow();
         QString daddr = deviceTable->item(selectedRow, 1)->text();
