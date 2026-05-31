@@ -1088,38 +1088,46 @@
              logfile("Installed Kodi version: " + installedVer);
          }
 
-         QString latestVer = m_kodiDownloader->fetchLatestVersion();
+         disconnect(m_kodiDownloader, &KodiDownloader::versionFetched, this, nullptr);
 
-         bool isUpToDate = !KodiDownloader::isNewerVersionAvailable(installedVer, latestVer);
+         connect(m_kodiDownloader, &KodiDownloader::versionFetched, this,
+             [this, installedVer](const QString &latestVer) {
 
-         logfile("Latest Kodi version: " + latestVer);
+             disconnect(m_kodiDownloader, &KodiDownloader::versionFetched, this, nullptr);
 
-         QString message;
-         if (installedVer == "Unknown" || latestVer == "Unknown") {
-             message = "Cannot compare versions.\n"
-                       "Installed Kodi Version: " + installedVer + "\n"
-                       "Latest Stable Version: " + latestVer;
-         } else {
-             message = "Installed Kodi Version: " + installedVer + "\n"
-                       "Latest Stable Version: " + latestVer + "\n"
-                     + (isUpToDate ? "Your Kodi version is up to date."
-                                   : "A newer version of Kodi is available.");
-         }
+             bool isUpToDate = !KodiDownloader::isNewerVersionAvailable(installedVer, latestVer);
 
-         logfile(message);
+             logfile("Latest Kodi version: " + latestVer);
 
-         if (!isUpToDate && installedVer != "Unknown" && latestVer != "Unknown") {
-             QMessageBox msgBox(this);
-             msgBox.setWindowTitle("Kodi Version Check");
-             msgBox.setText(message + "\n\nWould you like to download " + latestVer + "?");
-             QPushButton *downloadBtn = msgBox.addButton("Download", QMessageBox::ActionRole);
-             msgBox.addButton(QMessageBox::Cancel);
-             msgBox.exec();
-             if (msgBox.clickedButton() == downloadBtn)
-                 on_actionDownload_Kodi_triggered();
-         } else {
-             QMessageBox::information(this, "Kodi Version Check", message);
-         }
+             QString message;
+             if (installedVer == "Unknown" || latestVer == "Unknown") {
+                 message = "Cannot compare versions.\n"
+                           "Installed Kodi Version: " + installedVer + "\n"
+                           "Latest Stable Version: " + latestVer;
+             } else {
+                 message = "Installed Kodi Version: " + installedVer + "\n"
+                           "Latest Stable Version: " + latestVer + "\n"
+                         + (isUpToDate ? "Your Kodi version is up to date."
+                                       : "A newer version of Kodi is available.");
+             }
+
+             logfile(message);
+
+             if (!isUpToDate && installedVer != "Unknown" && latestVer != "Unknown") {
+                 QMessageBox msgBox(this);
+                 msgBox.setWindowTitle("Kodi Version Check");
+                 msgBox.setText(message + "\n\nWould you like to download " + latestVer + "?");
+                 QPushButton *downloadBtn = msgBox.addButton("Download", QMessageBox::ActionRole);
+                 msgBox.addButton(QMessageBox::Cancel);
+                 msgBox.exec();
+                 if (msgBox.clickedButton() == downloadBtn)
+                     on_actionDownload_Kodi_triggered();
+             } else {
+                 QMessageBox::information(this, "Kodi Version Check", message);
+             }
+         });
+
+         m_kodiDownloader->fetchLatestVersion();
      }
 
 

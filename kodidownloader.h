@@ -18,8 +18,8 @@ public:
     QString installedVersionOnDevice(const QString &adbPrefix,
                                      const QString &deviceAddr) const;
 
-    // Network — synchronous fetch (uses QEventLoop internally)
-    QString fetchLatestVersion();
+    // Network — async fetch (emits versionFetched)
+    void fetchLatestVersion();
 
     // Network — async download (emits signals)
     void startDownload(const QString &version, int archIndex,
@@ -31,6 +31,7 @@ public:
     static QString stripVersionV(const QString &version);
 
 signals:
+    void versionFetched(const QString &version);
     void logMessage(const QString &msg) const;
     void downloadProgress(qint64 received, qint64 total);
     void downloadCompleted(const QString &filePath);

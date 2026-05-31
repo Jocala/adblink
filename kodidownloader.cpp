@@ -10,7 +10,6 @@
 #include <QDir>
 #include <QFile>
 #include <QUrl>
-#include <QEventLoop>
 
 KodiDownloader::KodiDownloader(QObject *parent)
     : QObject(parent)
@@ -57,16 +56,15 @@ QString KodiDownloader::installedVersionOnDevice(const QString &adbPrefix,
     return output;
 }
 
-QString KodiDownloader::fetchLatestVersion()
+void KodiDownloader::fetchLatestVersion()
 {
     QNetworkRequest req(QUrl("https://api.github.com/repos/xbmc/xbmc/releases/latest"));
     req.setHeader(QNetworkRequest::UserAgentHeader, "adblink/1.0");
 
     QNetworkReply *reply = m_networkManager->get(req);
-    QString result = "Unknown";
 
-    QEventLoop loop;
-    connect(reply, &QNetworkReply::finished, this, [&]() {
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+        QString result = "Unknown";
         if (reply->error() == QNetworkReply::NoError) {
             QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
             if (!doc.isNull() && doc.isObject()) {
@@ -81,11 +79,8 @@ QString KodiDownloader::fetchLatestVersion()
             logfile("Failed to fetch latest Kodi version: " + reply->errorString());
         }
         reply->deleteLater();
-        loop.quit();
+        emit versionFetched(result);
     });
-    loop.exec();
-
-    return result;
 }
 
 void KodiDownloader::startDownload(const QString &version, int archIndex,
