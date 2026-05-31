@@ -796,13 +796,10 @@
     //////////////////////////////////////////////
     void MainWindow::on_actionHelp_triggered()
     {
-
-        helpDialog helpdialog;
-
-
-        helpdialog.setWindowModality(Qt::NonModal);
-        helpdialog.setWindowTitle("Help");
-        helpdialog.exec();
+        auto *helpdialog = new helpDialog(this);
+        helpdialog->setWindowTitle("Help");
+        helpdialog->setAttribute(Qt::WA_DeleteOnClose);
+        helpdialog->show();
     }
 
 
