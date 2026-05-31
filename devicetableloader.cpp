@@ -101,7 +101,7 @@ void DeviceTableLoader::loadTable(QTableWidget *table, int windowSizeSelector,
     table->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     table->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
-    QSettings settings("YourCompany", "YourApp");
+    QSettings settings("jocala", "adblink");
     int sortColumn = settings.value("DeviceTableSortColumn", 0).toInt();
     Qt::SortOrder sortOrder = static_cast<Qt::SortOrder>(settings.value("DeviceTableSortOrder", Qt::AscendingOrder).toInt());
     table->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
@@ -114,7 +114,7 @@ void DeviceTableLoader::loadTable(QTableWidget *table, int windowSizeSelector,
 
     disconnect(table->horizontalHeader(), &QHeaderView::sectionClicked, nullptr, nullptr);
     connect(table->horizontalHeader(), &QHeaderView::sectionClicked, this, [table](int logicalIndex) {
-        QSettings settings("YourCompany", "YourApp");
+        QSettings settings("jocala", "adblink");
         settings.setValue("DeviceTableSortColumn", logicalIndex);
         settings.setValue("DeviceTableSortOrder", table->horizontalHeader()->sortIndicatorOrder());
     });

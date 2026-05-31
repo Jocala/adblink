@@ -1,5 +1,5 @@
 #include "deviceeditor.h"
-#include "preferencesdialog.h"
+#include "devicerecorddialog.h"
 #include "logfile.h"
 #include <QMessageBox>
 #include <QSqlQuery>
@@ -31,7 +31,7 @@ void DeviceEditor::setExistingDevice(const DeviceRecord &device, const QString &
 
 bool DeviceEditor::exec()
 {
-    preferencesDialog dialog(m_parent, m_iskodi);
+    DeviceRecordDialog dialog(m_parent, m_iskodi);
     dialog.setWindowModality(Qt::WindowModal);
     dialog.setversionLabel(m_version);
     dialog.setdevicelist(m_devices);

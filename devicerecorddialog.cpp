@@ -1,4 +1,4 @@
-#include "preferencesdialog.h"
+#include "devicerecorddialog.h"
 #include <QFileDialog>
 #include <QProcess>
 #include <QMessageBox>
@@ -7,10 +7,10 @@
 #include <QDir>
 #include "getadbdata.h"
 
-preferencesDialog::preferencesDialog(QWidget *parent, bool showkodi) :
+DeviceRecordDialog::DeviceRecordDialog(QWidget *parent, bool showkodi) :
     QDialog(parent)
 {
-    setObjectName("preferencesDialog");
+    setObjectName("DeviceRecordDialog");
     setWindowTitle("Device Record");
     setToolTip("Choose Kodi's operating system");
     setLayoutDirection(Qt::LeftToRight);
@@ -231,22 +231,22 @@ preferencesDialog::preferencesDialog(QWidget *parent, bool showkodi) :
     connect(m_saveButton, &QPushButton::clicked, this, &QDialog::accept);
     connect(m_cancelButton, &QPushButton::clicked, this, &QDialog::reject);
 
-    connect(m_pfolderButton, &QPushButton::clicked, this, &preferencesDialog::on_pfolderButton_clicked);
-    connect(m_filepathButton, &QPushButton::clicked, this, &preferencesDialog::on_filepathButton_clicked);
+    connect(m_pfolderButton, &QPushButton::clicked, this, &DeviceRecordDialog::on_pfolderButton_clicked);
+    connect(m_filepathButton, &QPushButton::clicked, this, &DeviceRecordDialog::on_filepathButton_clicked);
 
     connect(m_kodiButton, &QRadioButton::clicked, this, [this]() { on_kodiButton_clicked(); });
     connect(m_spmcButton, &QRadioButton::clicked, this, [this]() { on_spmcButton_clicked(); });
     connect(m_otherButton, &QRadioButton::clicked, this, [this]() { on_otherButton_clicked(); });
 
-    connect(m_isusb, &QCheckBox::clicked, this, &preferencesDialog::on_isusb_clicked);
-    connect(m_wsa, &QCheckBox::clicked, this, &preferencesDialog::on_wsa_clicked);
-    connect(m_scoped, &QCheckBox::clicked, this, &preferencesDialog::on_scoped_clicked);
+    connect(m_isusb, &QCheckBox::clicked, this, &DeviceRecordDialog::on_isusb_clicked);
+    connect(m_wsa, &QCheckBox::clicked, this, &DeviceRecordDialog::on_wsa_clicked);
+    connect(m_scoped, &QCheckBox::clicked, this, &DeviceRecordDialog::on_scoped_clicked);
 
     connect(m_ostypeBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
-            this, &preferencesDialog::on_ostypeBox_currentIndexChanged);
+            this, &DeviceRecordDialog::on_ostypeBox_currentIndexChanged);
 
     connect(m_listDevicesp, &QListWidget::doubleClicked,
-            this, &preferencesDialog::on_listDevicesp_doubleClicked);
+            this, &DeviceRecordDialog::on_listDevicesp_doubleClicked);
     connect(m_listkodirootBox, &QListWidget::clicked,
             this, [this](const QModelIndex&) { on_listkodirootBox_clicked(); });
 
@@ -267,60 +267,60 @@ preferencesDialog::preferencesDialog(QWidget *parent, bool showkodi) :
     on_isusb_clicked(m_isusb->isChecked());
 }
 
-preferencesDialog::~preferencesDialog()
+DeviceRecordDialog::~DeviceRecordDialog()
 {
 }
 
-QString preferencesDialog::xbmcpackageName() {
+QString DeviceRecordDialog::xbmcpackageName() {
     return m_packagename->text();
 }
 
-QString preferencesDialog::scrcpy() {
+QString DeviceRecordDialog::scrcpy() {
     return m_scrcpy->text();
 }
 
-QString preferencesDialog::data_root() {
+QString DeviceRecordDialog::data_root() {
     return m_data_root->text();
 }
 
-QString preferencesDialog::pulldir() {
+QString DeviceRecordDialog::pulldir() {
     return m_pulldir->text();
 }
 
-QString preferencesDialog::daddr() {
+QString DeviceRecordDialog::daddr() {
     return m_daddr->text();
 }
 
-QString preferencesDialog::description() {
+QString DeviceRecordDialog::description() {
     return m_description->text();
 }
 
-QString preferencesDialog::filepath() {
+QString DeviceRecordDialog::filepath() {
     return m_filepath->text();
 }
 
-QString preferencesDialog::port() {
+QString DeviceRecordDialog::port() {
     return m_port->text();
 }
 
-bool preferencesDialog::isusb() {
+bool DeviceRecordDialog::isusb() {
     return m_isusb->isChecked();
 }
 
-bool preferencesDialog::wsa() {
+bool DeviceRecordDialog::wsa() {
     return m_wsa->isChecked();
 }
 
-bool preferencesDialog::scoped() {
+bool DeviceRecordDialog::scoped() {
     return m_scoped->isChecked();
 }
 
-QString preferencesDialog::ostype() {
+QString DeviceRecordDialog::ostype() {
     QString ost = QString::number(m_ostypeBox->currentIndex());
     return ost;
 }
 
-void preferencesDialog::setPackagename(const QString &packagename)
+void DeviceRecordDialog::setPackagename(const QString &packagename)
 {
     bool isset = false;
     m_packagename->setText(packagename);
@@ -342,42 +342,42 @@ void preferencesDialog::setPackagename(const QString &packagename)
         m_otherButton->setChecked(true);
 }
 
-void preferencesDialog::setPulldir(const QString &pulldir)
+void DeviceRecordDialog::setPulldir(const QString &pulldir)
 {
     m_pulldir->setText(pulldir);
 }
 
-void preferencesDialog::setscrcpy(const QString &scrcpy)
+void DeviceRecordDialog::setscrcpy(const QString &scrcpy)
 {
     m_scrcpy->setText(scrcpy);
 }
 
-void preferencesDialog::setisusb(const bool &isusb)
+void DeviceRecordDialog::setisusb(const bool &isusb)
 {
     m_isusb->setChecked(isusb);
 }
 
-void preferencesDialog::setscope(const bool &scoped)
+void DeviceRecordDialog::setscope(const bool &scoped)
 {
     m_scoped->setChecked(scoped);
 }
 
-void preferencesDialog::setwsa(const bool &wsa)
+void DeviceRecordDialog::setwsa(const bool &wsa)
 {
     m_wsa->setChecked(wsa);
 }
 
-void preferencesDialog::setversionLabel(const QString &versiontext)
+void DeviceRecordDialog::setversionLabel(const QString &versiontext)
 {
     m_versionLabel->setText("adblink version: " + versiontext);
 }
 
-void preferencesDialog::setostype(const QString &ostype)
+void DeviceRecordDialog::setostype(const QString &ostype)
 {
     m_ostypeBox->setCurrentIndex(ostype.toInt());
 }
 
-void preferencesDialog::setdevicelist(const QStringList &dstringlist)
+void DeviceRecordDialog::setdevicelist(const QStringList &dstringlist)
 {
     if (dstringlist.count() < 1)
         return;
@@ -389,34 +389,34 @@ void preferencesDialog::setdevicelist(const QStringList &dstringlist)
     }
 }
 
-void preferencesDialog::setdaddr(const QString &daddr)
+void DeviceRecordDialog::setdaddr(const QString &daddr)
 {
     m_daddr->setText(daddr);
 }
 
-void preferencesDialog::setdescription(const QString &description)
+void DeviceRecordDialog::setdescription(const QString &description)
 {
     m_description->setText(description);
 }
 
-void preferencesDialog::setfilepath(const QString &filepath)
+void DeviceRecordDialog::setfilepath(const QString &filepath)
 {
     m_filepath->setText(filepath);
 }
 
-void preferencesDialog::setdataroot(const QString &data_root)
+void DeviceRecordDialog::setdataroot(const QString &data_root)
 {
     m_data_root->setText(data_root);
     if (m_ostypeBox->currentIndex() == 0) {
     }
 }
 
-void preferencesDialog::setport(const QString &port)
+void DeviceRecordDialog::setport(const QString &port)
 {
     m_port->setText(port);
 }
 
-void preferencesDialog::on_pfolderButton_clicked()
+void DeviceRecordDialog::on_pfolderButton_clicked()
 {
     QString dir = QFileDialog::getExistingDirectory(this, tr("Choose pull folder"),
                                                     m_pulldir->text(),
@@ -428,25 +428,25 @@ void preferencesDialog::on_pfolderButton_clicked()
     }
 }
 
-void preferencesDialog::on_kodiButton_clicked()
+void DeviceRecordDialog::on_kodiButton_clicked()
 {
     m_packagename->setText("org.xbmc.kodi");
     m_filepath->setText("/files/.kodi");
 }
 
-void preferencesDialog::on_spmcButton_clicked()
+void DeviceRecordDialog::on_spmcButton_clicked()
 {
     m_packagename->setText("com.semperpax.spmc16");
     m_filepath->setText("/files/.spmc");
 }
 
-void preferencesDialog::on_otherButton_clicked()
+void DeviceRecordDialog::on_otherButton_clicked()
 {
     m_packagename->setText("");
     m_filepath->setText("");
 }
 
-void preferencesDialog::on_isusb_clicked(bool checked)
+void DeviceRecordDialog::on_isusb_clicked(bool checked)
 {
     if (checked) {
         m_port->setText("");
@@ -455,7 +455,7 @@ void preferencesDialog::on_isusb_clicked(bool checked)
     }
 }
 
-void preferencesDialog::setadb_pref(const QString &adb_pref)
+void DeviceRecordDialog::setadb_pref(const QString &adb_pref)
 {
     m_listkodirootBox->clear();
     QString command;
@@ -495,12 +495,12 @@ void preferencesDialog::setadb_pref(const QString &adb_pref)
     command = getadbOutput(cstring);
 }
 
-void preferencesDialog::on_listkodirootBox_clicked()
+void DeviceRecordDialog::on_listkodirootBox_clicked()
 {
     m_data_root->setText(m_listkodirootBox->currentItem()->text());
 }
 
-void preferencesDialog::disable_ui()
+void DeviceRecordDialog::disable_ui()
 {
     m_port->setText("");
     m_port->setEnabled(false);
@@ -517,7 +517,7 @@ void preferencesDialog::disable_ui()
     m_mediaBox->setDisabled(true);
 }
 
-void preferencesDialog::enable_ui()
+void DeviceRecordDialog::enable_ui()
 {
     m_port->setEnabled(true);
     m_port->setText("5555");
@@ -531,7 +531,7 @@ void preferencesDialog::enable_ui()
     m_mediaBox->setEnabled(true);
 }
 
-void preferencesDialog::on_ostypeBox_currentIndexChanged(int index)
+void DeviceRecordDialog::on_ostypeBox_currentIndexChanged(int index)
 {
     switch (index) {
     case 0:
@@ -599,7 +599,7 @@ void preferencesDialog::on_ostypeBox_currentIndexChanged(int index)
     }
 }
 
-void preferencesDialog::on_filepathButton_clicked()
+void DeviceRecordDialog::on_filepathButton_clicked()
 {
     QString dir = QFileDialog::getExistingDirectory(this, tr("Choose file path"),
                                                     m_filepath->text(),
@@ -611,21 +611,21 @@ void preferencesDialog::on_filepathButton_clicked()
     }
 }
 
-void preferencesDialog::on_listDevicesp_doubleClicked(const QModelIndex &index)
+void DeviceRecordDialog::on_listDevicesp_doubleClicked(const QModelIndex &index)
 {
     m_daddr->setText(index.data(Qt::DisplayRole).toString());
 }
 
-bool preferencesDialog::disableroot() {
+bool DeviceRecordDialog::disableroot() {
     return m_disableroot->isChecked();
 }
 
-void preferencesDialog::setdisableroot(const bool &disableroot)
+void DeviceRecordDialog::setdisableroot(const bool &disableroot)
 {
     m_disableroot->setChecked(disableroot);
 }
 
-void preferencesDialog::on_wsa_clicked(bool checked)
+void DeviceRecordDialog::on_wsa_clicked(bool checked)
 {
     enable_ui();
     if (checked) {
@@ -642,7 +642,7 @@ void preferencesDialog::on_wsa_clicked(bool checked)
     }
 }
 
-void preferencesDialog::on_scoped_clicked(bool checked)
+void DeviceRecordDialog::on_scoped_clicked(bool checked)
 {
     if (checked) {
         m_data_root->setText("/sdcard/");

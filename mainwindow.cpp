@@ -92,7 +92,7 @@
     #include <QtSql/QSqlDatabase>
     #include <QtSql/QSqlError>
     #include <QtSql/QSqlQuery>
-    #include <preferencesdialog.h>
+    #include <devicerecorddialog.h>
     #include <QElapsedTimer>
     #include <QTextStream>
     #include <QDate>

@@ -59,7 +59,7 @@ set(SOURCES
     scpdialog.cpp
     screencapmanager.cpp
     uninstalldialog.cpp
-    preferencesdialog.cpp
+    devicerecorddialog.cpp
     usbfiledialog.cpp
     adblogdialog.cpp
     datadialog.cpp
@@ -139,7 +139,7 @@ set(HEADERS
     scpdialog.h
     screencapmanager.h
     uninstalldialog.h
-    preferencesdialog.h
+    devicerecorddialog.h
     usbfiledialog.h
     adblogdialog.h
     datadialog.h

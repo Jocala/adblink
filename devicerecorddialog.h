@@ -1,5 +1,5 @@
-#ifndef PREFERENCESDIALOG_H
-#define PREFERENCESDIALOG_H
+#ifndef DEVICERECORDDIALOG_H
+#define DEVICERECORDDIALOG_H
 
 #include <QDialog>
 #include <QPushButton>
@@ -14,12 +14,12 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 
-class preferencesDialog : public QDialog
+class DeviceRecordDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit preferencesDialog(QWidget *parent = nullptr, bool showkodi = true);
+    explicit DeviceRecordDialog(QWidget *parent = nullptr, bool showkodi = true);
 
     void setPackagename(const QString &packagename);
     void setPulldir(const QString &pulldir);
@@ -41,7 +41,7 @@ public:
     void setrecnum(const QString &recnum);
     void setdisableroot(const bool &disableroot);
 
-    ~preferencesDialog();
+    ~DeviceRecordDialog();
 
 public:
     QString xbmcpackageName();
@@ -110,4 +110,4 @@ private:
     QGroupBox *m_mediaBox;
 };
 
-#endif // PREFERENCESDIALOG_H
+#endif // DEVICERECORDDIALOG_H
