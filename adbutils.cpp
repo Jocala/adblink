@@ -181,7 +181,7 @@ static QString scopedAdbOutput(const QString &adbPrefix, const QString &adbComma
     process.setProcessChannelMode(QProcess::MergedChannels);
     process.start(program, args);
     process.waitForStarted();
-    while (process.state() != QProcess::NotRunning)
+    while (!process.waitForFinished(50))
         QCoreApplication::processEvents();
     return process.readAll().trimmed();
 }

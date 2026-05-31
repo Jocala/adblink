@@ -16,7 +16,7 @@ bool getreturncode(const QString &cstring)
 
   run_command.waitForStarted();
 
-  while(run_command.state() != QProcess::NotRunning)
+  while(!run_command.waitForFinished(50))
       qApp->processEvents();
 
   return (run_command.exitCode() == 0);

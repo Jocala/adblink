@@ -35,7 +35,7 @@ QString AdbDevice::runCommand(const QString &binary, const QStringList &args) co
     process.setProcessChannelMode(QProcess::MergedChannels);
     process.start(binary, args);
     process.waitForStarted();
-    while (process.state() != QProcess::NotRunning)
+    while (!process.waitForFinished(50))
         QCoreApplication::processEvents();
     return QString::fromUtf8(process.readAll());
 }
@@ -90,10 +90,12 @@ bool AdbDevice::reboot(const QString &rebootMode) const
     QStringList args = QProcess::splitCommand(adbPrefix() + QStringLiteral(" ") + rebootMode);
     process.start(args.takeFirst(), args);
     process.waitForStarted();
-    while (process.state() != QProcess::NotRunning) {
+    while (!process.waitForFinished(50)) {
         QCoreApplication::processEvents();
-        if (timer.elapsed() >= 5000)
+        if (timer.elapsed() >= 5000) {
+            process.kill();
             break;
+        }
     }
     return true;
 }
@@ -107,7 +109,7 @@ bool AdbDevice::installApk(const QString &apkPath) const
         << QStringLiteral("install") << QStringLiteral("-r")
         << apkPath);
     process.waitForStarted();
-    while (process.state() != QProcess::NotRunning)
+    while (!process.waitForFinished(50))
         QCoreApplication::processEvents();
 
     QString output = QString::fromUtf8(process.readAll());

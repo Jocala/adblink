@@ -25,7 +25,7 @@ QString getadbOutput(const QString &cstring)
 
   run_command.waitForStarted();
 
-  while(run_command.state() != QProcess::NotRunning)
+  while(!run_command.waitForFinished(50))
       qApp->processEvents();
 
   QString command=run_command.readAll();

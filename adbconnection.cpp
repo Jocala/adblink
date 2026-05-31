@@ -66,7 +66,7 @@ QString AdbConnection::runCommand(const QString &args) const
     process.setProcessChannelMode(QProcess::MergedChannels);
     process.start(m_adbPath, QStringList() << QProcess::splitCommand(args));
     process.waitForStarted();
-    while (process.state() != QProcess::NotRunning)
+    while (!process.waitForFinished(50))
         QCoreApplication::processEvents();
     return QString::fromUtf8(process.readAll());
 }
@@ -77,7 +77,7 @@ QString AdbConnection::runCommand(const QStringList &args) const
     process.setProcessChannelMode(QProcess::MergedChannels);
     process.start(m_adbPath, args);
     process.waitForStarted();
-    while (process.state() != QProcess::NotRunning)
+    while (!process.waitForFinished(50))
         QCoreApplication::processEvents();
     return QString::fromUtf8(process.readAll());
 }

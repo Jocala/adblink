@@ -31,10 +31,12 @@ void RebootManager::rebootDevice(QWidget *parentWidget, QTableWidget *deviceTabl
         QStringList args = QProcess::splitCommand(adbPrefix + " reboot");
         reboot_device.start(args.takeFirst(), args);
         reboot_device.waitForStarted();
-        while (reboot_device.state() != QProcess::NotRunning) {
+        while (!reboot_device.waitForFinished(50)) {
             qApp->processEvents();
-            if (rtimer.elapsed() >= 5000)
+            if (rtimer.elapsed() >= 5000) {
+                reboot_device.kill();
                 break;
+            }
         }
 
         int selectedRow = deviceTable->currentRow();
