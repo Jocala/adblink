@@ -1,6 +1,5 @@
 #include "getreturncode.h"
 
-#include "adbutils.h"
 #include "logfile.h"
 #include <QDebug>
 #include <QProcess>
@@ -8,9 +7,8 @@
 
 bool getreturncode(const QString &cstring)
 {
-  QString program = getadbpath();
   QStringList args = QProcess::splitCommand(cstring);
-  args.removeFirst();
+  QString program = args.takeFirst();
 
   QProcess run_command;
   run_command.setProcessChannelMode(QProcess::MergedChannels);

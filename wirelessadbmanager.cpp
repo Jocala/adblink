@@ -1,4 +1,5 @@
 #include "wirelessadbmanager.h"
+#include "adbutils.h"
 #include "devicerecord.h"
 #include "getadbdata.h"
 #include "logfile.h"
@@ -53,7 +54,7 @@ void WirelessAdbManager::enableWirelessAdb(QWidget *parentWidget,
         logfile(command);
 
         QTimer::singleShot(2000, this, [parentWidget, ip]() {
-            QString cstring = "null connect " + ip + ":5555";
+            QString cstring = getadbpath() + " connect " + ip + ":5555";
             QString command = getadbOutput(cstring);
             logfile("adb connect: " + command);
 
@@ -61,7 +62,7 @@ void WirelessAdbManager::enableWirelessAdb(QWidget *parentWidget,
                 QMessageBox::information(parentWidget, "Success",
                                          "Wireless ADB enabled for " + ip);
 
-                cstring = "null disconnect " + ip + ":5555";
+                cstring = getadbpath() + " disconnect " + ip + ":5555";
                 command = getadbOutput(cstring);
                 logfile("adb disconnect: " + command);
             } else {

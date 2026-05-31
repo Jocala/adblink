@@ -15,7 +15,7 @@ getdevices::getdevices(QObject *parent)
     QStringList mstringlist;
     QStringList dstringlist;
 
-    cstring = "null devices";
+    cstring = getadbpath() + " devices";
     command = getadbOutput(cstring);
 
     mstringlist = command.split(QRegularExpression("[\t\n\r]"), Qt::SkipEmptyParts);

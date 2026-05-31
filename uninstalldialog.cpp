@@ -1,5 +1,4 @@
 #include "uninstalldialog.h"
-#include <QProcess>
 #include <QString>
 #include <QMessageBox>
 #include <QStringList>
@@ -8,6 +7,7 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include "adbutils.h"
+#include "getadbdata.h"
 
 #ifdef Q_OS_LINUX
  int ost=0;
@@ -16,11 +16,6 @@
 #elif defined(Q_OS_MAC)
 int ost=2;
 #endif
-
-QString commstr;
-QString cstr;
-QString argument;
-QProcess packages;
 
 QString uninstallDialog::packageName() {
    if (m_unlistWidget->selectedItems().count() == 1 )
@@ -89,13 +84,12 @@ uninstallDialog::uninstallDialog(const QString &daddr, const QString &port, QWid
    buttonLayout->addWidget(m_okButton);
    mainLayout->addLayout(buttonLayout);
 
-   connect(m_applyButton, SIGNAL(clicked()), this, SLOT(on_applyButton_clicked()));
-   connect(m_clearButton, SIGNAL(clicked()), this, SLOT(on_apkclearButton_clicked()));
-   connect(m_cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
-   connect(m_okButton, SIGNAL(clicked()), this, SLOT(accept()));
+   connect(m_applyButton, &QPushButton::clicked, this, &uninstallDialog::on_applyButton_clicked);
+   connect(m_clearButton, &QPushButton::clicked, this, &uninstallDialog::on_apkclearButton_clicked);
+   connect(m_cancelButton, &QPushButton::clicked, this, &QDialog::reject);
+   connect(m_okButton, &QPushButton::clicked, this, &QDialog::accept);
 
    loadList();
-   makeFile();
    loadBox();
 }
 
@@ -107,38 +101,30 @@ void uninstallDialog::on_applyButton_clicked() {
     m_unlistWidget->clear();
 
     if (m_lineEdit->text() != "") {
+        QString cmd;
         if (m_port.isEmpty())
-            argument = " -s " + m_daddr + " shell pm list packages | grep " + m_lineEdit->text();
+            cmd = getadbpath() + " -s " + m_daddr + " shell pm list packages | grep " + m_lineEdit->text();
         else
-            argument = " -s " + m_daddr + ":" + m_port + " shell pm list packages | grep " + m_lineEdit->text();
-
-         cstr = QString("\"%1\"").arg(getadbpath()) + argument;
-
+            cmd = getadbpath() + " -s " + m_daddr + ":" + m_port + " shell pm list packages | grep " + m_lineEdit->text();
+        m_lastOutput = getadbOutput(cmd);
     } else {
         loadList();
     }
 
-    makeFile();
     loadBox();
 }
 
 void uninstallDialog::loadList() {
+    QString cmd;
     if (m_port.isEmpty())
-        argument = " -s " + m_daddr + " shell pm list packages";
+        cmd = getadbpath() + " -s " + m_daddr + " shell pm list packages";
     else
-        argument = " -s " + m_daddr + ":" + m_port + " shell pm list packages";
-
-     cstr = QString("\"%1\"").arg(getadbpath()) + argument;
-}
-
-void uninstallDialog::makeFile() {
-    packages.start(cstr);
-    packages.waitForFinished(-1);
-    commstr = packages.readAll();
+        cmd = getadbpath() + " -s " + m_daddr + ":" + m_port + " shell pm list packages";
+    m_lastOutput = getadbOutput(cmd);
 }
 
 void uninstallDialog::loadBox() {
-    QStringList packageList = commstr.split('\n', Qt::SkipEmptyParts);
+    QStringList packageList = m_lastOutput.split('\n', Qt::SkipEmptyParts);
 
     foreach (QString package, packageList) {
         if (!package.isEmpty()) {

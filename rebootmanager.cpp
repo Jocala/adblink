@@ -1,4 +1,5 @@
 #include "rebootmanager.h"
+#include "adbutils.h"
 #include "getadbdata.h"
 #include "logfile.h"
 
@@ -39,7 +40,7 @@ void RebootManager::rebootDevice(QWidget *parentWidget, QTableWidget *deviceTabl
         QString daddr = deviceTable->item(selectedRow, 1)->text();
 
         if (!isUsb) {
-            QString cstring = "null disconnect " + daddr;
+            QString cstring = getadbpath() + " disconnect " + daddr;
             QString command = getadbOutput(cstring);
             logfile(command);
             logfile("disconnect: " + daddr);

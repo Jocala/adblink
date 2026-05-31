@@ -154,7 +154,7 @@ keyboardDialog::~keyboardDialog()
 
 void keyboardDialog::setdaddr(const QString &daddress)
 {
-    cstring = QStringLiteral("null -s ") + daddress;
+    cstring = getadbpath() + " -s " + daddress + " shell input keyevent ";
 }
 
 void keyboardDialog::on_upButton_clicked()

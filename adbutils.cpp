@@ -174,9 +174,8 @@ bool isPackageInstalled(const QString &adbPrefix, const QString &package)
 static QString scopedAdbOutput(const QString &adbPrefix, const QString &adbCommand)
 {
     QString fullCommand = adbPrefix + " " + adbCommand;
-    QString program = getadbpath();
     QStringList args = QProcess::splitCommand(fullCommand);
-    args.removeFirst();
+    QString program = args.takeFirst();
 
     QProcess process;
     process.setProcessChannelMode(QProcess::MergedChannels);

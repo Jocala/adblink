@@ -280,7 +280,7 @@ elseif(APPLE)
     )
     add_custom_command(TARGET adblink POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
-            "${CMAKE_BINARY_DIR}/../adbfiles"
+            "${CMAKE_SOURCE_DIR}/adbfiles"
             "$<TARGET_BUNDLE_CONTENT_DIR:adblink>/MacOS/adbfiles"
         COMMENT "Bundling adbfiles into app"
     )

@@ -1,4 +1,5 @@
 #include "disconnectmanager.h"
+#include "adbutils.h"
 #include "getadbdata.h"
 #include "logfile.h"
 
@@ -37,7 +38,7 @@ void DisconnectManager::disconnectDevice(QWidget *parentWidget, QTableWidget *de
     if (reply == QMessageBox::No)
         return;
 
-    QString cstring = "null disconnect " + daddr;
+    QString cstring = getadbpath() + " disconnect " + daddr;
     QString command = getadbOutput(cstring);
 
     logfile(command);

@@ -409,7 +409,7 @@
     void MainWindow::onApplicationQuit() {
 
 
-     QString cstring = "null kill-server";
+      QString cstring = getadbpath() + " kill-server";
      QString command=getadbOutput(cstring);
  //    logfile(command);
   //   logfile("server stopped");
@@ -1794,7 +1794,7 @@ void MainWindow::serverlabel()
 {
 
 
-           QString cstring =  "null devices";
+           QString cstring = getadbpath() + " devices";
            QString command = getadbOutput(cstring);
 
 
@@ -1900,7 +1900,7 @@ void MainWindow::displayOff()
 
 bool MainWindow::usbConnected(QString daddr)
 {
-    QString cstring =  "null devices";
+    QString cstring = getadbpath() + " devices";
     QString command = getadbOutput(cstring);
     return command.contains(daddr);
 }

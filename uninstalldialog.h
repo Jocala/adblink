@@ -21,7 +21,6 @@ public:
 
 private slots:
     void loadList();
-    void makeFile();
     void loadBox();
     void on_applyButton_clicked();
     void on_apkclearButton_clicked();
@@ -29,6 +28,7 @@ private slots:
 private:
     QString m_daddr;
     QString m_port;
+    QString m_lastOutput;
 
     QLabel *m_titleLabel;
     QLineEdit *m_lineEdit;
@@ -39,13 +39,5 @@ private:
     QPushButton *m_cancelButton;
     QPushButton *m_okButton;
 };
-
-extern int ost;
-extern QString tmpdir;
-extern QString tmpstr;
-extern QString commstr;
-extern QString cstr;
-extern QString argument;
-extern QString fline;
 
 #endif // UNINSTALLDIALOG_H

@@ -1,4 +1,5 @@
 #include "deviceeditormanager.h"
+#include "adbutils.h"
 #include "devicerecord.h"
 #include "deviceeditor.h"
 #include "getadbdata.h"
@@ -22,7 +23,7 @@ void DeviceEditorManager::openEditor(QWidget *parentWidget, bool isNewRecord,
                                       EraseDbCallback eraseDb,
                                       ReloadTableCallback reloadTable)
 {
-    QString command = getadbOutput("null devices");
+    QString command = getadbOutput(getadbpath() + " devices");
     QStringList mstringlist = command.split(QRegularExpression("[\t\n\r]"), Qt::SkipEmptyParts);
     QStringList dstringlist;
 

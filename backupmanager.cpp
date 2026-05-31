@@ -99,7 +99,7 @@ bool BackupManager::backupDevice(QWidget *parent, const DeviceRecord &device,
 {
     logfile("Starting backup for " + device.daddr);
 
-    QString cstring = "null -s " + device.daddr + " shell /data/local/tmp/adblink/busybox find /storage -type d -maxdepth 1";
+    QString cstring = getadbpath() + " -s " + device.daddr + " shell /data/local/tmp/adblink/busybox find /storage -type d -maxdepth 1";
     QString s = getadbOutput(cstring);
 
     QStringList list = s.split('\n');
@@ -205,10 +205,10 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
     QString kbase;
     bool xbmc_env = false;
 
-    cstring = "null -s " + device.daddr + " shell ls /sdcard/xbmc_env.properties";
+    cstring = getadbpath() + " -s " + device.daddr + " shell ls /sdcard/xbmc_env.properties";
     command = getadbOutput(cstring);
     if (!command.contains("No such file")) {
-        cstring = "null -s " + device.daddr + " shell cat /sdcard/xbmc_env.properties";
+        cstring = getadbpath() + " -s " + device.daddr + " shell cat /sdcard/xbmc_env.properties";
         command = getadbOutput(cstring);
         command.replace(QRegularExpression("[\r\n]"), "");
         int startIndex = command.indexOf("=") + 1;
@@ -217,7 +217,7 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
         xbmc_env = true;
     }
 
-    cstring = "null -s " + device.daddr + " shell ps | grep " + device.xbmcpackage;
+    cstring = getadbpath() + " -s " + device.daddr + " shell ps | grep " + device.xbmcpackage;
     command = getadbOutput(cstring);
 
     if (command.contains(device.xbmcpackage)) {
@@ -227,7 +227,7 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
                                       ".\n Stop " + device.xbmcpackage + "?",
                                       QMessageBox::Yes | QMessageBox::No);
         if (reply == QMessageBox::Yes) {
-            cstring = "null -s " + device.daddr + " shell am force-stop " + device.xbmcpackage;
+            cstring = getadbpath() + " -s " + device.daddr + " shell am force-stop " + device.xbmcpackage;
             getadbOutput(cstring);
         } else {
             logfile(device.daddr + ": Error: " + device.xbmcpackage + " running. Restore failed");
@@ -236,7 +236,7 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
     }
 
     if (!xbmc_env) {
-        cstring = "null -s " + device.daddr + " shell /data/local/tmp/adblink/busybox find /storage -type d -maxdepth 1";
+        cstring = getadbpath() + " -s " + device.daddr + " shell /data/local/tmp/adblink/busybox find /storage -type d -maxdepth 1";
         QString storageOutput = getadbOutput(cstring);
 
         QStringList storageList = storageOutput.split('\n');
@@ -280,7 +280,7 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
             kbase = n_data_root + "kodi_data/";
             mcpath = kbase + device.xbmcpackage;
 
-            cstring = "null -s " + device.daddr + " shell mkdir -p " + kbase;
+            cstring = getadbpath() + " -s " + device.daddr + " shell mkdir -p " + kbase;
             command = getadbOutput(cstring);
             if (command.contains("No such file or directory")) {
                 QMessageBox::critical(parent, "", "Failed to create kodi_data directory on " + device.daddr);
@@ -325,15 +325,15 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
     cstring = adbPrefix + "shell rm -r " + mcpath;
     runLongProcess(cstring, "preparing target for " + device.daddr);
 
-    cstring = "null -s " + device.daddr + " shell ls " + mcpath;
+    cstring = getadbpath() + " -s " + device.daddr + " shell ls " + mcpath;
     command = getadbOutput(cstring);
 
     if (command.contains("No such file or directory")) {
-        cstring = "null -s " + device.daddr + " shell mkdir -p " + mcpath + "/files/.kodi";
+        cstring = getadbpath() + " -s " + device.daddr + " shell mkdir -p " + mcpath + "/files/.kodi";
         command = getadbOutput(cstring);
         QString errorOutput = command;
 
-        cstring = "null -s " + device.daddr + " shell ls " + mcpath + "/files/.kodi";
+        cstring = getadbpath() + " -s " + device.daddr + " shell ls " + mcpath + "/files/.kodi";
         command = getadbOutput(cstring);
 
         if (command.contains("No such file or directory")) {
@@ -349,11 +349,11 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
     command = runLongProcess(cstring, "restore running for " + device.daddr);
 
     if (command.contains("bytes")) {
-        cstring = "null -s " + device.daddr + " shell rm /sdcard/xbmc_env.properties";
+        cstring = getadbpath() + " -s " + device.daddr + " shell rm /sdcard/xbmc_env.properties";
         getadbOutput(cstring);
 
         if (scoped) {
-            cstring = "null -s " + device.daddr + " shell echo xbmc.data=" + mcpath + "/files > /sdcard/xbmc_env.properties";
+            cstring = getadbpath() + " -s " + device.daddr + " shell echo xbmc.data=" + mcpath + "/files > /sdcard/xbmc_env.properties";
             command = getadbOutput(cstring);
             if (command.contains("No such file or directory") || !command.isEmpty()) {
                 QMessageBox::critical(parent, "", "Failed to create xbmc_env.properties on " + device.daddr);
@@ -361,7 +361,7 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
                 return false;
             }
         } else if (n_data_root != "/sdcard/") {
-            cstring = "null -s " + device.daddr + " shell echo xbmc.data=" + mcpath + "/files > /sdcard/xbmc_env.properties";
+            cstring = getadbpath() + " -s " + device.daddr + " shell echo xbmc.data=" + mcpath + "/files > /sdcard/xbmc_env.properties";
             getadbOutput(cstring);
         }
 
