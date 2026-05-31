@@ -278,6 +278,7 @@ private:
     KodiDownloader *m_kodiDownloader;
     KodiDownloadCoordinator *m_kodiDownloadCoordinator;
     QTimer *m_usbPollTimer;
+    QTimer m_progressTimer;
     QHash<QString, QString> m_usbStatusCache;
     KodiLogManager *m_kodiLogManager;
     KodiSetupManager *m_kodiSetupManager;

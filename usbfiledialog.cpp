@@ -222,7 +222,6 @@ void usbfileDialog::setADB(const QString &adbdata) {
 
     adb21=adbdata;
 
-   // qDebug() << adb21;
 
 }
 
@@ -240,7 +239,6 @@ void usbfileDialog::setkodiPath(const QString &kodipath) {
 
 void usbfileDialog::on_pullButton_clicked()
 {
-       // qDebug() << pulldir_ufd;
 
        if (!QDir(pulldir_ufd).exists()) {
         QMessageBox::critical(this, "", "Pull destination does not exist");
@@ -634,10 +632,6 @@ void usbfileDialog::on_goButton_clicked()
       kpath3 = mcpath+"/addons";
   }
 
-// qDebug() << mcpath;
-// qDebug() << kpath1;
-// qDebug() << kpath2;
-// qDebug() << kpath3;
 
 
 
@@ -962,6 +956,7 @@ QString usbfileDialog::RunLongProcess_ufd(QString cstring)
   // fmactivityIcon(true);
 
 QString command=getadbOutput(cstring);
+operationTimer->stop();
 
 usbprogressBar->setHidden(true);
 usbprogressBar->setValue(0);
@@ -984,7 +979,6 @@ void usbfileDialog::on_usblistWidget2_doubleClicked(const QModelIndex &index)
          previous_directory2=previous_directory2.left(previous_directory2.lastIndexOf("/"));
          previous_directory2=fix_directory(previous_directory2);
          setPath2(previous_directory2);
-         //qDebug() << previous_directory2;
 
          return;
 
@@ -1032,7 +1026,6 @@ void usbfileDialog::on_usblistWidget1_doubleClicked(const QModelIndex &index)
          previous_directory1=previous_directory1.left(previous_directory1.lastIndexOf("/"));
          previous_directory1=fix_directory(previous_directory1);
          setPath1(previous_directory1);
-         //qDebug() << previous_directory2;
 
          return;
 
@@ -1054,8 +1047,6 @@ void usbfileDialog::on_usblistWidget1_doubleClicked(const QModelIndex &index)
 
     QString command=getadbOutput(cstring);
 
-  // qDebug() << cstring;
-  //  qDebug() << command;
 
     if (command.contains("true"))
     {
@@ -1090,7 +1081,6 @@ QString string1=adb21 + adbShell +"/data/local/tmp/adblink/busybox find "+'"'+fd
 QString command=getadbOutput(string1);
 
 
-// qDebug() << command;
 
 if (command.contains("No such file or directory"))
     return false;
@@ -1104,7 +1094,6 @@ else
 void usbfileDialog::setPathCommon(QListWidget *widget, QString &currentDir, QString &previousDir, QString &currentItem, const QString &dir)
 {
     QString currentdir = dir;
-    //qDebug() << "setPathCommon called with:" << currentdir;
 
     currentDir = currentdir;
     previousDir = currentdir.left(currentdir.lastIndexOf("/"));
@@ -1116,7 +1105,6 @@ void usbfileDialog::setPathCommon(QListWidget *widget, QString &currentDir, QStr
     previousDir = fix_directory(previousDir);
 
     widget->setProperty("currentDirectory", currentDir);
-    //qDebug() << widget->objectName() << "currentDirectory set to:" << widget->property("currentDirectory").toString();
 
     currentdir.replace(" ", "\\ ");
     currentdir.replace("'", "\\'");
@@ -1157,7 +1145,6 @@ void usbfileDialog::setPathCommon(QListWidget *widget, QString &currentDir, QStr
             QListWidgetItem *item = new QListWidgetItem(currentItem);
             item->setFlags(item->flags() | Qt::ItemIsDragEnabled | Qt::ItemIsSelectable | Qt::ItemIsEnabled);
             widget->addItem(item);
-            //qDebug() << "Added item to" << widget->objectName() << ":" << currentItem << "flags:" << item->flags()
             //         << "dragEnabled:" << (item->flags() & Qt::ItemIsDragEnabled);
         }
     }
@@ -1166,10 +1153,8 @@ void usbfileDialog::setPathCommon(QListWidget *widget, QString &currentDir, QStr
     newItem->setText("..");
     newItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
     widget->insertItem(0, newItem);
-    //qDebug() << "Added .. item to" << widget->objectName() << ", flags:" << newItem->flags()
     //         << "dragEnabled:" << (newItem->flags() & Qt::ItemIsDragEnabled);
 
-    //qDebug() << widget->objectName() << "item count after setPathCommon:" << widget->count();
 }
 
 void usbfileDialog::setPath1(QString currentdir)
@@ -1558,7 +1543,6 @@ void usbfileDialog::on_copyButton_clicked()
 ////////////////////////////////////////////
   void usbfileDialog::do_xcopy(int /*opcode*/)
   {
-       //qDebug() << "do_xcopy function entered";
 
        QStringList mstringlist;
        QString fileName;
@@ -1571,11 +1555,9 @@ void usbfileDialog::on_copyButton_clicked()
 
        // Get selected items from source widget
        if (hasfocus) {
-         //qDebug() << "Source: usblistWidget2, Target: usblistWidget1";
          if (usblistWidget2->selectedItems().count() >= 1) {
              foreach (QListWidgetItem *item, usblistWidget2->selectedItems()) {
                                  if (item->text() == "..") {
-                  //qDebug() << "Skipping .. item";
                   continue;
                                  }
                                  mstringlist << item->text();
@@ -1583,11 +1565,9 @@ void usbfileDialog::on_copyButton_clicked()
              workingdir = current_directory1; // Target is usblistWidget1
          }
        } else {
-         //qDebug() << "Source: usblistWidget1, Target: usblistWidget2";
          if (usblistWidget1->selectedItems().count() >= 1) {
              foreach (QListWidgetItem *item, usblistWidget1->selectedItems()) {
                                  if (item->text() == "..") {
-                  //qDebug() << "Skipping .. item";
                   continue;
                                  }
                                  mstringlist << item->text();
@@ -1596,12 +1576,8 @@ void usbfileDialog::on_copyButton_clicked()
          }
        }
 
-       //qDebug() << "mstringlist:" << mstringlist;
-       //qDebug() << "usblistWidget1 selected items:" << usblistWidget1->selectedItems().size();
-       //qDebug() << "usblistWidget2 selected items:" << usblistWidget2->selectedItems().size();
 
        if (mstringlist.count() < 1) {
-         //qDebug() << "No valid files selected, exiting do_xcopy";
          return;
        }
 
@@ -1617,7 +1593,6 @@ void usbfileDialog::on_copyButton_clicked()
        msgBox.exec();
 
        if (msgBox.clickedButton() == cancelButton) {
-         //qDebug() << "User cancelled operation";
          return;
        } else if (msgBox.clickedButton() == copyButton) {
          opcode = 0;
@@ -1627,7 +1602,6 @@ void usbfileDialog::on_copyButton_clicked()
          optext = "Move";
        }
 
-       //qDebug() << "Selected operation:" << optext << "opcode:" << opcode;
 
        logfile(optext + " files");
        logfile("----------");
@@ -1635,47 +1609,39 @@ void usbfileDialog::on_copyButton_clicked()
        // Execute adb commands
        for (QStringList::iterator it = mstringlist.begin(); it != mstringlist.end(); ++it) {
          fileName = *it;
-         //qDebug() << "Processing file:" << fileName;
 
          if (opcode == 0)
              cstring = adb21 + adbShell + " cp -R " + quote1 + fileName + quote2 + " " + quote1 + workingdir + quote2;
          else
              cstring = adb21 + adbShell + " mv " + quote1 + fileName + quote2 + " " + quote1 + workingdir + quote2;
 
-         //qDebug() << "adb command:" << cstring;
          logfile(cstring);
 
          command = RunLongProcess_ufd(cstring);
 
          if (!command.isEmpty()) {
-             //qDebug() << "adb result:" << command << "error: " + optext + " failed";
              logfile(command);
              logfile(optext + " failed");
              QMessageBox::critical(this, "", fileName + " " + optext + " failed");
              error = error + 1;
          } else {
-             //qDebug() << "adb result: success";
              logfile(fileName + " " + optext + " succeeded");
          }
        }
 
        if (error > 0) {
-         //qDebug() << optext + " errors occurred";
          QMessageBox::critical(this, "", optext + "(s) failed. See log.");
        }
 
        // Refresh widgets
-       //qDebug() << "Refreshing widgets with current_directory1:" << current_directory1 << "current_directory2:" << current_directory2;
        setPath1(current_directory1);
        setPath2(current_directory2);
 
-       //qDebug() << "do_xcopy completed";
   } // eof
 
   ///////////////////////////////////////////////
   void usbfileDialog::handleFilesDropped(const QStringList &fileNames, const QString &targetDir)
   {
-       //qDebug() << "handleFilesDropped called with fileNames:" << fileNames << "targetDir:" << targetDir;
        bool droppedOnWidget1 = (targetDir == current_directory1);
        hasfocus = droppedOnWidget1;
 
@@ -1685,10 +1651,8 @@ void usbfileDialog::on_copyButton_clicked()
              mstringlist << fileName;
          }
        }
-       //qDebug() << "mstringlist:" << mstringlist;
 
        if (mstringlist.isEmpty()) {
-         //qDebug() << "No valid files to copy/move";
          return;
        }
 
@@ -1705,7 +1669,6 @@ void usbfileDialog::on_copyButton_clicked()
              for (int i = 0; i < usblistWidget2->count(); ++i) {
                                  if (usblistWidget2->item(i)->text() == fileName) {
                   usblistWidget2->item(i)->setSelected(true);
-                  //qDebug() << "Selected item in usblistWidget2:" << fileName;
                   break;
                                  }
              }
@@ -1721,21 +1684,14 @@ void usbfileDialog::on_copyButton_clicked()
              for (int i = 0; i < usblistWidget1->count(); ++i) {
                                  if (usblistWidget1->item(i)->text() == fileName) {
                   usblistWidget1->item(i)->setSelected(true);
-                  //qDebug() << "Selected item in usblistWidget1:" << fileName;
                   break;
                                  }
              }
          }
        }
-       //qDebug() << "Updated directories: current_directory1:" << current_directory1 << "current_directory2:" << current_directory2;
-       //qDebug() << "hasfocus:" << hasfocus;
-       //qDebug() << "usblistWidget1 selected items:" << usblistWidget1->selectedItems().size();
-       //qDebug() << "usblistWidget2 selected items:" << usblistWidget2->selectedItems().size();
 
        // Call do_xcopy
-       //qDebug() << "Calling do_xcopy";
        do_xcopy(0); // Default opcode, overridden by dialog
-       //qDebug() << "do_xcopy completed in handleFilesDropped";
   } // eof
 
 

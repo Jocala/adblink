@@ -255,6 +255,7 @@
         new QShortcut(QKeySequence("Ctrl+X"), this, SLOT(displayOff()));
         new QShortcut(QKeySequence("Ctrl++"), this, SLOT(switchSize()));
         connect(qApp, &QCoreApplication::aboutToQuit, this, &MainWindow::onApplicationQuit);
+        connect(&m_progressTimer, &QTimer::timeout, this, &MainWindow::TimerEvent);
 
 
         setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
@@ -436,7 +437,7 @@
       donateButton->setVisible(active);
       donateButton->setEnabled(active);
          } else {
-      // qDebug() << "Error: donateButton is not initialized";
+
          }
     }
 
@@ -1015,13 +1016,10 @@
         else
            server_running->setText(s);
 
-        int tsvalue = 4000;
-
-        QTimer *timer = new QTimer(this);
-        connect(timer, SIGNAL(timeout()), this, SLOT(TimerEvent()));
-        timer->start(tsvalue);
+        m_progressTimer.start(4000);
 
         command = getadbOutput(cstring);
+        m_progressTimer.stop();
 
         RunProcessList.removeAll(s);
 
@@ -2061,7 +2059,7 @@ void MainWindow::on_actionSwitch_View_triggered()
         jsonFile.close();
    } else {
         logfile("Failed to write to adblink.json");
-        // qDebug() << "Failed to write to adblink.json";
+
    }
 }
 
@@ -2073,7 +2071,6 @@ QPushButton* MainWindow::setupDonateButton(QWidget* parent) {
    donateButton = new QPushButton(parent); // Assign to member variable
    QPixmap pix(":/assets/donatel.png");
    if (pix.isNull()) {
-        // qDebug() << "Error: Failed to load :/assets/donatel.png";
         donateButton->setText("Donate");
    } else {
         QIcon icon(pix);
@@ -2094,9 +2091,8 @@ QPushButton* MainWindow::setupDonateButton(QWidget* parent) {
        );
    if (QMetaObject::checkConnectArgs(SIGNAL(clicked()), SLOT(on_donate_clicked()))) {
         connect(donateButton, &QPushButton::clicked, this, &MainWindow::on_donate_clicked);
-   } else {
-        // qDebug() << "Warning: on_donate_clicked slot not found";
-   }
+    }
+
 
    QString donation = readDonationValue();
    setDonateButtonActive(donation != "jocala.com");
@@ -2556,9 +2552,8 @@ void MainWindow::switchSize()
    jsonFile.write(doc.toJson());
    jsonFile.close();
  } else {
-   logfile("Failed to write to adblink.json");
-   // qDebug() << "Failed to write to adblink.json";
- }
+    logfile("Failed to write to adblink.json");
+  }
 
  setupUI();
 }

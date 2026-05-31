@@ -14,7 +14,6 @@ CustomListWidget::CustomListWidget(QWidget *parent) : QListWidget(parent)
     setAcceptDrops(true);
     setDragDropMode(QAbstractItemView::DragDrop);
     setSelectionMode(QAbstractItemView::MultiSelection);
-    //qDebug() << "CustomListWidget instantiated for" << this << "dragEnabled:" << dragEnabled()
     //         << "acceptDrops:" << acceptDrops() << "dragDropMode:" << dragDropMode()
     //         << "selectionMode:" << selectionMode();
 
@@ -65,9 +64,7 @@ void CustomListWidget::createContextMenu()
         connect(homeAction, &QAction::triggered, parentDialog, &usbfileDialog::on_resetButton_clicked);
         connect(exitAction, &QAction::triggered, parentDialog, &QDialog::close);
 
-        //qDebug() << "Context menu actions connected to usbfileDialog slots, including mkdir, pull, and home";
     } else {
-        //qDebug() << "Warning: Parent is not a usbfileDialog, context menu actions not connected";
     }
 }
 
@@ -85,20 +82,16 @@ void CustomListWidget::contextMenuEvent(QContextMenuEvent *event)
     pullAction->setEnabled(!selectedItems().isEmpty()); // Enabled only with selection
     homeAction->setEnabled(true); // Always enabled
 
-    //qDebug() << "Showing context menu at position:" << event->globalPos();
     contextMenu->exec(event->globalPos());
 }
 
 void CustomListWidget::mousePressEvent(QMouseEvent *event)
 {
     emit focusRequested();
-    //qDebug() << "mousePressEvent called, pos:" << event->pos();
     QListWidgetItem *item = itemAt(event->pos());
     if (item) {
-        //qDebug() << "Clicked item:" << item->text() << "flags:" << item->flags()
         //         << "dragEnabled:" << (item->flags() & Qt::ItemIsDragEnabled);
     } else {
-        //qDebug() << "No item at position";
     }
     QListWidget::mousePressEvent(event);
 }
@@ -107,19 +100,16 @@ void CustomListWidget::mousePressEvent(QMouseEvent *event)
 
 void CustomListWidget::dragEnterEvent(QDragEnterEvent *event)
 {
-    //qDebug() << "dragEnterEvent called, mimeData formats:" << event->mimeData()->formats();
     if (event->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist") ||
         event->mimeData()->hasFormat("text/uri-list")) {
         event->acceptProposedAction();
     } else {
-        //qDebug() << "dragEnterEvent ignored: no supported mime data";
         event->ignore();
     }
 }
 
 void CustomListWidget::dragMoveEvent(QDragMoveEvent *event)
 {
-    //qDebug() << "dragMoveEvent called";
     if (event->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist") ||
         event->mimeData()->hasFormat("text/uri-list")) {
         event->acceptProposedAction();
@@ -130,11 +120,9 @@ void CustomListWidget::dragMoveEvent(QDragMoveEvent *event)
 
 void CustomListWidget::dropEvent(QDropEvent *event)
 {
-    //qDebug() << "dropEvent called, mimeData formats:" << event->mimeData()->formats();
     QStringList fileNames;
     QStringList filePaths; // For external files
     QString targetDir = property("currentDirectory").toString();
-    //qDebug() << "dropEvent: targetDir from currentDirectory:" << targetDir;
 
     // Handle internal drag-and-drop (existing logic)
     if (event->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist")) {
@@ -153,7 +141,6 @@ void CustomListWidget::dropEvent(QDropEvent *event)
                 }
             }
         }
-        //qDebug() << "Model mime data: fileNames:" << fileNames;
     }
     // Handle external file drops (e.g., from desktop)
     else if (event->mimeData()->hasFormat("text/uri-list")) {
@@ -163,22 +150,18 @@ void CustomListWidget::dropEvent(QDropEvent *event)
                 filePaths << url.toLocalFile();
             }
         }
-        //qDebug() << "External file paths dropped:" << filePaths;
     }
 
     // Process internal drag-and-drop
     if (!fileNames.isEmpty() && !targetDir.isEmpty()) {
-        //qDebug() << "Drop event (internal): fileNames:" << fileNames << "targetDir:" << targetDir;
         emit filesDropped(fileNames, targetDir);
         event->acceptProposedAction();
     }
     // Process external file drops
     else if (!filePaths.isEmpty() && !targetDir.isEmpty()) {
-        //qDebug() << "Drop event (external): filePaths:" << filePaths << "targetDir:" << targetDir;
         emit externalFilesDropped(filePaths, targetDir); // New signal for external files
         event->acceptProposedAction();
     } else {
-        //qDebug() << "Drop ignored: fileNames:" << fileNames << "filePaths:" << filePaths << "targetDir:" << targetDir;
         event->ignore();
     }
 }
