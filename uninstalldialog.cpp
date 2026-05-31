@@ -80,6 +80,7 @@ uninstallDialog::uninstallDialog(const QString &daddr, const QString &port, QWid
    connect(m_clearButton, &QPushButton::clicked, this, &uninstallDialog::on_apkclearButton_clicked);
    connect(m_cancelButton, &QPushButton::clicked, this, &QDialog::reject);
    connect(m_okButton, &QPushButton::clicked, this, &QDialog::accept);
+   connect(m_unlistWidget, &QListWidget::itemDoubleClicked, this, &QDialog::accept);
 
    loadList();
    loadBox();
