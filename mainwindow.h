@@ -240,6 +240,7 @@ private:
     void setupMenuConnections();
 
     AdbConnection *m_adbConnection;
+    int m_os;
     AboutManager *m_aboutManager;
     AdhocManager *m_adhocManager;
     AppManager *m_appManager;

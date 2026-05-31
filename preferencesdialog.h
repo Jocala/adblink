@@ -59,8 +59,6 @@ public:
     bool wsa();
     bool disableroot();
 
-    int returnval1();
-
 private slots:
     void on_pfolderButton_clicked();
     void on_kodiButton_clicked();

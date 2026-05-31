@@ -26,18 +26,14 @@ private slots:
     void on_okButton_clicked();
 
 private:
+    QString m_tmpdir_backup;
+    QString m_thumbnail_backup_dir;
+    QString m_data_root_backup;
     QListWidget *m_listDirectories_backup;
     QListWidget *m_listDirectories_backup2;
     QPushButton *m_okButton;
     QPushButton *m_cancelButton;
     QLabel *m_backup_label2;
 };
-
-extern int os_backup;
-extern QString adb_backup;
-extern QString adbdir_backup;
-extern QString tmpdir_backup;
-extern QString thumbnail_backup_dir;
-extern QString data_root_backup;
 
 #endif // BACKUPDIALOG_H

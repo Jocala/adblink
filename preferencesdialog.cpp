@@ -7,30 +7,6 @@
 #include <QDir>
 #include "getadbdata.h"
 
-#ifdef Q_OS_LINUX
-int os_pref = 0;
-#elif defined(Q_OS_WIN)
-int os_pref = 1;
-#elif defined(Q_OS_MAC)
-int os_pref = 2;
-#endif
-
-QString pdir = "";
-QString version2;
-int rval1 = 0;
-
-QString packagepreset1 = "org.xbmc.kodi";
-QString packagepreset2 = "org.xbmc.xbmc";
-QString packagepreset3 = "com.semperpax.spmc16";
-QString homedir;
-QString tmpdir1;
-QString ostype1;
-
-QString xpackage;
-QString adbdir_pref;
-QString adb_pref;
-bool su_pref;
-
 preferencesDialog::preferencesDialog(QWidget *parent, bool showkodi) :
     QDialog(parent)
 {
@@ -288,7 +264,6 @@ preferencesDialog::preferencesDialog(QWidget *parent, bool showkodi) :
     m_packagename->setVisible(showkodi);
     m_data_root->setVisible(showkodi);
 
-    adbdir_pref = QCoreApplication::applicationDirPath() + "/adbfiles/";
     on_isusb_clicked(m_isusb->isChecked());
 }
 
@@ -350,6 +325,9 @@ void preferencesDialog::setPackagename(const QString &packagename)
     bool isset = false;
     m_packagename->setText(packagename);
 
+    static const QString packagepreset1 = QStringLiteral("org.xbmc.kodi");
+    static const QString packagepreset3 = QStringLiteral("com.semperpax.spmc16");
+
     if (packagename == packagepreset1) {
         m_kodiButton->setChecked(true);
         isset = true;
@@ -392,7 +370,6 @@ void preferencesDialog::setwsa(const bool &wsa)
 void preferencesDialog::setversionLabel(const QString &versiontext)
 {
     m_versionLabel->setText("adblink version: " + versiontext);
-    version2 = versiontext;
 }
 
 void preferencesDialog::setostype(const QString &ostype)
@@ -437,10 +414,6 @@ void preferencesDialog::setdataroot(const QString &data_root)
 void preferencesDialog::setport(const QString &port)
 {
     m_port->setText(port);
-}
-
-int preferencesDialog::returnval1() {
-    return rval1;
 }
 
 void preferencesDialog::on_pfolderButton_clicked()
@@ -520,11 +493,6 @@ void preferencesDialog::setadb_pref(const QString &adb_pref)
 
     cstring = adb_pref + " shell /data/local/tmp/adblink/busybox which su";
     command = getadbOutput(cstring);
-
-    if (command.contains("su"))
-        su_pref = true;
-    else
-        su_pref = false;
 }
 
 void preferencesDialog::on_listkodirootBox_clicked()
@@ -589,29 +557,29 @@ void preferencesDialog::on_ostypeBox_currentIndexChanged(int index)
         m_daddr->setText("");
         m_packagename->setText("");
         m_data_root->setText("");
-        homedir = QDir::homePath();
-        tmpdir1 = homedir + "/AppData/Roaming/Kodi";
-        m_filepath->setText(tmpdir1);
+        { QString homedir = QDir::homePath();
+        QString tmpdir1 = homedir + "/AppData/Roaming/Kodi";
+        m_filepath->setText(tmpdir1); }
         disable_ui();
         break;
 
     case 2:
-        homedir = QDir::homePath();
-        tmpdir1 = homedir + "/Library/Application Support/Kodi";
+        { QString homedir = QDir::homePath();
+        QString tmpdir1 = homedir + "/Library/Application Support/Kodi";
         m_daddr->setText("");
         m_packagename->setText("");
         m_data_root->setText("");
-        m_filepath->setText(tmpdir1);
+        m_filepath->setText(tmpdir1); }
         disable_ui();
         break;
 
     case 3:
-        homedir = QDir::homePath();
-        tmpdir1 = homedir + "/.kodi";
+        { QString homedir = QDir::homePath();
+        QString tmpdir1 = homedir + "/.kodi";
         m_daddr->setText("");
         m_packagename->setText("");
         m_data_root->setText("");
-        m_filepath->setText(tmpdir1);
+        m_filepath->setText(tmpdir1); }
         disable_ui();
         break;
 

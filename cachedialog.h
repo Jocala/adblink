@@ -40,6 +40,8 @@ private slots:
     void on_copyxml_clicked();
 
 private:
+    int m_cval1;
+    QClipboard *m_cacheclipboard;
     QLabel *titleLabel;
     QComboBox *buffermode;
     QLineEdit *buffersize;
@@ -53,9 +55,5 @@ private:
     QPushButton *resetcxml;
     QPushButton *cancelButton;
 };
-
-extern QClipboard *cacheclipboard;
-extern int cval1;
-extern QString cachecontent;
 
 #endif // CACHEDIALOG_H

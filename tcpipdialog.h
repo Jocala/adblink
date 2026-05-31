@@ -21,11 +21,10 @@ private slots:
     void on_tcpipOn_clicked();
 
 private:
+    int m_tcpon;
     QLabel *m_tcplabel;
     QPushButton *m_tcpipCancel;
     QPushButton *m_tcpipOn;
 };
-
-extern int tcpon;
 
 #endif // TCPIPDIALOG_H

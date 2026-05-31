@@ -12,20 +12,6 @@
 #include <QStringList>
 #include <QTextStream>
 
-#ifdef Q_OS_LINUX
- int os_backup=0;
-#elif defined(Q_OS_WIN)
-  int os_backup=1;
-#elif defined(Q_OS_MAC)
-int os_backup=2;
-#endif
-
-QString adb_backup;
-QString adbdir_backup;
-QString tmpdir_backup;
-QString thumbnail_backup_dir;
-QString data_root_backup;
-
 backupDialog::backupDialog(QWidget *parent) :
     QDialog(parent)
 {
@@ -89,25 +75,17 @@ backupDialog::backupDialog(QWidget *parent) :
     QString commstr;
     QString cstr;
     QString argument;
-    QString adb_backup;
     QString fline;
 
-    if (os_backup == 1)
-    {
-        tmpdir_backup = QStringLiteral("./");
-    }
-
-    if (os_backup == 2)
-    {
-        tmpdir_backup = QCoreApplication::applicationDirPath();
-        tmpdir_backup = tmpdir_backup + QStringLiteral("/adbfiles/");
-    }
-
-    if (os_backup == 0)
-    {
-        tmpdir_backup = QCoreApplication::applicationDirPath();
-        tmpdir_backup = tmpdir_backup + QStringLiteral("/adbfiles/");
-    }
+#if defined(Q_OS_WIN)
+    m_tmpdir_backup = QStringLiteral("./");
+#elif defined(Q_OS_MAC)
+    m_tmpdir_backup = QCoreApplication::applicationDirPath();
+    m_tmpdir_backup = m_tmpdir_backup + QStringLiteral("/adbfiles/");
+#else
+    m_tmpdir_backup = QCoreApplication::applicationDirPath();
+    m_tmpdir_backup = m_tmpdir_backup + QStringLiteral("/adbfiles/");
+#endif
 }
 
 backupDialog::~backupDialog()
@@ -115,23 +93,23 @@ backupDialog::~backupDialog()
 }
 
 QString backupDialog::return_data_root() {
-   return data_root_backup;
+   return m_data_root_backup;
 }
 
 QString backupDialog::returnthumb() {
-    return data_root_backup;
+    return m_data_root_backup;
 }
 
-void backupDialog::setadb_backup(const QString &adb_backup, const QString &data_root_backup)
+void backupDialog::setadb_backup(const QString &adbPrefix, const QString &dataRoot)
 {
     QString command;
     QString cstring;
     QString mounted;
 
-    cstring = adb_backup + QStringLiteral(" shell /data/local/tmp/adblink/busybox find /storage/ -type d -maxdepth 2 -perm 0771");
+    cstring = adbPrefix + QStringLiteral(" shell /data/local/tmp/adblink/busybox find /storage/ -type d -maxdepth 2 -perm 0771");
     command = getadbOutput(cstring);
 
-    QFile file21(tmpdir_backup + QStringLiteral("temp.txt"));
+    QFile file21(m_tmpdir_backup + QStringLiteral("temp.txt"));
 
     if(!file21.open(QFile::WriteOnly))
     {
@@ -145,7 +123,7 @@ void backupDialog::setadb_backup(const QString &adb_backup, const QString &data_
     file21.flush();
     file21.close();
 
-    QString tmpstr2 = tmpdir_backup + QStringLiteral("temp.txt");
+    QString tmpstr2 = m_tmpdir_backup + QStringLiteral("temp.txt");
     QString fline2;
     QFile file32(tmpstr2);
 
@@ -180,7 +158,7 @@ void backupDialog::setadb_backup(const QString &adb_backup, const QString &data_
 
     for (int i = 0; i < m_listDirectories_backup->count(); i++)
     {
-        if(m_listDirectories_backup->item(i)->text() == data_root_backup)
+        if(m_listDirectories_backup->item(i)->text() == m_data_root_backup)
         {
             m_listDirectories_backup->setCurrentRow(i);
         }
@@ -189,30 +167,30 @@ void backupDialog::setadb_backup(const QString &adb_backup, const QString &data_
 
 void backupDialog::on_listDirectories_backup_clicked()
 {
-    data_root_backup = m_listDirectories_backup->currentItem()->text();
+    m_data_root_backup = m_listDirectories_backup->currentItem()->text();
 
-    if(data_root_backup != QStringLiteral("/sdcard/"))
+    if(m_data_root_backup != QStringLiteral("/sdcard/"))
     {
         m_listDirectories_backup2->clearSelection();
-        thumbnail_backup_dir = data_root_backup;
-        m_backup_label2->setText(QStringLiteral("Thumbnails: ") + thumbnail_backup_dir);
+        m_thumbnail_backup_dir = m_data_root_backup;
+        m_backup_label2->setText(QStringLiteral("Thumbnails: ") + m_thumbnail_backup_dir);
     }
 }
 
 void backupDialog::on_listDirectories_backup2_clicked()
 {
-   thumbnail_backup_dir = m_listDirectories_backup2->currentItem()->text();
-   m_backup_label2->setText(QStringLiteral("Thumbnails: ") + thumbnail_backup_dir);
+   m_thumbnail_backup_dir = m_listDirectories_backup2->currentItem()->text();
+   m_backup_label2->setText(QStringLiteral("Thumbnails: ") + m_thumbnail_backup_dir);
 
-    if(data_root_backup != QStringLiteral("/sdcard/"))
+    if(m_data_root_backup != QStringLiteral("/sdcard/"))
     {
         m_listDirectories_backup2->clearSelection();
-        thumbnail_backup_dir = data_root_backup;
-        m_backup_label2->setText(QStringLiteral("Thumbnails: ") + thumbnail_backup_dir);
+        m_thumbnail_backup_dir = m_data_root_backup;
+        m_backup_label2->setText(QStringLiteral("Thumbnails: ") + m_thumbnail_backup_dir);
     }
 }
 
 void backupDialog::on_okButton_clicked()
 {
-    data_root_backup = m_listDirectories_backup->currentItem()->text();
+    m_data_root_backup = m_listDirectories_backup->currentItem()->text();
 }

@@ -4,11 +4,6 @@
 #include <QGridLayout>
 #include <QGroupBox>
 
-int xandos;
-bool guardian;
-bool proximity;
-bool screentimer;
-
 oculusDialog::oculusDialog(QWidget *parent) :
     QDialog(parent)
 {

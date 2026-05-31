@@ -5,10 +5,8 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
-int tcpon = 0;
-
 tcpipDialog::tcpipDialog(QWidget *parent) :
-    QDialog(parent)
+    QDialog(parent), m_tcpon(0)
 {
     resize(417, 318);
     setWindowTitle(QStringLiteral("ADB/TCPIP"));
@@ -57,9 +55,9 @@ void tcpipDialog::settcplabel(const QString &labeltext)
 
 void tcpipDialog::on_tcpipOn_clicked()
 {
-    tcpon = 1;
+    m_tcpon = 1;
 }
 
 int tcpipDialog::returntcp() {
-   return tcpon;
+   return m_tcpon;
 }

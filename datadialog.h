@@ -42,10 +42,4 @@ private:
     QPushButton *m_okButton;
 };
 
-extern int os_data;
-extern QString adbloc;
-extern QString adb_data;
-extern QString adbdir_data_data;
-extern QString tmpdir_data;
-
 #endif // DATADIALOG_H

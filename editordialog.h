@@ -25,6 +25,7 @@ private slots:
     void on_searchButton_clicked();
 
 private:
+    QClipboard *m_edclipboard;
     QLabel *m_editorfilename;
     QTextBrowser *m_editorBrowser;
     QPushButton *m_editquitButton;
@@ -32,8 +33,5 @@ private:
     QPushButton *m_searchButton;
     QPushButton *m_saveButton;
 };
-
-extern int edos;
-extern QClipboard *edclipboard;
 
 #endif // EDITORDIALOG_H

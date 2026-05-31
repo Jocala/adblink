@@ -31,6 +31,7 @@ private slots:
     void on_powerButton_clicked();
 
 private:
+    QString m_cstring;
     QLabel *m_daddressLabel;
     QPushButton *m_closeButton;
 };

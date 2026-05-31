@@ -8,9 +8,6 @@
 #include <QProcess>
 #include <QPushButton>
 
-QString cstring;
-QStringList args;
-
 keyboardDialog::keyboardDialog(QWidget *parent) :
     QDialog(parent)
 {
@@ -154,65 +151,65 @@ keyboardDialog::~keyboardDialog()
 
 void keyboardDialog::setdaddr(const QString &daddress)
 {
-    cstring = getadbpath() + " -s " + daddress + " shell input keyevent ";
+    m_cstring = getadbpath() + " -s " + daddress + " shell input keyevent ";
 }
 
 void keyboardDialog::on_upButton_clicked()
 {
-    getadbOutput(cstring + QStringLiteral("19"));
+    getadbOutput(m_cstring + QStringLiteral("19"));
 }
 
 void keyboardDialog::on_downButton_clicked()
 {
-    getadbOutput(cstring + QStringLiteral("20"));
+    getadbOutput(m_cstring + QStringLiteral("20"));
 }
 
 void keyboardDialog::on_leftButton_clicked()
 {
-    getadbOutput(cstring + QStringLiteral("21"));
+    getadbOutput(m_cstring + QStringLiteral("21"));
 }
 
 void keyboardDialog::on_rightButton_clicked()
 {
-    getadbOutput(cstring + QStringLiteral("22"));
+    getadbOutput(m_cstring + QStringLiteral("22"));
 }
 
 void keyboardDialog::on_homeButton_clicked()
 {
-    getadbOutput(cstring + QStringLiteral("3"));
+    getadbOutput(m_cstring + QStringLiteral("3"));
 }
 
 void keyboardDialog::on_selectButton_clicked()
 {
-    getadbOutput(cstring + QStringLiteral("23"));
+    getadbOutput(m_cstring + QStringLiteral("23"));
 }
 
 void keyboardDialog::on_menuButton_clicked()
 {
-    getadbOutput(cstring + QStringLiteral("82"));
+    getadbOutput(m_cstring + QStringLiteral("82"));
 }
 
 void keyboardDialog::on_backButton_clicked()
 {
-    getadbOutput(cstring + QStringLiteral("4"));
+    getadbOutput(m_cstring + QStringLiteral("4"));
 }
 
 void keyboardDialog::on_fastforwardButton_clicked()
 {
-    getadbOutput(cstring + QStringLiteral("90"));
+    getadbOutput(m_cstring + QStringLiteral("90"));
 }
 
 void keyboardDialog::on_rewindButton_clicked()
 {
-    getadbOutput(cstring + QStringLiteral("89"));
+    getadbOutput(m_cstring + QStringLiteral("89"));
 }
 
 void keyboardDialog::on_playpauseButton_clicked()
 {
-    getadbOutput(cstring + QStringLiteral("85"));
+    getadbOutput(m_cstring + QStringLiteral("85"));
 }
 
 void keyboardDialog::on_powerButton_clicked()
 {
-    getadbOutput(cstring + QStringLiteral("26"));
+    getadbOutput(m_cstring + QStringLiteral("26"));
 }

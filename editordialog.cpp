@@ -9,16 +9,6 @@
 #include <QTextBrowser>
 #include <QVBoxLayout>
 
-#ifdef Q_OS_LINUX
- int edos=0;
-#elif defined(Q_OS_WIN)
-  int edos=1;
-#elif defined(Q_OS_MAC)
-int edos=2;
-#endif
-
-QClipboard *edclipboard = nullptr;
-
 editorDialog::editorDialog(QWidget *parent) :
     QDialog(parent)
 {
@@ -74,7 +64,7 @@ void editorDialog::seteditor(const QString &xmlfile)
 
 void editorDialog::on_copyButton_clicked()
 {
-    edclipboard->setText(m_editorBrowser->toPlainText());
+    m_edclipboard->setText(m_editorBrowser->toPlainText());
 }
 
 QString editorDialog::xmlfile() {

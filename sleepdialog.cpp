@@ -8,8 +8,6 @@
 #include <QRadioButton>
 #include <QVBoxLayout>
 
-int andos;
-
 sleepDialog::sleepDialog(QWidget *parent) :
     QDialog(parent)
 {
@@ -139,9 +137,9 @@ void sleepDialog::setdevicelabel(const QString &description)
 void sleepDialog::setandroidlabel(const QString &android)
 {
     m_androidLabel->setText(android);
-    andos = m_androidLabel->text().toInt();
+    m_andos = m_androidLabel->text().toInt();
 
-    if (andos >= 11)
+    if (m_andos >= 11)
     {
         if (m_sleepEdit->text() == "1")
         {

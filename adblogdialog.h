@@ -21,20 +21,20 @@ private slots:
     void on_swapButton_clicked();
 
 private:
+    void getlog();
+
+    QString m_logdir;
+    QString m_logfile1;
+    QString m_logfile2;
+    QString m_content;
+    bool m_getfile;
+    QClipboard *m_clipboard;
+
     QLabel *logfileName;
     QTextBrowser *logBrowser;
     QPushButton *copyButton;
     QPushButton *swapButton;
     QPushButton *quitButton;
 };
-
-extern int os1;
-extern QString logdir;
-extern QString logfile1;
-extern QString logfile2;
-extern QString content;
-extern bool getfile;
-
-extern QClipboard *clipboard;
 
 #endif // ADBLOGDIALOG_H

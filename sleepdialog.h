@@ -31,6 +31,7 @@ private slots:
     void on_screenOn_clicked();
 
 private:
+    int m_andos;
     QLabel *m_title;
     QLabel *m_deviceLabel;
     QLabel *m_androidLabel;

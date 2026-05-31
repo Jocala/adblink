@@ -12,39 +12,35 @@
 #include <QPushButton>
 #include <QApplication>
 
-#ifdef Q_OS_WIN
-QString logdir = QDir::homePath() + "/AppData/Roaming/.jocala/";
-#elif defined(Q_OS_UNIX)
-QString logdir = QDir::homePath() + "/.jocala/";
-#endif
-
-QString logfile1 = "adblink.log";
-QString logfile2 = "adblink.old.log";
-QString content;
-bool getfile=true;
-
-QClipboard *clipboard = nullptr;
-
-void getlog()
+void adblogDialog::getlog()
 {
-    QString fn = getfile ? logfile1 : logfile2;
-    QFile file(logdir + fn);
+    QString fn = m_getfile ? m_logfile1 : m_logfile2;
+    QFile file(m_logdir + fn);
 
     if (!file.exists()) {
         QMessageBox::critical(0, "", "Can't find " + fn + "\n", QMessageBox::Cancel);
-        getfile = true;
+        m_getfile = true;
         return;
     }
 
     (void)file.open(QIODevice::ReadOnly);
     QTextStream stream(&file);
-    content = stream.readAll();
+    m_content = stream.readAll();
     file.close();
 }
 
 adblogDialog::adblogDialog(QWidget *parent) :
-    QDialog(parent)
+    QDialog(parent),
+    m_logdir(QDir::homePath() + "/.jocala/"),
+    m_logfile1("adblink.log"),
+    m_logfile2("adblink.old.log"),
+    m_getfile(true),
+    m_clipboard(nullptr)
 {
+#ifdef Q_OS_WIN
+    m_logdir = QDir::homePath() + "/AppData/Roaming/.jocala/";
+#endif
+
     setWindowTitle("Logfile Viewer");
     resize(598, 602);
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
@@ -77,7 +73,7 @@ adblogDialog::adblogDialog(QWidget *parent) :
 
     getlog();
     logfileName->setText("adblink.log");
-    logBrowser->setPlainText(content);
+    logBrowser->setPlainText(m_content);
 }
 
 adblogDialog::~adblogDialog()
@@ -86,15 +82,15 @@ adblogDialog::~adblogDialog()
 
 void adblogDialog::on_copyButton_clicked()
 {
-    clipboard->setText(content);
+    m_clipboard->setText(m_content);
 }
 
 void adblogDialog::on_swapButton_clicked()
 {
-    getfile = !getfile;
+    m_getfile = !m_getfile;
 
-    logfileName->setText(getfile ? "adblink.log" : "adblink.old.log");
+    logfileName->setText(m_getfile ? "adblink.log" : "adblink.old.log");
 
     getlog();
-    logBrowser->setPlainText(content);
+    logBrowser->setPlainText(m_content);
 }

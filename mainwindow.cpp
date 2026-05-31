@@ -130,17 +130,7 @@
     #include <QCoreApplication>
     #include <QButtonGroup>
     #include <QRadioButton>
-     #include <QDialogButtonBox>
-
-    #ifdef Q_OS_LINUX
-     int os=0;
-    #elif defined(Q_OS_WIN)
-      int os=1;
-    #elif defined(Q_OS_MAC)
-    int os=2;
-    #endif
-
-
+#include <QDialogButtonBox>
 
      MainWindow::MainWindow(QWidget *parent)
          : QMainWindow(parent)
@@ -182,8 +172,15 @@
            , m_killServerManager(new KillServerManager(this))
            , m_keypadManager(new KeypadManager(this))
            , m_remotePushManager(new RemotePushManager(this))
-     {
+      {
 
+#if defined(Q_OS_LINUX)
+        m_os = 0;
+#elif defined(Q_OS_WIN)
+        m_os = 1;
+#elif defined(Q_OS_MAC)
+        m_os = 2;
+#endif
 
 
         adbfiles=QCoreApplication::applicationDirPath()+"/adbfiles/";
@@ -194,7 +191,7 @@
         xmldir = adbfiles+"remotes/";
         splashdir = adbfiles+"splash/";
 
-        m_dataManager->os = os;
+        m_dataManager->os = m_os;
         m_dataManager->logFileDir = logfiledir;
         m_backupManager->setDataManager(m_dataManager);
 
@@ -210,7 +207,7 @@
 
 
 
-        if (os == 1) {
+        if (m_os == 1) {
             databasedir = QDir::homePath() + "/AppData/Roaming/.jocala/";
         } else  {
             databasedir = QDir::homePath() + "/.jocala/";
@@ -310,11 +307,11 @@
 
       logfile(program+" "+version+point);
 
-      if (os == 1) {
+      if (m_os == 1) {
             logfile("Windows");
-      } else if (os == 2) {
+      } else if (m_os == 2) {
             logfile("macOS");
-      } else if (os == 0) {
+      } else if (m_os == 0) {
             logfile("Linux");
       } else {
             logfile("Unknown OS");
@@ -826,7 +823,7 @@
     {
 
 
-       QString link = "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=GKZMW456H6E5W";
+       QString link = "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hm_osted_button_id=GKZMW456H6E5W";
        QDesktopServices::openUrl(QUrl(link));
 
     }
@@ -1141,7 +1138,7 @@
 
     void MainWindow::on_actionPreferences_triggered()
     {
-         PreferencesManager mgr(databasedir + "adblink.json", os);
+         PreferencesManager mgr(databasedir + "adblink.json", m_os);
          if (!mgr.exec(this))
              return;
 

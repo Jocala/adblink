@@ -9,18 +9,12 @@
 #include <QHBoxLayout>
 #include <QGridLayout>
 
-QClipboard *cacheclipboard = nullptr;
-
-int cval1;
-
-QString cachecontent;
-
 bool cacheDialog::xmlcheck() {
    return xmlcheckBox->isChecked();
 }
 
 bool cacheDialog::cacheclip() {
-   return cacheclipboard;
+   return m_cacheclipboard;
 }
 
 int cacheDialog::cbuffermode() {
@@ -56,11 +50,11 @@ void cacheDialog::setxmlcheck(const bool &xmlcheck)
 }
 
 int cacheDialog::returncval1() {
-   return cval1;
+   return m_cval1;
 }
 
 cacheDialog::cacheDialog(QWidget *parent) :
-    QDialog(parent)
+    QDialog(parent), m_cval1(0), m_cacheclipboard(nullptr)
 {
     setFixedSize(466, 240);
     setWindowTitle("Cache settings");
@@ -176,7 +170,7 @@ void cacheDialog::on_cpreset3_clicked()
 
 void cacheDialog::on_writecxml_clicked()
 {
-   cval1 = 2;
+   m_cval1 = 2;
    QDialog::accept();
 }
 
@@ -256,6 +250,6 @@ void cacheDialog::on_copyxml_clicked()
     cacheFile.flush();
     out1.seek(0);
     QString temp = out1.readAll();
-    cacheclipboard->setText(temp);
+    m_cacheclipboard->setText(temp);
     cacheFile.close();
 }

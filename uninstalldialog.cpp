@@ -9,14 +9,6 @@
 #include "adbutils.h"
 #include "getadbdata.h"
 
-#ifdef Q_OS_LINUX
- int ost=0;
-#elif defined(Q_OS_WIN)
-  int ost=1;
-#elif defined(Q_OS_MAC)
-int ost=2;
-#endif
-
 QString uninstallDialog::packageName() {
    if (m_unlistWidget->selectedItems().count() == 1 )
         return m_unlistWidget->currentItem()->text();
