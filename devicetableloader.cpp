@@ -18,17 +18,20 @@ DeviceTableLoader::DeviceTableLoader(QObject *parent)
 }
 
 void DeviceTableLoader::loadTable(QTableWidget *table, int windowSizeSelector,
-                                   int sfont, int mfont, int lfont,
-                                   QSize sMain, QSize mMain, QSize lMain,
-                                   UsbConnectedCallback usbConnected)
+                                    int sfont, int mfont, int lfont,
+                                    QSize sMain, QSize mMain, QSize lMain,
+                                    UsbStatusCallback usbStatus)
 {
     QSet<QString> connectedDeviceIds;
+    QSet<QString> selectedDescriptions;
     for (int row = 0; row < table->rowCount(); ++row) {
         if (table->item(row, 2) &&
             table->item(row, 2)->text() == "Connected" &&
             table->item(row, 0)) {
             connectedDeviceIds.insert(table->item(row, 0)->data(Qt::UserRole).toString());
         }
+        if (table->item(row, 0) && table->item(row, 0)->isSelected())
+            selectedDescriptions.insert(table->item(row, 0)->text());
     }
 
     table->clearContents();
@@ -76,7 +79,7 @@ void DeviceTableLoader::loadTable(QTableWidget *table, int windowSizeSelector,
 
         QString status;
         if (isUsb)
-            status = usbConnected(query.value(2).toString()) ? "Connected" : "Disconnected";
+            status = usbStatus(query.value(2).toString());
         else
             status = connectedDeviceIds.contains(deviceId) ? "Connected" : "Disconnected";
 
@@ -107,6 +110,11 @@ void DeviceTableLoader::loadTable(QTableWidget *table, int windowSizeSelector,
     table->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     table->setSortingEnabled(true);
     table->sortItems(sortColumn, sortOrder);
+
+    for (int r = 0; r < table->rowCount(); ++r) {
+        if (table->item(r, 0) && selectedDescriptions.contains(table->item(r, 0)->text()))
+            table->selectRow(r);
+    }
 
     table->updateGeometry();
     table->viewport()->update();

@@ -28,6 +28,12 @@ void DeleteRecordManager::deleteSelectedDevice(QWidget *parentWidget,
     }
 
     if (!descrip.isEmpty()) {
+        if (deviceTable->item(selectedRow, 2) &&
+            deviceTable->item(selectedRow, 2)->text() == "Connected") {
+            QMessageBox::warning(parentWidget, "", "Cannot delete \"" + descrip + "\" while connected");
+            return;
+        }
+
         QMessageBox::StandardButton reply;
         reply = QMessageBox::question(parentWidget, "", "Delete " + descrip + "?",
                                       QMessageBox::Yes | QMessageBox::No);
@@ -38,6 +44,10 @@ void DeleteRecordManager::deleteSelectedDevice(QWidget *parentWidget,
         deleteRecord(descrip);
 
         selectedRow = deviceTable->currentRow();
+        if (selectedRow < 0 || !deviceTable->item(selectedRow, 1)) {
+            logfile("Device table was reset during delete operation");
+            return;
+        }
         daddr = deviceTable->item(selectedRow, 1)->text();
 
         QString cstring = getadbpath() + " disconnect " + daddr;

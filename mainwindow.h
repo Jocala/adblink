@@ -28,6 +28,8 @@
 #include <QMenu>
 #include <QAction>
 #include <QSize>
+#include <QTimer>
+#include <QHash>
 #include "devicerecord.h"
 
 class AdbConnection;
@@ -136,8 +138,9 @@ private slots:
     bool validateIPAddress(const QString& ipAddress);
     void serverlabel();
     bool validateDeviceSelection(QString& selectedDescription);
-    bool usbConnected(QString daddr);
+    QString usbStatus(const QString &daddr);
     void loadDeviceTableX(QTableWidget* table);
+    void pollUsbDevices();
     void onReqCompleted();
     void adhocip();
     void on_actionAbout_triggered();
@@ -274,6 +277,8 @@ private:
     bool m_isBusy = false;
     KodiDownloader *m_kodiDownloader;
     KodiDownloadCoordinator *m_kodiDownloadCoordinator;
+    QTimer *m_usbPollTimer;
+    QHash<QString, QString> m_usbStatusCache;
     KodiLogManager *m_kodiLogManager;
     KodiSetupManager *m_kodiSetupManager;
     KillServerManager *m_killServerManager;

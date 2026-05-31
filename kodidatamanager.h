@@ -19,6 +19,8 @@ public:
     bool initializeDatabase(const QString &dbPath);
     void createTables();
     DeviceRecord queryDeviceRecord(const QString &description) const;
+    DeviceRecord queryDeviceByDaddr(const QString &daddr) const;
+    bool descriptionExists(const QString &description) const;
     void deleteRecord(const QString &description);
 
     void createJsonConfig(const QString &configPath);

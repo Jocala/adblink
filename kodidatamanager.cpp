@@ -118,6 +118,51 @@ DeviceRecord KodiDataManager::queryDeviceRecord(const QString &description) cons
     return record;
 }
 
+DeviceRecord KodiDataManager::queryDeviceByDaddr(const QString &daddr) const
+{
+    DeviceRecord record;
+    QSqlQuery query;
+
+    QString sql = QStringLiteral(
+        "SELECT Id, daddr, pulldir, xbmcpackage, data_root, buffermode, buffersize, "
+        "bufferfactor, description, filepath, port, isusb, disableroot, flag1, flag2, ostype, flag5 "
+        "FROM device WHERE daddr = ?");
+
+    query.prepare(sql);
+    query.addBindValue(daddr);
+    query.exec();
+    while (query.next()) {
+        record.id = query.value(QStringLiteral("Id")).toInt();
+        record.daddr = query.value(QStringLiteral("daddr")).toString();
+        record.pulldir = query.value(QStringLiteral("pulldir")).toString();
+        record.xbmcpackage = query.value(QStringLiteral("xbmcpackage")).toString();
+        record.data_root = query.value(QStringLiteral("data_root")).toString();
+        record.buffermode = query.value(QStringLiteral("buffermode")).toInt();
+        record.buffersize = query.value(QStringLiteral("buffersize")).toString();
+        record.bufferfactor = query.value(QStringLiteral("bufferfactor")).toString();
+        record.description = query.value(QStringLiteral("description")).toString();
+        record.filepath = query.value(QStringLiteral("filepath")).toString();
+        record.port = query.value(QStringLiteral("port")).toString();
+        record.isusb = query.value(QStringLiteral("isusb")).toBool();
+        record.disableroot = query.value(QStringLiteral("disableroot")).toBool();
+        record.scoped = query.value(QStringLiteral("flag1")).toBool();
+        record.wsa = query.value(QStringLiteral("flag2")).toBool();
+        record.ostype = query.value(QStringLiteral("ostype")).toString();
+        record.scrcpyarg = query.value(QStringLiteral("flag5")).toString();
+    }
+    return record;
+}
+
+bool KodiDataManager::descriptionExists(const QString &description) const
+{
+    QSqlQuery query;
+    query.prepare(QStringLiteral("SELECT COUNT(*) FROM device WHERE description = ?"));
+    query.addBindValue(description);
+    if (query.exec() && query.next())
+        return query.value(0).toInt() > 0;
+    return false;
+}
+
 void KodiDataManager::deleteRecord(const QString &description)
 {
     QSqlQuery query;

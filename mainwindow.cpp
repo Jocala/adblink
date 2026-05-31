@@ -381,10 +381,13 @@
             setupMenus();
 
 
-            setWindowSize();
+             setWindowSize();
 
+             m_usbPollTimer = new QTimer(this);
+             connect(m_usbPollTimer, &QTimer::timeout, this, &MainWindow::pollUsbDevices);
+             m_usbPollTimer->start(3000);
 
-            do_versioncheck();
+             do_versioncheck();
 
 
 
@@ -1922,13 +1925,76 @@ void MainWindow::displayOff()
 
 
 
-bool MainWindow::usbConnected(QString daddr)
+QString MainWindow::usbStatus(const QString &daddr)
 {
-    QString cstring = getadbpath() + " devices";
-    QString command = getadbOutput(cstring);
-    return command.contains(daddr);
+    auto it = m_usbStatusCache.find(daddr);
+    if (it == m_usbStatusCache.end())
+        return QStringLiteral("Disconnected");
+    if (it.value() == QLatin1String("device"))
+        return QStringLiteral("Connected");
+    QString status = it.value();
+    if (!status.isEmpty())
+        status[0] = status[0].toUpper();
+    return status;
 }
 
+void MainWindow::pollUsbDevices()
+{
+    QString output = getadbOutput(getadbpath() + " devices");
+
+    m_usbStatusCache.clear();
+    QStringList currentSerials;
+
+    for (const QString &line : output.split('\n', Qt::SkipEmptyParts)) {
+        if (line.startsWith("List of devices") || line.contains("daemon"))
+            continue;
+        QString serial = line.section('\t', 0, 0).trimmed();
+        QString status = line.section('\t', 1, 1).trimmed();
+        if (serial.isEmpty())
+            continue;
+
+        m_usbStatusCache[serial] = status;
+
+        if (!serial.contains(':'))
+            currentSerials.append(serial);
+    }
+
+    for (const QString &serial : currentSerials) {
+        if (m_dataManager->queryDeviceByDaddr(serial).daddr.isEmpty()) {
+            int n = 0;
+            QString name;
+            do {
+                name = n == 0 ? QStringLiteral("UnknownUSB")
+                              : QStringLiteral("UnknownUSB%1").arg(n);
+                n++;
+            } while (m_dataManager->descriptionExists(name));
+
+            QSqlQuery query;
+            query.prepare(QStringLiteral(
+                "INSERT INTO device (description, daddr, port, isusb, ostype, "
+                "data_root, xbmcpackage, pulldir, disableroot, filepath, flag5) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"));
+            query.addBindValue(name);
+            query.addBindValue(serial);
+            query.addBindValue(QString());
+            query.addBindValue(true);
+            query.addBindValue(QStringLiteral("0"));
+            query.addBindValue(QStringLiteral("/sdcard/"));
+            query.addBindValue(QStringLiteral("org.xbmc.kodi"));
+            query.addBindValue(QString());
+            query.addBindValue(false);
+            query.addBindValue(QStringLiteral("files/.kodi"));
+            query.addBindValue(QString());
+            if (!query.exec())
+                logfile("Auto-add USB device failed: " + query.lastError().text());
+            else
+                logfile("Auto-added USB device: " + serial + " as " + name);
+        }
+    }
+
+    if (!QApplication::activeModalWidget())
+        loadDeviceTableX(deviceTable);
+}
 
 
 void MainWindow::on_actionReload_devices_triggered()
@@ -2422,7 +2488,7 @@ void MainWindow::loadDeviceTableX(QTableWidget* table) {
     m_deviceTableLoader->loadTable(table, windowSizeSelector,
         sfontsize, mfontsize, lfontsize,
         sMainWindowSize, mMainWindowSize, lMainWindowSize,
-        [this](const QString &daddr) { return usbConnected(daddr); });
+        [this](const QString &daddr) { return usbStatus(daddr); });
     if (centralWidget) {
         centralWidget->updateGeometry();
         centralWidget->update();
