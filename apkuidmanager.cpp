@@ -1,8 +1,9 @@
 #include "apkuidmanager.h"
+#include "getadbdata.h"
 #include "logfile.h"
 
-#include <QMessageBox>
 #include <QFileDialog>
+#include <QMessageBox>
 #include <QProcess>
 #include <QRegularExpression>
 #include <QStringList>
@@ -24,15 +25,10 @@ void ApkUidManager::getApkPackageName(QWidget *parentWidget, const QString &aapt
     if (filename.isEmpty())
         return;
 
+    // aaptPath has embedded quotes from mainwindow.cpp construction;
+    // getadbOutput uses splitCommand which handles the quoting correctly.
     QString cstring = aaptPath + " dump badging  " + '"' + filename + '"';
-
-    QProcess run_command;
-    run_command.setProcessChannelMode(QProcess::MergedChannels);
-    run_command.start(cstring);
-    run_command.waitForStarted();
-    while (run_command.state() != QProcess::NotRunning)
-        qApp->processEvents();
-    QString command = run_command.readAll();
+    QString command = getadbOutput(cstring);
 
     QStringList mstringlist = command.split(QRegularExpression("[\t\n\r]"), Qt::SkipEmptyParts);
 

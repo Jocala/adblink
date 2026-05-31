@@ -28,7 +28,8 @@ void RebootManager::rebootDevice(QWidget *parentWidget, QTableWidget *deviceTabl
         rtimer.start();
         QProcess reboot_device;
         reboot_device.setProcessChannelMode(QProcess::MergedChannels);
-        reboot_device.start(adbPrefix + " reboot");
+        QStringList args = QProcess::splitCommand(adbPrefix + " reboot");
+        reboot_device.start(args.takeFirst(), args);
         reboot_device.waitForStarted();
         while (reboot_device.state() != QProcess::NotRunning) {
             qApp->processEvents();

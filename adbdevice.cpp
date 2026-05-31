@@ -87,7 +87,8 @@ bool AdbDevice::reboot(const QString &rebootMode) const
 
     QProcess process;
     process.setProcessChannelMode(QProcess::MergedChannels);
-    process.start(adbPrefix() + QStringLiteral(" ") + rebootMode);
+    QStringList args = QProcess::splitCommand(adbPrefix() + QStringLiteral(" ") + rebootMode);
+    process.start(args.takeFirst(), args);
     process.waitForStarted();
     while (process.state() != QProcess::NotRunning) {
         QCoreApplication::processEvents();
