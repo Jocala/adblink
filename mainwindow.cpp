@@ -373,6 +373,9 @@
 
             deviceTable = new NoHScrollTableWidget(this);
 
+            connect(deviceTable, &QTableWidget::cellDoubleClicked,
+                    this, &MainWindow::onDeviceTableDoubleClicked);
+
              m_dataManager->createTables();
              m_dataManager->createJsonConfig(jsonstring);
             setupMenus();
@@ -733,6 +736,22 @@
 
 //////////////////////////////////////////////
 
+
+    void MainWindow::onDeviceTableDoubleClicked(int row, int column)
+    {
+        if (!deviceTable->item(row, 0) || !deviceTable->item(row, 2))
+            return;
+
+        deviceTable->selectRow(row);
+
+        QString status = deviceTable->item(row, 2)->text();
+
+        if (status == "Connected") {
+            disButton_clicked();
+        } else if (status == "Disconnected") {
+            connButton_clicked();
+        }
+    }
 
     void MainWindow::connButton_clicked()
     {

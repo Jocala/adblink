@@ -141,6 +141,7 @@ private slots:
     void onReqCompleted();
     void adhocip();
     void on_actionAbout_triggered();
+    void onDeviceTableDoubleClicked(int row, int column);
     void connButton_clicked();
     void displayOff();
     void sideload_Button_clicked();

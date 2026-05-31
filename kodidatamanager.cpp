@@ -82,15 +82,16 @@ void KodiDataManager::createTables()
 DeviceRecord KodiDataManager::queryDeviceRecord(const QString &description) const
 {
     DeviceRecord record;
-    QString quoted = QStringLiteral("\"") + description + QStringLiteral("\"");
     QSqlQuery query;
 
     QString sql = QStringLiteral(
         "SELECT Id, daddr, pulldir, xbmcpackage, data_root, buffermode, buffersize, "
         "bufferfactor, description, filepath, port, isusb, disableroot, flag1, flag2, ostype, flag5 "
-        "FROM device WHERE description=") + quoted;
+        "FROM device WHERE description = ?");
 
-    query.exec(sql);
+    query.prepare(sql);
+    query.addBindValue(description);
+    query.exec();
     while (query.next()) {
         record.id = query.value(QStringLiteral("Id")).toInt();
         record.daddr = query.value(QStringLiteral("daddr")).toString();
@@ -119,9 +120,10 @@ DeviceRecord KodiDataManager::queryDeviceRecord(const QString &description) cons
 
 void KodiDataManager::deleteRecord(const QString &description)
 {
-    QString quoted = QStringLiteral("\"") + description + QStringLiteral("\"");
     QSqlQuery query;
-    query.exec(QStringLiteral("DELETE FROM device WHERE description=") + quoted);
+    query.prepare(QStringLiteral("DELETE FROM device WHERE description = ?"));
+    query.addBindValue(description);
+    query.exec();
     if (query.lastError().isValid()) {
         logfile(QStringLiteral("SqLite error:") + query.lastError().text());
     }
