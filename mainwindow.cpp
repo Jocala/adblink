@@ -87,11 +87,10 @@
     #include <QTimer>
     #include <QLabel>
     #include <QInputDialog>
-    #include <QtSql>
     #include <QtSql/QSqlDatabase>
     #include <QtSql/QSqlError>
     #include <QtSql/QSqlQuery>
-    #include <devicerecorddialog.h>
+    #include "devicerecorddialog.h"
     #include <QElapsedTimer>
     #include <QTextStream>
     #include <QDate>
@@ -106,9 +105,8 @@
     #include <QNetworkAccessManager>
     #include <QNetworkRequest>
     #include <QNetworkReply>
-    #include <QtNetwork>
     #include <QtNetwork/QNetworkInterface>
-    #include <adblogdialog.h>
+    #include "adblogdialog.h"
     #include <QFileInfo>
     #include<QClipboard>
     #include <QShortcut>
