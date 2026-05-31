@@ -5,7 +5,6 @@
 #include "restdialog.h"
 #include "getadbdata.h"
 #include "getreturncode.h"
-#include "returncode.h"
 #include "logfile.h"
 
 #include <QDir>

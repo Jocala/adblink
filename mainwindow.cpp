@@ -24,7 +24,6 @@
     #include "tcpipdialog.h"
     #include "adbprefdialog.h"
     #include "sleepdialog.h"
-    #include "returncode.h"
     #include "oculusdialog.h"
      #include "scpdialog.h"
       #include "screencapmanager.h"

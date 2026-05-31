@@ -55,7 +55,6 @@ set(SOURCES
     aboutmanager.cpp
     helpdialog.cpp
     installmanager.cpp
-    returncode.cpp
     scpdialog.cpp
     screencapmanager.cpp
     uninstalldialog.cpp
@@ -135,7 +134,6 @@ set(HEADERS
     kodidatamanager.h
     logfile.h
     point.h
-    returncode.h
     scpdialog.h
     screencapmanager.h
     uninstalldialog.h
