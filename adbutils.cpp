@@ -171,25 +171,25 @@ bool isPackageInstalled(const QString &adbPrefix, const QString &package)
     return result.contains(package);
 }
 
+static QString scopedAdbOutput(const QString &adbPrefix, const QString &adbCommand)
+{
+    QString fullCommand = adbPrefix + " " + adbCommand;
+    QString program = getadbpath();
+    QStringList args = QProcess::splitCommand(fullCommand);
+    args.removeFirst();
+
+    QProcess process;
+    process.setProcessChannelMode(QProcess::MergedChannels);
+    process.start(program, args);
+    process.waitForStarted();
+    while (process.state() != QProcess::NotRunning)
+        QCoreApplication::processEvents();
+    return process.readAll().trimmed();
+}
+
 bool isScopedStorage(const QString &adbPrefix)
 {
-    auto runAdbCommand = [&adbPrefix](const QString &adbCommand) -> QString {
-        QString command = adbPrefix + " " + adbCommand;
-        QProcess process;
-        process.start(command);
-        if (!process.waitForFinished(5000)) {
-            logfile("Issue: ADB command timed out: " + command);
-            return QString();
-        }
-        QString output = process.readAllStandardOutput().trimmed();
-        QString error = process.readAllStandardError().trimmed();
-        if (process.exitCode() != 0 || !error.isEmpty()) {
-            return error.isEmpty() ? "Unknown error" : error;
-        }
-        return output;
-    };
-
-    QString apiOutput = runAdbCommand("shell getprop ro.build.version.sdk");
+    QString apiOutput = scopedAdbOutput(adbPrefix, "shell getprop ro.build.version.sdk");
     bool ok;
     int apiLevel = apiOutput.toInt(&ok);
     if (!ok || apiOutput.isEmpty())
@@ -198,23 +198,23 @@ bool isScopedStorage(const QString &adbPrefix)
         return false;
 
     bool restrictedAccess = false;
-    QString touchOutput = runAdbCommand("shell touch /sdcard/Android/data/org.xbmc.kodi/files/test.txt");
+    QString touchOutput = scopedAdbOutput(adbPrefix, "shell touch /sdcard/Android/data/org.xbmc.kodi/files/test.txt");
     if (touchOutput.isEmpty() && !restrictedAccess) {
-        runAdbCommand("shell rm /sdcard/Android/data/org.xbmc.kodi/files/test.txt");
+        scopedAdbOutput(adbPrefix, "shell rm /sdcard/Android/data/org.xbmc.kodi/files/test.txt");
     } else {
         restrictedAccess = touchOutput.contains("Permission denied", Qt::CaseInsensitive);
     }
 
     if (!restrictedAccess) {
-        touchOutput = runAdbCommand("shell touch /sdcard/DCIM/test.txt");
+        touchOutput = scopedAdbOutput(adbPrefix, "shell touch /sdcard/DCIM/test.txt");
         if (touchOutput.isEmpty()) {
-            runAdbCommand("shell rm /sdcard/DCIM/test.txt");
+            scopedAdbOutput(adbPrefix, "shell rm /sdcard/DCIM/test.txt");
         } else {
             restrictedAccess = touchOutput.contains("Permission denied", Qt::CaseInsensitive);
         }
     }
 
-    QString lsOutput = runAdbCommand("shell ls -ld /sdcard/");
+    QString lsOutput = scopedAdbOutput(adbPrefix, "shell ls -ld /sdcard/");
     if (lsOutput.isEmpty()) {
         logfile("Issue: Failed to get /sdcard/ permissions");
     } else {
