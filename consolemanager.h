@@ -16,7 +16,6 @@ public:
     void setOsType(OSType os) { m_os = os; }
     OSType osType() const { return m_os; }
 
-    QString adbShellScript(const QString &scriptDir, const QString &serial, const QString &adbfilesDir) const;
     QString scrcpyScript(const QString &scriptDir, const QString &adbfilesDir, const QString &scrcpyDir) const;
 
     void launchTerminal(const QString &scriptPath, int terminalChoice) const;

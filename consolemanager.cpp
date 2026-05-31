@@ -35,44 +35,6 @@ ConsoleManager::OSType ConsoleManager::detectOs()
 #endif
 }
 
-QString ConsoleManager::adbShellScript(const QString &scriptDir, const QString &serial, const QString &adbfilesDir) const
-{
-    if (m_os == Windows) {
-        QString path = scriptDir + QStringLiteral("/shell.bat");
-        QFile file(path);
-        if (!file.open(QFile::WriteOnly | QFile::Text)) {
-            logfile(QStringLiteral("error creating shell.bat!"));
-            return QString();
-        }
-        QTextStream out(&file);
-        out << QStringLiteral("echo off") << Qt::endl;
-        out << QStringLiteral("set PATH=") + adbfilesDir + QStringLiteral(";%PATH%") << Qt::endl;
-        out << QStringLiteral("adb.exe ") + serial + QStringLiteral(" shell -t \"export PATH=\\\"$PATH:/data/local/tmp/adblink\\\"; export PS1=\\\"$HOSTNAME:$PWD\\\\$\\\"; sh -i\"") << Qt::endl;
-        file.flush();
-        file.close();
-        logfile(QStringLiteral("shell.bat created"));
-        return path;
-    }
-
-    QString path = scriptDir + QStringLiteral("/shell.sh");
-    QFile file(path);
-    if (!file.open(QFile::WriteOnly | QFile::Text)) {
-        logfile(QStringLiteral("error creating shell.sh!"));
-        return QString();
-    }
-    QTextStream out(&file);
-    out << QStringLiteral("#!/bin/sh") << Qt::endl;
-    out << QStringLiteral("export PATH=\"") + adbfilesDir + QStringLiteral("\":$PATH") << Qt::endl;
-    out << QStringLiteral("adb ") + serial + QStringLiteral(" shell -t \"export PATH=\\\"$PATH:/data/local/tmp/adblink\\\"; export PS1=\\\"$HOSTNAME:$PWD\\\\$\\\"; sh -i\"") << Qt::endl;
-    file.flush();
-    file.close();
-
-    file.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner |
-                        QFileDevice::ReadGroup | QFileDevice::ExeGroup |
-                        QFileDevice::ReadOther | QFileDevice::ExeOther);
-    return path;
-}
-
 QString ConsoleManager::scrcpyScript(const QString &scriptDir, const QString &adbfilesDir, const QString &scrcpyDir) const
 {
     if (m_os == Windows) {
@@ -295,9 +257,10 @@ void ConsoleManager::openAdbShell(const QString &daddr, const QString &scriptDir
 
         QTextStream out(&file);
         out << "echo off" << Qt::endl;
-        QString adbfilesDir = QCoreApplication::applicationDirPath() + "/adbfiles";
-        out << "set PATH=" + adbfilesDir + ";%PATH%" << Qt::endl;
-        out << "adb.exe -s " + daddr + " shell -t \"export PATH=\\\"$PATH:/data/local/tmp/adblink\\\"; export PS1=\\\"$HOSTNAME:$PWD\\\\$\\\"; sh -i\"" << Qt::endl;
+        QString adbPath = getadbpath();
+        QFileInfo adbInfo(adbPath);
+        out << "set PATH=" + adbInfo.absolutePath() + ";%PATH%" << Qt::endl;
+        out << "\"" + adbPath + "\" -s " + daddr + " shell -t \"export PATH=\\\"$PATH:/data/local/tmp/adblink\\\"; export PS1=\\\"$HOSTNAME:$PWD\\\\$\\\"; sh -i\"" << Qt::endl;
         file.flush();
         file.close();
 

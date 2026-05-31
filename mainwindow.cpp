@@ -199,7 +199,7 @@
         });
 
 
-       if (!QFile::exists(adbfiles + "adb") && !QFile::exists(adbfiles + "adb.exe")) {
+       if (!QFile::exists(getadbpath())) {
            QMessageBox::critical(0, "", "adb binary missing!\n", QMessageBox::Cancel);
 
      }
