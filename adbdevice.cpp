@@ -3,12 +3,9 @@
 
 #include <QDateTime>
 #include <QDir>
-#include <QElapsedTimer>
-#include <QEventLoop>
 #include <QFileInfo>
 #include <QProcess>
 #include <QRegularExpression>
-#include <QTimer>
 
 AdbDevice::AdbDevice(const DeviceRecord &device, QObject *parent)
     : QObject(parent)
@@ -36,10 +33,7 @@ QString AdbDevice::runCommand(const QString &binary, const QStringList &args) co
     process.setProcessChannelMode(QProcess::MergedChannels);
     process.start(binary, args);
     process.waitForStarted();
-    QEventLoop loop;
-    QObject::connect(&process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), &loop, &QEventLoop::quit);
-    QObject::connect(&process, &QProcess::errorOccurred, &loop, &QEventLoop::quit);
-    loop.exec();
+    syncWaitForProcess(process);
     return QString::fromUtf8(process.readAll());
 }
 
@@ -90,16 +84,7 @@ bool AdbDevice::reboot(const QString &rebootMode) const
     QStringList args = QProcess::splitCommand(adbPrefix() + QStringLiteral(" ") + rebootMode);
     process.start(args.takeFirst(), args);
     process.waitForStarted();
-    QTimer timeoutTimer;
-    timeoutTimer.setSingleShot(true);
-    QEventLoop loop;
-    QObject::connect(&process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), &loop, &QEventLoop::quit);
-    QObject::connect(&process, &QProcess::errorOccurred, &loop, &QEventLoop::quit);
-    QObject::connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
-    timeoutTimer.start(5000);
-    loop.exec();
-    if (process.state() != QProcess::NotRunning)
-        process.kill();
+    syncWaitForProcess(process, 5000);
     return true;
 }
 
@@ -107,15 +92,12 @@ bool AdbDevice::installApk(const QString &apkPath) const
 {
     QProcess process;
     process.setProcessChannelMode(QProcess::MergedChannels);
-    process.start(getadbpath(), QStringList()
+    process.start(QStringLiteral("\"%1\"").arg(getadbpath()), QStringList()
         << QStringLiteral("-s") << m_device.daddr
         << QStringLiteral("install") << QStringLiteral("-r")
         << apkPath);
     process.waitForStarted();
-    QEventLoop loop;
-    QObject::connect(&process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), &loop, &QEventLoop::quit);
-    QObject::connect(&process, &QProcess::errorOccurred, &loop, &QEventLoop::quit);
-    loop.exec();
+    syncWaitForProcess(process);
 
     QString output = QString::fromUtf8(process.readAll());
     return output.contains(QStringLiteral("uccess")) && !output.contains(QStringLiteral("Failure"));

@@ -3,7 +3,6 @@
 #include "logfile.h"
 
 #include <QProcess>
-#include <QEventLoop>
 #include <QRegularExpression>
 
 AdbConnection::AdbConnection(QObject *parent)
@@ -66,10 +65,7 @@ QString AdbConnection::runCommand(const QString &args) const
     process.setProcessChannelMode(QProcess::MergedChannels);
     process.start(m_adbPath, QStringList() << QProcess::splitCommand(args));
     process.waitForStarted();
-    QEventLoop loop;
-    QObject::connect(&process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), &loop, &QEventLoop::quit);
-    QObject::connect(&process, &QProcess::errorOccurred, &loop, &QEventLoop::quit);
-    loop.exec();
+    syncWaitForProcess(process);
     return QString::fromUtf8(process.readAll());
 }
 
@@ -79,10 +75,7 @@ QString AdbConnection::runCommand(const QStringList &args) const
     process.setProcessChannelMode(QProcess::MergedChannels);
     process.start(m_adbPath, args);
     process.waitForStarted();
-    QEventLoop loop;
-    QObject::connect(&process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), &loop, &QEventLoop::quit);
-    QObject::connect(&process, &QProcess::errorOccurred, &loop, &QEventLoop::quit);
-    loop.exec();
+    syncWaitForProcess(process);
     return QString::fromUtf8(process.readAll());
 }
 

@@ -1,7 +1,7 @@
 #include "adbutils.h"
 #include <QCoreApplication>
 #include <QDir>
-#include <QEventLoop>
+#include <QElapsedTimer>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QJsonDocument>
@@ -172,6 +172,24 @@ bool isPackageInstalled(const QString &adbPrefix, const QString &package)
     return result.contains(package);
 }
 
+void syncWaitForProcess(QProcess &process, int timeoutMs)
+{
+    QElapsedTimer timer;
+    if (timeoutMs > 0)
+        timer.start();
+
+    while (process.state() != QProcess::NotRunning) {
+        if (process.waitForFinished(100))
+            break;
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        if (timeoutMs > 0 && timer.elapsed() >= timeoutMs) {
+            process.kill();
+            process.waitForFinished(1000);
+            break;
+        }
+    }
+}
+
 static QString scopedAdbOutput(const QString &adbPrefix, const QString &adbCommand)
 {
     QString fullCommand = adbPrefix + " " + adbCommand;
@@ -182,10 +200,7 @@ static QString scopedAdbOutput(const QString &adbPrefix, const QString &adbComma
     process.setProcessChannelMode(QProcess::MergedChannels);
     process.start(program, args);
     process.waitForStarted();
-    QEventLoop loop;
-    QObject::connect(&process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), &loop, &QEventLoop::quit);
-    QObject::connect(&process, &QProcess::errorOccurred, &loop, &QEventLoop::quit);
-    loop.exec();
+    syncWaitForProcess(process);
     return process.readAll().trimmed();
 }
 

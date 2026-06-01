@@ -5,9 +5,15 @@
 #include <QString>
 
 class QWidget;
+class QProcess;
 
 // Get the path to the ADB binary
 QString getadbpath();
+
+// Synchronously wait for QProcess to finish, excluding user input events
+// so modal dialogs (QMessageBox) are not auto-triggered by stale clicks.
+// If timeoutMs > 0, kills the process after the timeout.
+void syncWaitForProcess(QProcess &process, int timeoutMs = -1);
 
 // Read battery level from device via dumpsys battery
 QString readBatteryLevel(const QString &adbPrefix);
