@@ -1030,13 +1030,8 @@
            progressBar->setHidden(true);
             container->setHidden(false);
            progressBar->setValue(0);
-           server_running->setText("");
+            server_running->setText("");
         }
-
-
-
-
-        serverlabel();
 
         return command;
     }
@@ -1216,7 +1211,7 @@
                 return true;
             },
             [this]() { on_actionView_adbLink_Log_triggered(); },
-            [this]() { serverlabel(); });
+            []() { });
     }
 
 
@@ -1809,17 +1804,7 @@ void MainWindow::screenCap()
 
 ////////////////////////////////////////////////////////////
 
-void MainWindow::serverlabel()
-{
-
-
-           QString cstring = getadbpath() + " devices";
-           QString command = getadbOutput(cstring);
-
-
-}
-
-/////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
 
 bool MainWindow::validateIPAddress(const QString& ipAddress) {
 

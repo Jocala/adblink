@@ -613,6 +613,12 @@ void DeviceRecordDialog::on_filepathButton_clicked()
 
 void DeviceRecordDialog::on_listDevicesp_doubleClicked(const QModelIndex &index)
 {
+    QMessageBox::StandardButton reply;
+    reply = QMessageBox::question(this, "",
+        QStringLiteral("Copy this address?"),
+        QMessageBox::Yes | QMessageBox::No);
+    if (reply == QMessageBox::No)
+        return;
     m_daddr->setText(index.data(Qt::DisplayRole).toString());
 }
 

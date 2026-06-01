@@ -136,7 +136,6 @@ public:
 private slots:
     void onApplicationQuit();
     bool validateIPAddress(const QString& ipAddress);
-    void serverlabel();
     bool validateDeviceSelection(QString& selectedDescription);
     QString usbStatus(const QString &daddr);
     void loadDeviceTableX(QTableWidget* table);

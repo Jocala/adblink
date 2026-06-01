@@ -42,7 +42,6 @@ set(SOURCES
     consolemanager.cpp
     customlistwidget.cpp
     getadbdata.cpp
-    getdevices.cpp
     getlocaladb.cpp
     getreturncode.cpp
     kodidatamanager.cpp
@@ -126,7 +125,6 @@ set(HEADERS
     customlistwidget.h
     devicerecord.h
     getadbdata.h
-    getdevices.h
     getlocaladb.h
     getreturncode.h
     helpdialog.h
