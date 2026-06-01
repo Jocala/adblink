@@ -287,3 +287,6 @@ elseif(UNIX)
         INCLUDE Qt6::QTlsBackendOpenSSLPlugin
     )
 endif()
+
+enable_testing()
+add_subdirectory(tests)
