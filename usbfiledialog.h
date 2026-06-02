@@ -43,8 +43,6 @@ public:
     void setuProgram(const QString &fprogram);
     void setdisableroot(const bool &disableroot);
     void setoldfm(const bool &oldfm);
-    bool checkRoot();
-    QString binfileName();
     QString mcpath;
     void setTitle(QString text);
     QString buffer;
