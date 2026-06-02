@@ -1,0 +1,85 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>Add USB Devices</title></head><body>
+
+<b><u>Adding USB Devices to the adblink Database</u></b><br>
+<p>
+adbLink automatically detects USB-connected Android devices and
+adds them to its internal SQLite device database. There are three
+ways a device can be added to the database.
+<p>
+
+<b>1. Automatic USB Discovery</b><br>
+Every three seconds adbLink runs the <code>adb devices</code>
+command to poll for newly attached USB devices. When a USB device
+serial number is discovered that does not already exist in the
+database, adbLink automatically inserts a new device record.
+<p>
+The auto-created record uses these default values:
+<p>
+<table border="0" cellpadding="3" cellspacing="0">
+<tr><td><b>Description</b></td><td>"UnknownUSB" (numbered if duplicate, e.g. "UnknownUSB1")</td></tr>
+<tr><td><b>daddr (serial)</b></td><td>USB serial number from adb devices output</td></tr>
+<tr><td><b>isusb</b></td><td>true</td></tr>
+<tr><td><b>ostype</b></td><td>"0"</td></tr>
+<tr><td><b>data_root</b></td><td>"/sdcard/"</td></tr>
+<tr><td><b>xbmcpackage</b></td><td>"org.xbmc.kodi"</td></tr>
+<tr><td><b>filepath</b></td><td>"files/.kodi"</td></tr>
+<tr><td><b>port</b></td><td>empty</td></tr>
+<tr><td><b>disableroot</b></td><td>false</td></tr>
+</table>
+<p>
+After auto-insertion, the device table is reloaded and the new
+device appears. You can then edit the device (Ctrl+W) to give it
+a meaningful description and adjust its settings.
+<p>
+
+<b>2. Manual Device Entry (New Button / Ctrl+G)</b><br>
+A device can be added manually by clicking the <b>New</b> button
+or pressing <b>Ctrl+G</b>. This opens the Device Editor dialog
+where you can fill in all fields:
+<p>
+<table border="0" cellpadding="3" cellspacing="0">
+<tr><td><b>Description</b></td><td>A friendly name for the device</td></tr>
+<tr><td><b>IP/Hostname</b></td><td>The device's network address or USB serial</td></tr>
+<tr><td><b>Port</b></td><td>ADB port (default 5555)</td></tr>
+<tr><td><b>USB</b></td><td>Check if the device connects via USB</td></tr>
+<tr><td><b>Package Name</b></td><td>Kodi package (default "org.xbmc.kodi")</td></tr>
+<tr><td><b>Data Root</b></td><td>Device data root path (default "/sdcard/")</td></tr>
+<tr><td><b>File Path</b></td><td>Kodi data subdirectory (default "files/.kodi")</td></tr>
+<tr><td><b>Pull Directory</b></td><td>Local directory for pulled files</td></tr>
+<tr><td><b>Scrcpy Args</b></td><td>Optional arguments passed to scrcpy</td></tr>
+<tr><td><b>Disable Root</b></td><td>Check to skip su-based operations</td></tr>
+</table>
+<p>
+When you confirm the dialog, the record is inserted into the
+<code>device</code> table in the SQLite database located at
+<code>~/.jocala/adblink.db</code> (or
+<code>%APPDATA%\.jocala\adblink.db</code> on Windows).
+<p>
+
+<b>3. Ad Hoc IP Entry</b><br>
+You can quickly connect to a device not in the database by typing
+its IP address (with optional port separated by a colon) into the
+<b>Ad hoc IP</b> field and clicking <b>Connect</b>. This creates
+a temporary database record with the description "Ad hoc". Each
+new ad hoc connection overwrites the previous one. The record is
+created with the description "Ad hoc", <code>isusb = false</code>,
+and the entered IP and port.
+<p>
+
+<b>Database Storage</b><br>
+All device records are stored in a SQLite database file. The
+schema for the <code>device</code> table includes these columns:
+id, daddr, description, pulldir, xbmcpackage, data_root,
+buffermode, buffersize, bufferfactor, filepath, port, isusb,
+ostype, logfilename, disableroot, flag1 (scoped storage),
+flag2 (WSA), flag3, flag4, and flag5 (scrcpy args).
+<p>
+
+If you have questions or comments, please email jocala@jocala.com
+or visit one of the forums linked below. adbLink produces a log
+file, adblink.log, with each run. Include it in your email or
+post if you're having problems.
+<p>
+<a href="menu.html">main menu</a>
+</body></html>
