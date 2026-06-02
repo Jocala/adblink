@@ -42,6 +42,16 @@ qt_add_executable(tst_getadbpath tst_getadbpath.cpp)
 target_link_libraries(tst_getadbpath PRIVATE testsupport Qt6::Test)
 add_test(NAME getadbpath COMMAND tst_getadbpath)
 
+# --- Test: DeviceRecord defaults ---
+qt_add_executable(tst_devicerecord tst_devicerecord.cpp)
+target_link_libraries(tst_devicerecord PRIVATE testsupport Qt6::Test)
+add_test(NAME devicerecord COMMAND tst_devicerecord)
+
+# --- Test: IpTableWidgetItem sorting ---
+qt_add_executable(tst_iptablesort tst_iptablesort.cpp)
+target_link_libraries(tst_iptablesort PRIVATE testsupport Qt6::Test Qt6::Widgets)
+add_test(NAME iptablesort COMMAND tst_iptablesort)
+
 # --- Test: stringutils ---
 qt_add_executable(tst_stringutils tst_stringutils.cpp)
 target_link_libraries(tst_stringutils PRIVATE testsupport Qt6::Test)
