@@ -259,6 +259,12 @@ if(WIN32)
         INCLUDE Qt6::QSchannelBackendPlugin
         INCLUDE Qt6::QTlsBackendOpenSSLPlugin
     )
+    add_custom_command(TARGET adblink POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.windows"
+            "$<TARGET_FILE_DIR:adblink>/adbfiles"
+        COMMENT "Bundling adbfiles"
+    )
 elseif(APPLE)
     set_target_properties(adblink PROPERTIES
         MACOSX_BUNDLE TRUE
@@ -278,7 +284,7 @@ elseif(APPLE)
     )
     add_custom_command(TARGET adblink POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
-            "${CMAKE_SOURCE_DIR}/adbfiles"
+            "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.macos"
             "$<TARGET_BUNDLE_CONTENT_DIR:adblink>/MacOS/adbfiles"
         COMMENT "Bundling adbfiles into app"
     )
@@ -287,6 +293,12 @@ elseif(UNIX)
         INCLUDE Qt6::QXcbIntegrationPlugin
         INCLUDE ${ADBLINK_COMMON_PLUGINS}
         INCLUDE Qt6::QTlsBackendOpenSSLPlugin
+    )
+    add_custom_command(TARGET adblink POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.linux"
+            "$<TARGET_FILE_DIR:adblink>/adbfiles"
+        COMMENT "Bundling adbfiles"
     )
 endif()
 
