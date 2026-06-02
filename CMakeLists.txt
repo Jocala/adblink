@@ -79,6 +79,7 @@ set(SOURCES
     sideloadmanager.cpp
     sleepdialog.cpp
     adbstring.cpp
+    stringutils.cpp
     oculusdialog.cpp
     oculusmanager.cpp
     kodiarchdialog.cpp
@@ -157,6 +158,7 @@ set(HEADERS
     sideloadmanager.h
     sleepdialog.h
     adbstring.h
+    stringutils.h
     program.h
     version.h
     oculusdialog.h

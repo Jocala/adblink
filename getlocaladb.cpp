@@ -4,18 +4,13 @@
 #include <QJsonObject>
 #include <QFile>
 
-QString getlocaladb()
+QString getlocaladb(const QString &configDir)
 {
-    QString databasedir;
-#ifdef Q_OS_WIN
-    databasedir = QDir::homePath() + "/AppData/Roaming/.jocala/";
-#else
-    databasedir = QDir::homePath() + "/.jocala/";
-#endif
-    databasedir = QDir::cleanPath(databasedir);
+    QString dir = QDir::cleanPath(configDir);
+    if (!dir.endsWith('/'))
+        dir += '/';
 
-    // Check if adblink.json exists
-    QString jsonPath = databasedir + "/adblink.json";
+    QString jsonPath = dir + "adblink.json";
     if (QFileInfo::exists(jsonPath)) {
         QFile file(jsonPath);
         if (file.open(QIODevice::ReadOnly)) {
@@ -29,9 +24,6 @@ QString getlocaladb()
 #ifdef Q_OS_WIN
                     adbPath += ".exe";
 #endif
-
-
-
                     if (QFileInfo::exists(adbPath)) {
                         return adbPath;
                     }
@@ -41,4 +33,13 @@ QString getlocaladb()
     }
 
     return QString();
+}
+
+QString getlocaladb()
+{
+#ifdef Q_OS_WIN
+    return getlocaladb(QDir::homePath() + "/AppData/Roaming/.jocala/");
+#else
+    return getlocaladb(QDir::homePath() + "/.jocala/");
+#endif
 }

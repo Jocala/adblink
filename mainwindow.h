@@ -135,9 +135,7 @@ public:
 
 private slots:
     void onApplicationQuit();
-    bool validateIPAddress(const QString& ipAddress);
     bool validateDeviceSelection(QString& selectedDescription);
-    QString usbStatus(const QString &daddr);
     void loadDeviceTableX(QTableWidget* table);
     void pollUsbDevices();
     void onReqCompleted();
@@ -165,7 +163,6 @@ private slots:
     int getandroid();
     void writeBackup(QString dir);
     QString readBackup(QString databasedir);
-    QString checkslash(QString qpath);
     void writeInstall(QString dir);
     QString readInstall(QString databasedir);
     void TimerEvent();
@@ -175,7 +172,6 @@ private slots:
     void logfile2(QString line);
     bool fileExists(QString path);
     void kill_server();
-    QString strip(QString str);
     void on_actionReboot_triggered();
     void deleteRecord(QString descrip);
     void on_donate_clicked();

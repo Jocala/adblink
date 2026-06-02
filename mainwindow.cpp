@@ -64,6 +64,7 @@
 #include "kodisetupmanager.h"
     #include "oculusmanager.h"
     #include "preferencesmanager.h"
+#include "stringutils.h"
 #include "remotepushmanager.h"
 #include "rebootmanager.h"
     #include "deviceeditor.h"
@@ -544,17 +545,7 @@
 
     {
 
-     QFile file(logfiledir+"adblink.old.log");
-
-     if( file.exists() )
-         QFile::remove(logfiledir+"adblink.old.log");
-
-
-    QFile file2(logfiledir+"adblink.log");
-
-    if( file2.exists() )
-        file2.rename(logfiledir+"adblink.old.log");
-
+     rotateLogFile(logfiledir);
 
     }
 
@@ -584,15 +575,6 @@
 
 
     ////////////////////////////////////////////////
-     QString MainWindow::strip (QString str)
-    {
-        str = str.simplified();
-        str.replace( " ", "" );
-        return str;
-    }
-
-
-
      //////////////////////////////////////////
      void MainWindow::kill_server()
      {
@@ -758,7 +740,7 @@
     {
         m_connectManager->connectToDevice(this, adhoc_ip, deviceTable,
             [this](const QString &desc) { return queryDeviceRecord(desc); },
-            [this](const QString &ip) { return validateIPAddress(ip); },
+            [this](const QString &ip) { return ::validateIPAddress(ip); },
             [this]() { infolog(); },
             [this]() { adhocip(); },
             getadbpath());
@@ -1598,19 +1580,6 @@ void MainWindow::on_actionView_Changelog_triggered()
 //////////////////////////////////////////
 
 
-QString MainWindow::checkslash(QString qpath)
-{
-
-    if(!qpath.startsWith("/"))
-     qpath.prepend("/");
-
-    if(!qpath.endsWith("/"))
-     qpath.append("/") ;
-
-    return qpath;
-}
-
-
 void MainWindow::on_actionSplash_Screen_triggered()
 {
     QString selectedDescription;
@@ -1804,29 +1773,6 @@ void MainWindow::screenCap()
 
 ////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////////
-
-bool MainWindow::validateIPAddress(const QString& ipAddress) {
-
-           QString normalized = ipAddress.trimmed();
-
-
-           QRegularExpression ipRegex(
-               // IPv4 pattern
-               "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}"
-               "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
-               "|"
-
-               "^[a-zA-Z0-9][a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9]?"
-               "(\\.[a-zA-Z0-9][a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9]?)*"
-               "\\.[a-zA-Z0-9]{1,}$",
-               QRegularExpression::CaseInsensitiveOption
-               );
-
-           return ipRegex.match(normalized).hasMatch();
-}
-
-
 ////////////////////////////////////////
 
 void MainWindow::delRecordButton_clicked()
@@ -1901,19 +1847,6 @@ void MainWindow::displayOff()
 
 
 
-
-QString MainWindow::usbStatus(const QString &daddr)
-{
-    auto it = m_usbStatusCache.find(daddr);
-    if (it == m_usbStatusCache.end())
-        return QStringLiteral("Disconnected");
-    if (it.value() == QLatin1String("device"))
-        return QStringLiteral("Connected");
-    QString status = it.value();
-    if (!status.isEmpty())
-        status[0] = status[0].toUpper();
-    return status;
-}
 
 void MainWindow::pollUsbDevices()
 {
@@ -2463,7 +2396,7 @@ void MainWindow::loadDeviceTableX(QTableWidget* table) {
     m_deviceTableLoader->loadTable(table, windowSizeSelector,
         sfontsize, mfontsize, lfontsize,
         sMainWindowSize, mMainWindowSize, lMainWindowSize,
-        [this](const QString &daddr) { return usbStatus(daddr); });
+        [this](const QString &daddr) { return ::usbStatus(m_usbStatusCache, daddr); });
     if (centralWidget) {
         centralWidget->updateGeometry();
         centralWidget->update();

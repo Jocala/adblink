@@ -27,3 +27,14 @@ void logfile(const QString& line)
     out << line << Qt::endl;
     file.close();
 }
+
+void rotateLogFile(const QString &dir)
+{
+    QFile file(dir + "adblink.old.log");
+    if (file.exists())
+        QFile::remove(dir + "adblink.old.log");
+
+    QFile file2(dir + "adblink.log");
+    if (file2.exists())
+        file2.rename(dir + "adblink.old.log");
+}
