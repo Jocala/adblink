@@ -259,10 +259,6 @@ if(WIN32)
         INCLUDE Qt6::QSchannelBackendPlugin
         INCLUDE Qt6::QTlsBackendOpenSSLPlugin
     )
-    add_custom_command(TARGET adblink POST_BUILD
-        COMMAND cmd /C "if not exist \"${CMAKE_CURRENT_BINARY_DIR}\\adbfiles\" robocopy \"${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.windows\" \"${CMAKE_CURRENT_BINARY_DIR}\\adbfiles\" /E /R:3 /W:2 /NP & exit /b 0"
-        COMMENT "Bundling adbfiles"
-    )
 elseif(APPLE)
     set_target_properties(adblink PROPERTIES
         MACOSX_BUNDLE TRUE
@@ -291,12 +287,6 @@ elseif(UNIX)
         INCLUDE Qt6::QXcbIntegrationPlugin
         INCLUDE ${ADBLINK_COMMON_PLUGINS}
         INCLUDE Qt6::QTlsBackendOpenSSLPlugin
-    )
-    add_custom_command(TARGET adblink POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
-            "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.linux"
-            "${CMAKE_CURRENT_BINARY_DIR}/adbfiles"
-        COMMENT "Bundling adbfiles"
     )
 endif()
 
