@@ -31,7 +31,6 @@ public:
     void setversionLabel(const QString &versiontext);
     void setostype(const QString &ostype);
     void setdaddr(const QString &daddr);
-    void setdevicelist(const QStringList &dstringlist);
     void setdescription(const QString &description);
     void setfilepath(const QString &filepath);
     void setscrcpy(const QString &scrcpy);
@@ -70,7 +69,6 @@ private slots:
     void enable_ui();
     void on_ostypeBox_currentIndexChanged(int index);
     void on_filepathButton_clicked();
-    void on_listDevicesp_doubleClicked(const QModelIndex &index);
     void on_wsa_clicked(bool checked);
     void on_scoped_clicked(bool checked);
 
@@ -100,7 +98,6 @@ private:
 
     QComboBox *m_ostypeBox;
 
-    QListWidget *m_listDevicesp;
     QListWidget *m_listkodirootBox;
 
     QLabel *m_versionLabel;

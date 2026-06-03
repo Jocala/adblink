@@ -17,7 +17,6 @@ public:
                          const QString &version,
                          std::function<void()> eraseCallback);
 
-    void setDeviceList(const QStringList &devices);
     void setExistingDevice(const DeviceRecord &device, const QString &description);
 
     bool exec();
@@ -26,7 +25,6 @@ private:
     QWidget *m_parent;
     bool m_iskodi;
     QString m_version;
-    QStringList m_devices;
     DeviceRecord m_existingDevice;
     QString m_existingDescription;
     bool m_isUpdate = false;

@@ -2,11 +2,8 @@
 #include "adbutils.h"
 #include "devicerecord.h"
 #include "deviceeditor.h"
-#include "getadbdata.h"
 
 #include <QMessageBox>
-#include <QRegularExpression>
-#include <QStringList>
 #include <QSqlDatabase>
 #include <QTableWidget>
 #include <QWidget>
@@ -23,19 +20,6 @@ void DeviceEditorManager::openEditor(QWidget *parentWidget, bool isNewRecord,
                                       EraseDbCallback eraseDb,
                                       ReloadTableCallback reloadTable)
 {
-    QString command = getadbOutput(getadbpath() + " devices");
-    QStringList mstringlist = command.split(QRegularExpression("[\t\n\r]"), Qt::SkipEmptyParts);
-    QStringList dstringlist;
-
-    if (command.contains("List of devices attached")) {
-        mstringlist.removeFirst();
-        for (int a = 0; a < mstringlist.size(); a = a + 2) {
-            QStringList pieces = mstringlist.at(a).split(":", Qt::SkipEmptyParts);
-            if (!mstringlist.at(a).contains("daemon"))
-                dstringlist << pieces.at(0);
-        }
-    }
-
     DeviceRecord device;
     QString selectedDescription;
 
@@ -51,7 +35,6 @@ void DeviceEditorManager::openEditor(QWidget *parentWidget, bool isNewRecord,
     }
 
     DeviceEditor editor(parentWidget, isKodiTab, version, eraseDb);
-    editor.setDeviceList(dstringlist);
     if (!isNewRecord)
         editor.setExistingDevice(device, selectedDescription);
 

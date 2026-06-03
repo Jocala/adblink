@@ -17,11 +17,6 @@ DeviceEditor::DeviceEditor(QWidget *parent, bool iskodi,
 {
 }
 
-void DeviceEditor::setDeviceList(const QStringList &devices)
-{
-    m_devices = devices;
-}
-
 void DeviceEditor::setExistingDevice(const DeviceRecord &device, const QString &description)
 {
     m_existingDevice = device;
@@ -34,7 +29,6 @@ bool DeviceEditor::exec()
     DeviceRecordDialog dialog(m_parent, m_iskodi);
     dialog.setWindowModality(Qt::WindowModal);
     dialog.setversionLabel(m_version);
-    dialog.setdevicelist(m_devices);
 
     if (m_isUpdate)
     {

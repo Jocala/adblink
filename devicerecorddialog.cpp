@@ -16,21 +16,12 @@ DeviceRecordDialog::DeviceRecordDialog(QWidget *parent, bool showkodi) :
     setLayoutDirection(Qt::LeftToRight);
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
-    this->setFixedHeight(425);
+    this->setFixedHeight(280);
     this->setFixedWidth(540);
 
     // ---------- Widgets ----------
 
     // Connected devices list
-    QLabel *label_5 = new QLabel("Connected devices", this);
-    label_5->setGeometry(30, 26, 115, 16);
-
-    m_listDevicesp = new QListWidget(this);
-    m_listDevicesp->setGeometry(30, 50, 150, 100);
-    m_listDevicesp->setMinimumSize(150, 100);
-    m_listDevicesp->setMaximumSize(150, 100);
-    m_listDevicesp->setToolTip("Double-click to copy value to address field");
-
     // Media Center group box
     m_mediaBox = new QGroupBox("Media Center", this);
     m_mediaBox->setGeometry(30, 600, 120, 111);
@@ -94,7 +85,7 @@ DeviceRecordDialog::DeviceRecordDialog(QWidget *parent, bool showkodi) :
 
     // Device info fields (gridLayout_2)
     QWidget *deviceInfoWidget = new QWidget(this);
-    deviceInfoWidget->setGeometry(30, 160, 206, 123);
+    deviceInfoWidget->setGeometry(30, 20, 206, 123);
     QGridLayout *gridLayout_2 = new QGridLayout(deviceInfoWidget);
     gridLayout_2->setContentsMargins(0, 0, 0, 0);
 
@@ -153,7 +144,7 @@ DeviceRecordDialog::DeviceRecordDialog(QWidget *parent, bool showkodi) :
 
     // Port / USB layout
     QWidget *portUsbWidget = new QWidget(this);
-    portUsbWidget->setGeometry(30, 300, 221, 30);
+    portUsbWidget->setGeometry(30, 160, 221, 30);
     QHBoxLayout *horizontalLayout = new QHBoxLayout(portUsbWidget);
     horizontalLayout->setContentsMargins(0, 0, 0, 0);
 
@@ -180,7 +171,7 @@ DeviceRecordDialog::DeviceRecordDialog(QWidget *parent, bool showkodi) :
 
     // Save / Cancel buttons
     QWidget *buttonWidget = new QWidget(this);
-    buttonWidget->setGeometry(30, 350, 145, 32);
+    buttonWidget->setGeometry(30, 210, 145, 32);
     QHBoxLayout *horizontalLayout_11 = new QHBoxLayout(buttonWidget);
     horizontalLayout_11->setContentsMargins(0, 0, 0, 0);
 
@@ -195,7 +186,7 @@ DeviceRecordDialog::DeviceRecordDialog(QWidget *parent, bool showkodi) :
 
     // Kodi fields (gridLayout)
     QWidget *kodiFieldsWidget = new QWidget(this);
-    kodiFieldsWidget->setGeometry(286, 164, 233, 117);
+    kodiFieldsWidget->setGeometry(286, 24, 233, 117);
     QGridLayout *gridLayout = new QGridLayout(kodiFieldsWidget);
     gridLayout->setContentsMargins(0, 0, 0, 0);
     gridLayout->setHorizontalSpacing(5);
@@ -245,8 +236,6 @@ DeviceRecordDialog::DeviceRecordDialog(QWidget *parent, bool showkodi) :
     connect(m_ostypeBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &DeviceRecordDialog::on_ostypeBox_currentIndexChanged);
 
-    connect(m_listDevicesp, &QListWidget::doubleClicked,
-            this, &DeviceRecordDialog::on_listDevicesp_doubleClicked);
     connect(m_listkodirootBox, &QListWidget::clicked,
             this, [this](const QModelIndex&) { on_listkodirootBox_clicked(); });
 
@@ -375,18 +364,6 @@ void DeviceRecordDialog::setversionLabel(const QString &versiontext)
 void DeviceRecordDialog::setostype(const QString &ostype)
 {
     m_ostypeBox->setCurrentIndex(ostype.toInt());
-}
-
-void DeviceRecordDialog::setdevicelist(const QStringList &dstringlist)
-{
-    if (dstringlist.count() < 1)
-        return;
-
-    QString tmpstr;
-    for (QStringList::const_iterator it = dstringlist.begin(); it != dstringlist.end(); ++it) {
-        tmpstr = *it;
-        m_listDevicesp->addItem(tmpstr);
-    }
 }
 
 void DeviceRecordDialog::setdaddr(const QString &daddr)
@@ -609,17 +586,6 @@ void DeviceRecordDialog::on_filepathButton_clicked()
     if (!dir.isEmpty()) {
         m_filepath->setText(dir);
     }
-}
-
-void DeviceRecordDialog::on_listDevicesp_doubleClicked(const QModelIndex &index)
-{
-    QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(this, "",
-        QStringLiteral("Copy this address?"),
-        QMessageBox::Yes | QMessageBox::No);
-    if (reply == QMessageBox::No)
-        return;
-    m_daddr->setText(index.data(Qt::DisplayRole).toString());
 }
 
 bool DeviceRecordDialog::disableroot() {
