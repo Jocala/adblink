@@ -3,7 +3,7 @@ Type=Application
 Name=adbLink
 GenericName=adbLink
 Comment=adbLink
-Exec=/home/name/adblink/adbLink
-Icon=/home/name/.local/share/icons/adblink.png
+Exec=adblink
+Icon=adblink
 Categories=Media;X-Gnome-Other;
 

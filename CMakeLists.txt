@@ -290,5 +290,54 @@ elseif(UNIX)
     )
 endif()
 
+# ---- Packaging: install rules ----
+install(TARGETS adblink
+    BUNDLE DESTINATION .
+    RUNTIME DESTINATION .
+)
+
+if(WIN32)
+    install(DIRECTORY "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.windows/"
+            DESTINATION ./adbfiles
+            USE_SOURCE_PERMISSIONS)
+elseif(APPLE)
+    install(DIRECTORY "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.macos/"
+            DESTINATION adblink.app/Contents/MacOS/adbfiles
+            USE_SOURCE_PERMISSIONS)
+else()
+    install(DIRECTORY "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.linux/"
+            DESTINATION ./adbfiles
+            USE_SOURCE_PERMISSIONS
+            PATTERN "icons" EXCLUDE)
+    install(FILES "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.linux/icons/adblink.desktop"
+            DESTINATION .)
+    install(FILES "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.linux/icons/adblink.png"
+            DESTINATION .)
+endif()
+
+# ---- CPack packaging ----
+set(CPACK_PACKAGE_NAME "adblink")
+set(CPACK_PACKAGE_VENDOR "jocala.com")
+set(CPACK_PACKAGE_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")
+set(CPACK_PACKAGE_VERSION_MINOR "${PROJECT_VERSION_MINOR}")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/license.txt")
+
+if(WIN32)
+    set(CPACK_GENERATOR "NSIS")
+    set(CPACK_NSIS_DISPLAY_NAME "adblink")
+    set(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")
+    set(CPACK_NSIS_MENU_LINKS "adblink.exe" "adblink")
+    set(CPACK_NSIS_CREATE_ICONS_EXTRA
+        "CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\adblink.lnk' '$INSTDIR\\\\adblink.exe'")
+    set(CPACK_NSIS_DELETE_ICONS_EXTRA
+        "Delete '$SMPROGRAMS\\\\$MUI_TEMP\\\\adblink.lnk'")
+elseif(APPLE)
+    set(CPACK_GENERATOR "DragNDrop")
+else()
+    set(CPACK_GENERATOR "TGZ")
+endif()
+
+include(CPack)
+
 enable_testing()
 add_subdirectory(tests)
