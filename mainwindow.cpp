@@ -1871,13 +1871,14 @@ void MainWindow::pollUsbDevices()
 
     for (const QString &serial : currentSerials) {
         if (m_dataManager->queryDeviceByDaddr(serial).daddr.isEmpty()) {
-            int n = 0;
-            QString name;
-            do {
-                name = n == 0 ? QStringLiteral("UnknownUSB")
-                              : QStringLiteral("UnknownUSB%1").arg(n);
-                n++;
-            } while (m_dataManager->descriptionExists(name));
+            QString name = serial;
+            if (m_dataManager->descriptionExists(name)) {
+                int n = 2;
+                do {
+                    name = QStringLiteral("%1-%2").arg(serial).arg(n);
+                    n++;
+                } while (m_dataManager->descriptionExists(name));
+            }
 
             QSqlQuery query;
             query.prepare(QStringLiteral(
