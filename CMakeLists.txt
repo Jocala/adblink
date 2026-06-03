@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(adblink VERSION 7.3 LANGUAGES CXX)
+project(adblink VERSION 8.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

@@ -1,3 +1,26 @@
+06/XX/26
+
+adblink.8.0
+
+Migrated from Qt 5.15 to Qt 6.11.1
+Major codebase refactoring and modularization
+Converted all .ui files to pure C++ UI code
+Switched build system from QMake to CMake
+USB device polling with automatic addition of unknown devices
+Double-click now toggles device connection status
+Improved device table showing USB names and better scrolling
+Async Kodi downloader
+Automated program bundling via CMake
+Fixed multiple busy-wait loops across the codebase
+Fixed getAdbPath() for bypassed local ADB
+Fixed scoped storage detection
+Fixed ADB install and package name handling
+Fixed QProcess timing loops and busybox detection
+Large-scale dead code removal
+Converted global variables to member variables
+Full CMake modernization
+Version bumped to 8.0
+
 10/05/25
 
 adblink.7.2
