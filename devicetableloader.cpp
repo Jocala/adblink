@@ -11,6 +11,7 @@
 #include <QStringList>
 #include <QFont>
 #include <QAbstractItemView>
+#include <QScrollBar>
 
 DeviceTableLoader::DeviceTableLoader(QObject *parent)
     : QObject(parent)
@@ -33,6 +34,8 @@ void DeviceTableLoader::loadTable(QTableWidget *table, int windowSizeSelector,
         if (table->item(row, 0) && table->item(row, 0)->isSelected())
             selectedDescriptions.insert(table->item(row, 0)->text());
     }
+
+    int savedScroll = table->verticalScrollBar()->value();
 
     table->clearContents();
     table->setRowCount(0);
@@ -115,6 +118,8 @@ void DeviceTableLoader::loadTable(QTableWidget *table, int windowSizeSelector,
         if (table->item(r, 0) && selectedDescriptions.contains(table->item(r, 0)->text()))
             table->selectRow(r);
     }
+
+    table->verticalScrollBar()->setValue(savedScroll);
 
     table->updateGeometry();
     table->viewport()->update();
