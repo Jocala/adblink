@@ -8,7 +8,6 @@
         <file>assets/kodi.html</file>
         <file>assets/busybox.html</file>
         <file>assets/switch.html</file>
-        <file>assets/perms.html</file>
         <file>assets/about.html</file>
         <file>assets/adbwifi.html</file>
         <file>assets/main.html</file>
@@ -20,7 +19,6 @@
         <file>assets/keyboard.html</file>
         <file>assets/backup.html</file>
         <file>assets/cache.html</file>
-        <file>assets/nonandroid.html</file>
         <file>assets/console.html</file>
         <file>assets/editor.html</file>
         <file>assets/createkodi.html</file>
@@ -28,9 +26,7 @@
         <file>assets/offline.html</file>
         <file>assets/menu.html</file>
         <file>assets/preferences.html</file>
-        <file>assets/project.html</file>
         <file>assets/fileman.html</file>
-        <file>assets/rbreco.html</file>
         <file>assets/reboot.html</file>
         <file>assets/reload.html</file>
         <file>assets/remote.html</file>
@@ -48,7 +44,6 @@
         <file>assets/erase.html</file>
         <file>assets/download.html</file>
         <file>assets/package.html</file>
-        <file>assets/path2clip.html</file>
         <file>assets/buttons.html</file>
         <file>assets/build.html</file>
         <file>assets/fabout.html</file>

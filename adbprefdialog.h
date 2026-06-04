@@ -23,7 +23,6 @@ public:
     QString installdir() const;
     QString backupdir() const;
     QString localadb() const;
-    QString donation() const;
     bool versioncheck() const;
     bool scrcpyargs() const;
     bool startview() const;
@@ -41,7 +40,6 @@ public:
     void setinstalldir(const QString &dir);
     void setbackupdir(const QString &dir);
     void setlocaladb(const QString &path);
-    void setdonation(const QString &code);
     void setversioncheck(bool val);
     void setscrcpyargs(bool val);
     void setstartview(bool val);
@@ -82,7 +80,6 @@ private:
     QComboBox *macTermCombo;
     QComboBox *linTermCombo;
 
-    QLineEdit *donationEdit;
     QLineEdit *downloadPathEdit;
     QLineEdit *installPathEdit;
     QLineEdit *backupPathEdit;

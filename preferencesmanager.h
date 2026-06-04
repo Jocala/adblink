@@ -10,7 +10,6 @@ struct PreferencesResult {
     int mdFontIndex = 0;
     int smFontIndex = 0;
     int fmFontIndex = 0;
-    QString donationValue;
 };
 
 class PreferencesManager

@@ -141,7 +141,6 @@ private slots:
     QString readInstall(QString databasedir);
     void TimerEvent();
     QString RunLongProcess(QString cstring, QString jobname);
-    QString readDonationValue();
     void rotate_logfile();
     void logfile2(QString line);
     bool fileExists(QString path);
@@ -202,7 +201,6 @@ private:
     QStringList RunProcessList;
     QPushButton* setupDonateButton(QWidget* parent);
     QPushButton* donateButton;
-    void setDonateButtonActive(bool active);
 
     void setupMenuBar();
     void setupFileMenu();

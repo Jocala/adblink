@@ -27,7 +27,6 @@ bool PreferencesManager::exec(QWidget *parent)
     int mcheck = obj["dropdown"].toInt();
     QString install = obj["install"].toString();
     QString backup = obj["backup"].toString();
-    QString donation = obj["donation"].toString();
     QString localadb = obj["localadb"].toString();
 
     bool checkversion = doc.object()["checkversion"].toBool();
@@ -52,7 +51,6 @@ bool PreferencesManager::exec(QWidget *parent)
     dialog.setlocaladb(localadb);
     dialog.setinstalldir(install);
     dialog.setbackupdir(backup);
-    dialog.setdonation(donation);
     dialog.setfmfont(fmfont);
     dialog.setlgfont(lgfont);
     dialog.setmdfont(mdfont);
@@ -72,7 +70,6 @@ bool PreferencesManager::exec(QWidget *parent)
     obj["scrcpy"] = dialog.scrcpyargs();
     obj["startview"] = dialog.startview();
     obj["defaultwindow"] = dialog.defaultwindow();
-    obj["donation"] = dialog.donation();
     obj["download"] = dialog.downloaddir();
     obj["install"] = dialog.installdir();
     obj["backup"] = dialog.backupdir();
@@ -92,8 +89,7 @@ bool PreferencesManager::exec(QWidget *parent)
         dialog.lgfont(),
         dialog.mdfont(),
         dialog.smfont(),
-        dialog.fmfont(),
-        dialog.donation()
+        dialog.fmfont()
     };
 
     return true;

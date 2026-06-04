@@ -277,8 +277,6 @@
 
 
         donateButton = setupDonateButton(statusBar);
-        QString donation = m_dataManager->readDonationValue(jsonstring);
-        setDonateButtonActive(donation != "jocala.com");
 
         container = new QWidget(statusBar);
         container->setFixedHeight(statusBar->height());
@@ -429,21 +427,6 @@
     }
 
 
-
-    void MainWindow::setDonateButtonActive(bool active) {
-         if (donateButton) {
-      donateButton->setVisible(active);
-      donateButton->setEnabled(active);
-         } else {
-
-         }
-    }
-
-
-
-    QString MainWindow::readDonationValue() {
-        return m_dataManager->readDonationValue(jsonstring);
-    }
 
     /////////////////////////////////////////////////////
     void MainWindow::TimerEvent()
@@ -822,7 +805,7 @@
     {
 
 
-       QString link = "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hm_osted_button_id=GKZMW456H6E5W";
+       QString link = "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=GKZMW456H6E5W";
        QDesktopServices::openUrl(QUrl(link));
 
     }
@@ -1142,7 +1125,6 @@
              return;
 
          PreferencesResult r = mgr.result();
-         setDonateButtonActive(r.donationValue != "jocala.com");
 
          switch (r.lgFontIndex) {
          case 0: lfontsize = 14; break;
@@ -2001,16 +1983,13 @@ QPushButton* MainWindow::setupDonateButton(QWidget* parent) {
        "QPushButton:hover {"
        "   background: rgba(200, 200, 200, 50);"
        "}"
-       );
-   if (QMetaObject::checkConnectArgs(SIGNAL(clicked()), SLOT(on_donate_clicked()))) {
-        connect(donateButton, &QPushButton::clicked, this, &MainWindow::on_donate_clicked);
-    }
+        );
+    connect(donateButton, &QPushButton::clicked, this, &MainWindow::on_donate_clicked);
 
+    donateButton->setVisible(true);
+    donateButton->setEnabled(true);
 
-   QString donation = readDonationValue();
-   setDonateButtonActive(donation != "jocala.com");
-
-   return donateButton;
+    return donateButton;
 }
 
 /////////////////////////////////////////////////
