@@ -14,10 +14,12 @@ command to poll for newly attached USB devices. When a USB device
 serial number is discovered that does not already exist in the
 database, adbLink automatically inserts a new device record.
 <p>
-The auto-created record uses these default values:
+The auto-created record uses the device's USB serial number as its
+description, making it easy to identify which physical device the record
+represents. Other default values are:
 <p>
 <table border="0" cellpadding="3" cellspacing="0">
-<tr><td><b>Description</b></td><td>"UnknownUSB" (numbered if duplicate, e.g. "UnknownUSB1")</td></tr>
+<tr><td><b>Description</b></td><td>The device's USB serial number (e.g. "G0909N1823520BPE")</td></tr>
 <tr><td><b>daddr (serial)</b></td><td>USB serial number from adb devices output</td></tr>
 <tr><td><b>isusb</b></td><td>true</td></tr>
 <tr><td><b>ostype</b></td><td>"0"</td></tr>
@@ -77,7 +79,7 @@ flag2 (WSA), flag3, flag4, and flag5 (scrcpy args).
 <p>
 
 If you have questions or comments, please email jocala@jocala.com
-or visit one of the forums linked below. adbLink produces a log
+ adbLink produces a log
 file, adblink.log, with each run. Include it in your email or
 post if you're having problems.
 <p>

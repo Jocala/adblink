@@ -6,26 +6,26 @@
 
 Other than <a href="atvsetup.html">device settings</a> specific to your system, there is little required for a basic connection between your media device and adbLink.
 <p>
-If you are connecting your device via a USB cable, pressing "Refresh ADB" after the connection should cause the USB serial number of the device to appear in the "Connected devices" list box. You are now ready to use other adbLink features such as installing Kodi, doing backups, etc.
+If you are connecting your device via a USB cable, plug in the cable and enable USB debugging on the device. adbLink polls every three seconds and will auto-detect the device, adding it to the device table. You are now ready to use other adbLink features such as installing Kodi, doing backups, etc.
 <p>
-If you are connecting your device via IP adress, enter the IP address into the "Ad Hoc IP" text entry field, then press "Connect". The IP address will appear in the "Connected devices" list box. You are now ready to use other adbLink features such as installing Kodi, doing backups, etc.
+If you are connecting your device via IP address, enter the IP address into the "Ad Hoc IP" text entry field, then press "Connect". The device will appear in the device table. You are now ready to use other adbLink features such as installing Kodi, doing backups, etc.
 <p>
 
 
-You may also create a record for your device. Records allow you to maintain multiple media devices, without the the need to remember their IP addresses, and allow you to reference devices by a descriptive name. Using records you can also specify custom Kodi locations on your system, such as sd cards or usb thumb drives. Device records are optional for Kodi systems, but required for Kodi forks such as SPMC.
+You may also create a record for your device. Records allow you to maintain multiple media devices, without the need to remember their IP addresses, and allow you to reference devices by a descriptive name. Using records you can also specify custom Kodi locations on your system, such as sd cards or usb thumb drives. Device records are optional for Kodi systems, but required for Kodi forks such as SPMC.
 
 <p>
 Adding a device record with adbLink
 <p>
 1. Connect to your device, using the instructions above.<p>
 2. Press the "New" button. This will bring up a blank device record screen.<p>
-3. Double-click the device USB serial number or IP address in the in the "Connected Devices" listbox. This will fill in the "Address" field for the record.<p>
+3. Fill in the device fields manually, or type/paste the USB serial number or IP address into the Address field.<p>
 
 Record data fields:
 <p>
 Description:
-A description for the device, e.g. Livingroom TV. A description must be unique. You couldn't have
-two devices named "Livingroom TV".
+A description for the device, e.g. Living room TV. A description must be unique. You couldn't have
+two devices named "Living room TV".
 <p>
 Address. The address of this new device. It can be an IP address or a USB serial number. If you've
 selected a non-Android OS, this field is inactive.
@@ -35,7 +35,7 @@ Kodi Partition: For Android the default is /sdcard/ For other OSes, this field i
 Media Center Package name: For Android the default is org.xbmc.kodi For other OSes, this field is inactive.
 <p>
 File Path: This the path to Kodi's data folder. For Android it defaults to /files/.kodi, on other OSes the path changes.
-When you choose the OS, this field is filled in with a reasonable default.  You can also use the File Path button
+When you choose the OS, this field is filled in with a reasonable default. You can also use the File Path button
 to browse your local computer for the Kodi data area.
 <p>
 Pull Folder: This will allow you to set the file path for files copied from your Android device to be sent to.
@@ -44,10 +44,8 @@ USB checkbox. Check this for USB-connected devices<br>
 <p>
 IP address port: Default is 5555.
 <p>
-Connected devices:  This listbox shows the USB serial number or IP address of currently connected devices.
+Scoped storage checkbox. Check this if your device enforces scoped storage (Android 11+).
 <p>
-Double-clicking an item in this box will copy its value to the Address field. This is useful when setting up a new record for a connected device.
-<p>
-If you have questions or comments, please email jocala@jocala.com or visit one of the forums linked below. adbLink produces a log file, adblink.log, with each run. Include it in your email or post if you're having problems.<p>
+If you have questions or comments, please email jocala@jocala.com adbLink produces a log file, adblink.log, with each run. Include it in your email or post if you're having problems.<p>
 <a href="menu.html">main menu</a>
 </body></html>

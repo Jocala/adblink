@@ -1,0 +1,33 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>USB Device Naming</title></head><body>
+
+<b><u>USB Device Naming</u></b><br>
+<p>
+When adbLink automatically detects a new USB-connected Android device,
+it creates a device record using the device's <b>USB serial number</b>
+as the description. For example, a device with serial
+<code>G0909N1823520BPE</code> will appear in the device table with
+that exact identifier.
+<p>
+Previously, auto-detected devices were named "UnknownUSB",
+"UnknownUSB1", etc. Using the serial number makes it immediately
+obvious which physical device each record represents — the serial
+matches the identifier shown on the device hardware sticker or in
+Android Settings → About → Status.
+<p>
+If a serial number happens to conflict with an existing device
+description, adbLink appends a number to make it unique. For example,
+if "ABC123" is already in use, the new record will be named
+"ABC123-2", "ABC123-3", and so on.
+<p>
+You can rename any device at any time by selecting it and pressing
+<b>Edit</b> (Ctrl+W). The serial number stored in the daddr field
+remains unchanged — only the display name is updated.
+<p>
+If you have questions or comments, please email jocala@jocala.com
+ adbLink produces a log
+file, adblink.log, with each run. Include it in your email or
+post if you're having problems.
+<p>
+<a href="menu.html">main menu</a>
+</body></html>

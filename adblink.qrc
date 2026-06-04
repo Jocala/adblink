@@ -47,8 +47,10 @@
         <file>assets/quest.html</file>
         <file>assets/erase.html</file>
         <file>assets/download.html</file>
+        <file>assets/package.html</file>
         <file>assets/path2clip.html</file>
         <file>assets/buttons.html</file>
+        <file>assets/build.html</file>
         <file>assets/fabout.html</file>
         <file>assets/logcat.html</file>
         <file>assets/startstop.html</file>
@@ -59,6 +61,7 @@
         <file>assets/showarch.html</file>
         <file>assets/timers.html</file>
         <file>assets/android11.html</file>
+        <file>assets/usbserial.html</file>
         <file>assets/scrcpy.html</file>
         <file>assets/delthumb.html</file>
         <file>assets/xapk.html</file>

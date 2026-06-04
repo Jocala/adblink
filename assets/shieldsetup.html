@@ -1,28 +1,70 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html><head><title>adbLink</title></head><body>
+<html><head><title>Android TV Setup</title></head><body>
 
-<b><u>Set up Nvidia Shield</u></b><br>
-Prior to using <b>adbLink</b> there are setup steps required on the Nvidia Shield itself:<p>
-From the main (Launcher) screen of Shield, select "Settings".<p>
-Select About<p>
-Scroll down to "Build"<p>
-Click "Build" six or seven times. This will tun on "Developer Options"<p>
-In the "Preferences" section of settings, open "Developer options"<p>
-Turn USB debugging On<p>
-Turn Network debugging On<p>
-Under Settings->Personal->Security, turn "Unknown sources" On.<p>
-Under Settings->Device->Network, make note of your IP address<p>
+<b><u>Android TV / Google TV Setup</u></b><br>
 <p>
-Next, connect your Shield to your PC via the supplied USB cable.
-A dialog will pop-up on the Shield asking you to authorize your
-connection. Confirm the connection and tell the Shield to remember it.
+adbLink is tested with the Nvidia Shield, Chromecast with Google TV,
+and other Android TV OS devices running Android 11 and later. Device
+menu labels may vary slightly between manufacturers and OS versions.
 <p>
-This initial connection via USB is required. Once you have authorized
-the USB connection, your connection via IP address will be authorized
-as well.
 
-
+<b>1. Enable Developer Options</b><br>
+Go to <b>Settings</b> → <b>System</b> → <b>About</b> (on some devices:
+<b>Settings</b> → <b>Device Preferences</b> → <b>About</b>).<br>
+Scroll down to <b>Build</b> and press the select button seven times.
+You will see a message that Developer Options are enabled.
 <p>
-If you have questions or comments, please email jocala@jocala.com or visit one of the forums linked below. adbLink produces a log file, adblink.log, with each run. Include it in your email or post if you're having problems.<p>
+
+<b>2. Enable USB Debugging</b><br>
+Go to <b>Settings</b> → <b>System</b> → <b>Developer Options</b>.<br>
+Turn <b>USB debugging</b> ON. This is required even for Wi-Fi
+connections on most devices.
+<p>
+
+<b>3. Enable Wireless Debugging (Android 11+)</b><br>
+In <b>Developer Options</b>, turn <b>Wireless debugging</b> ON.
+Confirm the dialog that appears.
+<p>
+Tap <b>Wireless debugging</b> to see details. You will see an
+IP address and port (e.g. 192.168.1.100:12345) and a pairing code.
+The pairing code is needed for the initial wireless connection.
+<p>
+From your computer, pair with the device using adbLink's console
+or a terminal:
+<p>
+<tt>adb pair 192.168.1.100:12345</tt><br>
+<tt>Enter pairing code: 123456</tt><br>
+<tt>adb connect 192.168.1.100:12345</tt>
+<p>
+After pairing, you can connect normally using adbLink's Connect
+button with the standard ADB port (5555).
+<p>
+
+<b>4. Allow Unknown Apps</b><br>
+Go to <b>Settings</b> → <b>Apps</b> → <b>Special app access</b>
+→ <b>Install unknown apps</b>. Enable permission for any file
+manager app you use. This allows sideloading applications such
+as Kodi.
+<p>
+
+<b>5. Find Your IP Address</b><br>
+Go to <b>Settings</b> → <b>Network & Internet</b>. Select your
+Wi-Fi network to see your IP address (e.g. 192.168.1.101).
+<p>
+
+<b>6. Connect via adbLink</b><br>
+For USB: plug your device into the computer. A dialog will appear
+on the device asking you to authorize. Check <b>Always allow</b>
+and confirm. adbLink will auto-detect the device within a few seconds.
+<p>
+For Wi-Fi (after wireless pairing): enter the IP address into the
+<b>Ad Hoc IP</b> field in adbLink and press <b>Connect</b>.
+<p>
+
+If you have questions or comments, please email jocala@jocala.com
+ adbLink produces a log
+file, adblink.log, with each run. Include it in your email or
+post if you're having problems.
+<p>
 <a href="menu.html">main menu</a>
 </body></html>

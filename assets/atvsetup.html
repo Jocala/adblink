@@ -1,61 +1,58 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html><head><title>adbLink Setup</title></head><body>
+<html><head><title>Fire TV Setup</title></head><body>
 
-adbLink is tested using the Amazon Fire TV , the Nvidia Shield and the Mi Box 3.
+<b><u>Amazon Fire TV / Fire Stick Setup</u></b><br>
 <p>
-
-To allow adbLink to install Kodi the device needs some settings changes and you need the device IP address. The changes below apply to Amazon Fire TV/Stick and Android TV devices.
+adbLink is tested with Fire OS 7 and Fire OS 8 devices. These
+instructions apply to Fire TV Stick 4K, Fire TV Stick 4K Max,
+Fire TV Cube, and Fire TV Omni series.
 <p>
+Note: newer Fire TV devices (2023 and later) do not have USB ports.
+Connections are made via Wi-Fi only.
 
-
-
-<b><u>Amazon Fire TV/Stick</b></u><br>
-
-
-From the main (Launcher) screen of AFTV, select Settings.
 <p>
-
-1. Your IP Address is found under Settings > About > network. Make note of this address.
-<p>
-
-2. Select Device > Developer Options.
-Turn ADB debugging on.
-<p>
-For USB connections, turn USB debugging on.
-Please note that USB connections disable external storage.
-<p>
-Turn Apps from unknown sources on. This allows you to install
- non-store applications, e.g. Kodi.
+<b>1. Enable Developer Options</b><br>
+From the Fire TV home screen, go to <b>Settings</b> → <b>My Fire TV</b>
+→ <b>About</b>.<br>
+Highlight your device name and press the select button on your remote
+seven times. You will see a message that Developer Options are enabled.
 <p>
 
+<b>2. Enable ADB Debugging</b><br>
+Go back to <b>Settings</b> → <b>My Fire TV</b> → <b>Developer Options</b>.<br>
+Turn <b>ADB debugging</b> ON.<br>
+If available, also turn <b>USB debugging</b> ON.
+<p>
 
-<b><u>Android TV (Nvidia Shield, Mi Box 3)</b></u><br>
+<b>3. Allow Unknown Apps</b><br>
+In <b>Developer Options</b>, turn <b>Install unknown apps</b> ON.
+This allows you to sideload applications such as Kodi.
+<p>
 
-From the main (Launcher) screen, select "Settings".
+<b>4. Find Your IP Address</b><br>
+Go to <b>Settings</b> → <b>Network</b>. Select your Wi-Fi network and
+press the Play/Pause button on your remote to see details. Make note of
+your IP address (e.g. 192.168.1.100).
 <p>
-Select About
+
+<b>5. Connect via adbLink</b><br>
+Enter the IP address into the <b>Ad Hoc IP</b> field in adbLink and
+press <b>Connect</b>. If this is your first connection, a dialog will
+appear on the Fire TV asking you to authorize. Check <b>Always allow</b>
+and confirm.
 <p>
-Scroll down to "Build"
+
+<b>Wireless Debugging (Fire OS 8)</b><br>
+Fire OS 8 (Android 11) supports wireless debugging. If ADB over Wi-Fi
+is not working, go to <b>Developer Options</b> → <b>Wireless debugging</b>
+and turn it ON. Use the pairing code shown on screen with the
+<tt>adb pair</tt> command if prompted.
 <p>
-Click "Build" six or seven times. This will tun on "Developer Options"
+
+If you have questions or comments, please email jocala@jocala.com
+ adbLink produces a log
+file, adblink.log, with each run. Include it in your email or
+post if you're having problems.
 <p>
-In the "Preferences" section of settings, open "Developer options"
-<p>
-Turn USB debugging On<br>
-Turn Network debugging On (if available)
-<p>
-Under Settings->Personal->Security, turn "Unknown sources" On.
-<p>
-Under Settings->Device->Network, make note of your IP address
-<p>
-Next, connect your device to your PC via the supplied USB cable. A dialog will pop-up on the device asking you to authorize your connection. Confirm the connection and tell the Shield to remember it.
-<p>
-This initial connection via USB is required. Once you have authorized the USB connection, your connection via IP address will be authorized as well.
-<p>
-Your device is now ready to accept Kodi installation via adbLink.
-<p>
-Please explore adbLink's help menu for more information.
-<p>
-If you have questions or comments, please email jocala@jocala.com or visit one of the forums linked below. adbLink produces a log file, adblink.log, with each run. Include it in your email or post if you're having problems.<p>
 <a href="menu.html">main menu</a>
 </body></html>
