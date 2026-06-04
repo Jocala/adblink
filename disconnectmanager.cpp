@@ -32,10 +32,12 @@ void DisconnectManager::disconnectDevice(QWidget *parentWidget, QTableWidget *de
 
     QString daddr = deviceTable->item(selectedRow, 1)->text();
 
-    QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(parentWidget, "Disconnect", "Disconnect device?",
-                                  QMessageBox::Yes | QMessageBox::No);
-    if (reply == QMessageBox::No)
+    QMessageBox msgBox(parentWidget);
+    msgBox.setWindowTitle("Disconnect");
+    msgBox.setText("Disconnect device?");
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setWindowModality(Qt::WindowModal);
+    if (msgBox.exec() == QMessageBox::No)
         return;
 
     QString cstring = getadbpath() + " disconnect " + daddr;

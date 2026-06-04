@@ -333,7 +333,6 @@ private:
     QAction *actionEdit_XML;
     QAction *actionSwitch_View;
     QAction *actionReload_devices;
-    QAction *actionOculus;
     QAction *actionSize;
 
     const QSize lMainWindowSize = QSize(850, 525);

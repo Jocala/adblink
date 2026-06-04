@@ -1910,6 +1910,14 @@ void MainWindow::on_infoArchitecture_triggered()
 
 void MainWindow::on_actionSwitch_View_triggered()
 {
+   QMessageBox msgBox(this);
+   msgBox.setWindowTitle(QStringLiteral("Switch View"));
+   msgBox.setText(QStringLiteral("Switch between Kodi and Android view?"));
+   msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+   msgBox.setWindowModality(Qt::WindowModal);
+   if (msgBox.exec() == QMessageBox::No)
+       return;
+
    // Read existing JSON to preserve other data
    QJsonObject jsonObj;
    QFile jsonFile(databasedir + "/adblink.json");
@@ -2649,7 +2657,6 @@ void MainWindow::setupUtilityMenu()
     actionSwitch_View = new QAction("Switch View", this);
     actionReiinstall_Busybox = new QAction("Reinstall Busybox", this);
     infoArchitecture2 = new QAction("System information", this);
-    actionOculus = new QAction("Oculus Headset", this);
     Erase_adbLink_database = new QAction("Initialize adblink", this);
     actionSend_text = new QAction("Send text to device", this);
     actionGet_UID_from_APK_file = new QAction("Get package name", this);
@@ -2660,7 +2667,6 @@ void MainWindow::setupUtilityMenu()
     menuUtility->addAction(actionSwitch_View);
     menuUtility->addAction(actionReiinstall_Busybox);
     menuUtility->addAction(infoArchitecture2);
-    menuUtility->addAction(actionOculus);
     menuUtility->addAction(Erase_adbLink_database);
     menuUtility->addAction(actionSend_text);
     menuUtility->addAction(actionGet_UID_from_APK_file);
@@ -2711,6 +2717,5 @@ void MainWindow::setupMenuConnections()
     connect(actionWireless_ADBD,        &QAction::triggered, this, &MainWindow::on_actionWireless_ADBD_triggered);
     connect(actionReboot,               &QAction::triggered, this, &MainWindow::on_actionReboot_triggered);
     connect(actionAbout,                &QAction::triggered, this, &MainWindow::on_actionAbout_triggered);
-    connect(actionOculus,               &QAction::triggered, this, &MainWindow::on_actionOculus_VR_triggered);
     connect(actionHelp,                 &QAction::triggered, this, &MainWindow::on_actionHelp_triggered);
 }
