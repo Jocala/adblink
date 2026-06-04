@@ -408,6 +408,7 @@
 
     void MainWindow::onApplicationQuit() {
 
+      m_usbPollTimer->stop();
 
       QString cstring = getadbpath() + " kill-server";
      QString command=getadbOutput(cstring);
