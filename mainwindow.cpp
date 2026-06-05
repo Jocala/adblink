@@ -380,9 +380,10 @@
 
              setWindowSize();
 
-             m_usbPollTimer = new QTimer(this);
-             connect(m_usbPollTimer, &QTimer::timeout, this, &MainWindow::pollUsbDevices);
-             m_usbPollTimer->start(3000);
+             m_trackDebounce = new QTimer(this);
+             m_trackDebounce->setSingleShot(true);
+             connect(m_trackDebounce, &QTimer::timeout, this, &MainWindow::applyDebouncedRefresh);
+             startTrackDevices();
 
              do_versioncheck();
 
@@ -408,7 +409,12 @@
 
     void MainWindow::onApplicationQuit() {
 
-      m_usbPollTimer->stop();
+      m_quitting = true;
+
+      if (m_trackDevicesProcess) {
+          m_trackDevicesProcess->kill();
+          m_trackDevicesProcess->waitForFinished(1000);
+      }
 
       QString cstring = getadbpath() + " kill-server";
      QString command=getadbOutput(cstring);
@@ -1781,6 +1787,38 @@ void MainWindow::deleteRecord(QString descrip)
     m_dataManager->deleteRecord(descrip);
 }
 
+void MainWindow::onDeviceTableContextMenu(const QPoint &pos)
+{
+    QModelIndex index = deviceTable->indexAt(pos);
+    if (!index.isValid())
+        return;
+    deviceTable->selectRow(index.row());
+
+    QString status = deviceTable->item(index.row(), 2)
+        ? deviceTable->item(index.row(), 2)->text() : QString();
+    QString ip = deviceTable->item(index.row(), 1)
+        ? deviceTable->item(index.row(), 1)->text() : QString();
+    bool isUsb = ip == QLatin1String("USB");
+
+    QMenu menu(this);
+    QAction *connectAction    = menu.addAction(QStringLiteral("Connect"));
+    QAction *disconnectAction = menu.addAction(QStringLiteral("Disconnect"));
+    menu.addSeparator();
+    QAction *editAction       = menu.addAction(QStringLiteral("Edit"));
+    QAction *deleteAction     = menu.addAction(QStringLiteral("Delete"));
+
+    connectAction->setEnabled(status != QStringLiteral("Connected") && !isUsb);
+    disconnectAction->setEnabled(status == QStringLiteral("Connected") && !isUsb);
+    deleteAction->setEnabled(status != QStringLiteral("Connected"));
+
+    connect(connectAction,    &QAction::triggered, this, &MainWindow::connButton_clicked);
+    connect(disconnectAction, &QAction::triggered, this, &MainWindow::disButton_clicked);
+    connect(editAction,       &QAction::triggered, this, [this] { dataentry(false); });
+    connect(deleteAction,     &QAction::triggered, this, &MainWindow::delRecordButton_clicked);
+
+    menu.exec(deviceTable->viewport()->mapToGlobal(pos));
+}
+
 void MainWindow::on_Erase_adbLink_database_triggered()
 {
     m_databaseResetManager->resetDatabase(this, databasedir);
@@ -1831,65 +1869,101 @@ void MainWindow::displayOff()
 
 
 
-void MainWindow::pollUsbDevices()
+void MainWindow::startTrackDevices()
 {
-    QString output = getadbOutput(getadbpath() + " devices");
+    if (m_trackDevicesProcess) {
+        m_trackDevicesProcess->kill();
+        m_trackDevicesProcess->deleteLater();
+        m_trackDevicesProcess = nullptr;
+    }
 
-    m_usbStatusCache.clear();
-    QStringList currentSerials;
+    m_trackDevicesProcess = new QProcess(this);
+    connect(m_trackDevicesProcess, &QProcess::readyReadStandardOutput,
+            this, &MainWindow::onTrackOutput);
+    connect(m_trackDevicesProcess, &QProcess::finished,
+            this, &MainWindow::onTrackFinished);
 
-    for (const QString &line : output.split('\n', Qt::SkipEmptyParts)) {
-        if (line.startsWith("List of devices") || line.contains("daemon"))
+    m_trackDevicesProcess->start(getadbpath(), QStringList() << QStringLiteral("track-devices"));
+}
+
+void MainWindow::onTrackOutput()
+{
+    while (m_trackDevicesProcess->canReadLine()) {
+        QByteArray line = m_trackDevicesProcess->readLine().trimmed();
+        if (line.isEmpty())
             continue;
-        QString serial = line.section('\t', 0, 0).trimmed();
-        QString status = line.section('\t', 1, 1).trimmed();
+
+        QString lineStr = QString::fromLatin1(line);
+        QString serial = lineStr.section('\t', 0, 0).trimmed();
+        int firstLetter = 0;
+        while (firstLetter < serial.length() && serial.at(firstLetter).isDigit())
+            firstLetter++;
+        if (firstLetter > 0)
+            serial = serial.mid(firstLetter);
+        QString status = lineStr.section('\t', 1, 1).trimmed();
         if (serial.isEmpty())
             continue;
 
-        m_usbStatusCache[serial] = status;
-
-        if (!serial.contains(':'))
-            currentSerials.append(serial);
+        if (status == QLatin1String("offline"))
+            m_usbStatusCache.remove(serial);
+        else
+            m_usbStatusCache[serial] = status;
     }
 
-    for (const QString &serial : currentSerials) {
-        if (m_dataManager->queryDeviceByDaddr(serial).daddr.isEmpty()) {
-            QString name = serial;
-            if (m_dataManager->descriptionExists(name)) {
-                int n = 2;
-                do {
-                    name = QStringLiteral("%1-%2").arg(serial).arg(n);
-                    n++;
-                } while (m_dataManager->descriptionExists(name));
-            }
+    m_trackDebounce->start(150);
+}
 
-            QSqlQuery query;
-            query.prepare(QStringLiteral(
-                "INSERT INTO device (description, daddr, port, isusb, ostype, "
-                "data_root, xbmcpackage, pulldir, disableroot, filepath, flag5) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"));
-            query.addBindValue(name);
-            query.addBindValue(serial);
-            query.addBindValue(QString());
-            query.addBindValue(true);
-            query.addBindValue(QStringLiteral("0"));
-            query.addBindValue(QStringLiteral("/sdcard/"));
-            query.addBindValue(QStringLiteral("org.xbmc.kodi"));
-            query.addBindValue(QString());
-            query.addBindValue(false);
-            query.addBindValue(QStringLiteral("files/.kodi"));
-            query.addBindValue(QString());
-            if (!query.exec())
-                logfile("Auto-add USB device failed: " + query.lastError().text());
-            else
-                logfile("Auto-added USB device: " + serial + " as " + name);
+void MainWindow::onTrackFinished(int /*exitCode*/, QProcess::ExitStatus /*exitStatus*/)
+{
+    if (!m_quitting)
+        QTimer::singleShot(1000, this, &MainWindow::startTrackDevices);
+}
+
+void MainWindow::applyDebouncedRefresh()
+{
+    for (auto it = m_usbStatusCache.begin(); it != m_usbStatusCache.end(); ++it) {
+        const QString &serial = it.key();
+        if (serial.contains(QLatin1Char(':')))
+            continue;
+        if (it.value() != QLatin1String("device"))
+            continue;
+        if (!m_dataManager->queryDeviceByDaddr(serial).daddr.isEmpty())
+            continue;
+
+        QString name = serial;
+        if (m_dataManager->descriptionExists(name)) {
+            int n = 2;
+            do {
+                name = QStringLiteral("%1-%2").arg(serial).arg(n);
+                n++;
+            } while (m_dataManager->descriptionExists(name));
         }
+
+        QSqlQuery query;
+        query.prepare(QStringLiteral(
+            "INSERT INTO device (description, daddr, port, isusb, ostype, "
+            "data_root, xbmcpackage, pulldir, disableroot, filepath, flag5) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"));
+        query.addBindValue(name);
+        query.addBindValue(serial);
+        query.addBindValue(QString());
+        query.addBindValue(true);
+        query.addBindValue(QStringLiteral("0"));
+        query.addBindValue(QStringLiteral("/sdcard/"));
+        query.addBindValue(QStringLiteral("org.xbmc.kodi"));
+        query.addBindValue(QString());
+        query.addBindValue(false);
+        query.addBindValue(QStringLiteral("files/.kodi"));
+        query.addBindValue(QString());
+        if (!query.exec())
+            logfile("Auto-add USB device failed: " + query.lastError().text());
+        else
+            logfile("Auto-added USB device: " + serial + " as " + name);
     }
 
     if (!QApplication::activeModalWidget())
         loadDeviceTableX(deviceTable);
 }
-
 
 void MainWindow::on_actionReload_devices_triggered()
 {
@@ -2065,6 +2139,10 @@ default:
 }
 deviceTable->setFont(tableFont);
 upperLayout->addWidget(deviceTable);
+
+deviceTable->setContextMenuPolicy(Qt::CustomContextMenu);
+connect(deviceTable, &QTableWidget::customContextMenuRequested,
+        this, &MainWindow::onDeviceTableContextMenu);
 
 cosmeticGap = new QSpacerItem(12, 0, QSizePolicy::Fixed, QSizePolicy::Minimum);
 upperLayout->addItem(cosmeticGap);

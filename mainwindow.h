@@ -111,7 +111,7 @@ private slots:
     void onApplicationQuit();
     bool validateDeviceSelection(QString& selectedDescription);
     void loadDeviceTableX(QTableWidget* table);
-    void pollUsbDevices();
+    void onDeviceTableContextMenu(const QPoint &pos);
     void onReqCompleted();
     void adhocip();
     void on_actionAbout_triggered();
@@ -195,6 +195,11 @@ private slots:
     void on_actionReload_devices_triggered();
     void on_infoArchitecture_triggered();
     void setupMenus();
+    void applyDebouncedRefresh();
+
+    void startTrackDevices();
+    void onTrackOutput();
+    void onTrackFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
 private:
     QNetworkAccessManager *m_networkManager;
@@ -244,9 +249,11 @@ private:
     bool m_isBusy = false;
     KodiDownloader *m_kodiDownloader;
     KodiDownloadCoordinator *m_kodiDownloadCoordinator;
-    QTimer *m_usbPollTimer;
     QTimer m_progressTimer;
     QHash<QString, QString> m_usbStatusCache;
+    QProcess *m_trackDevicesProcess = nullptr;
+    QTimer *m_trackDebounce = nullptr;
+    bool m_quitting = false;
     KodiLogManager *m_kodiLogManager;
     KodiSetupManager *m_kodiSetupManager;
     KillServerManager *m_killServerManager;
