@@ -52,13 +52,22 @@ LogViewerDialog::LogViewerDialog(QWidget *parent)
 
 LogViewerDialog::~LogViewerDialog() = default;
 
+void LogViewerDialog::setLogDirForTest(const QString &logDir)
+{
+    m_logDir = logDir;
+    m_firstContent.clear();
+    m_secondContent.clear();
+}
+
 void LogViewerDialog::loadAdblinkLog()
 {
     m_isRemote = false;
-    m_logDir = QDir::homePath() + QStringLiteral("/.jocala/");
+    if (m_logDir.isEmpty()) {
+        m_logDir = QDir::homePath() + QStringLiteral("/.jocala/");
 #ifdef Q_OS_WIN
-    m_logDir = QDir::homePath() + QStringLiteral("/AppData/Roaming/.jocala/");
+        m_logDir = QDir::homePath() + QStringLiteral("/AppData/Roaming/.jocala/");
 #endif
+    }
 
     QString path = m_logDir + (m_showingFirst ? m_firstLogName : m_secondLogName);
     QFile file(path);

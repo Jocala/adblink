@@ -18,6 +18,7 @@ public:
     void loadAdblinkLog();
     void loadRemoteLog(const QString &adbPath, const QString &filepath);
     void loadLocalLog(const QString &ostype);
+    void setLogDirForTest(const QString &logDir);
 
 private slots:
     void copyClicked();

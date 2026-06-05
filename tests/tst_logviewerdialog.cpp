@@ -39,14 +39,18 @@ private slots:
     void initTestCase()
     {
         QVERIFY(m_tmp.isValid());
-        qputenv("HOME", m_tmp.path().toUtf8());
+#ifdef Q_OS_WIN
+        m_jocalaDir = m_tmp.path() + QStringLiteral("/AppData/Roaming/.jocala");
+#else
         m_jocalaDir = m_tmp.path() + QStringLiteral("/.jocala");
+#endif
         QDir().mkpath(m_jocalaDir);
     }
 
     void init()
     {
         dialog = new LogViewerDialog(nullptr);
+        dialog->setLogDirForTest(m_jocalaDir + QStringLiteral("/"));
     }
 
     void cleanup()

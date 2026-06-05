@@ -338,15 +338,15 @@ private:
     QAction *actionSwitch_View;
     QAction *actionReload_devices;
 
-    const QSize lMainWindowSize = QSize(850, 525);
+    const QSize lMainWindowSize = QSize(850, 555);
     const QSize lGridButtonSize = QSize(180, 66);
     const QSize l6ButtonSize = QSize(160, 32);
 
-    const QSize mMainWindowSize = QSize(750, 425);
+    const QSize mMainWindowSize = QSize(750, 455);
     const QSize mGridButtonSize = QSize(130, 46);
     const QSize m6ButtonSize = QSize(110, 32);
 
-    const QSize sMainWindowSize = QSize(710, 375);
+    const QSize sMainWindowSize = QSize(710, 405);
     const QSize sGridButtonSize = QSize(110, 36);
     const QSize s6ButtonSize = QSize(100, 32);
 

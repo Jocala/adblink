@@ -2164,11 +2164,10 @@ cosmeticGap = new QSpacerItem(12, 0, QSizePolicy::Fixed, QSizePolicy::Minimum);
 upperLayout->addItem(cosmeticGap);
 
 rightColumnWidget = new QWidget();
-rightColumnWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+rightColumnWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
 rightLayout = new QVBoxLayout(rightColumnWidget);
 rightLayout->setSpacing(0);
 rightLayout->setContentsMargins(0, 0, 0, 0);
-rightLayout->setAlignment(Qt::AlignTop);
 
 buttonGridWidget = new QWidget();
 buttonGridWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
@@ -2269,7 +2268,7 @@ adhocLayout->addWidget(adhoc_ip);
 
 adhocLayout->addStretch();
 rightLayout->addLayout(adhocLayout);
-
+rightLayout->addStretch();
 
 upperLayout->addWidget(rightColumnWidget);
 mainLayout->addWidget(topWidget);

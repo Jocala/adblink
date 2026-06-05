@@ -14,9 +14,13 @@ bool getreturncode(const QString &cstring)
   QProcess run_command;
   run_command.setProcessChannelMode(QProcess::MergedChannels);
   run_command.start(program, args);
-  run_command.waitForStarted();
+  if (!run_command.waitForStarted())
+    return false;
 
   syncWaitForProcess(run_command);
+
+  if (run_command.error() == QProcess::FailedToStart)
+    return false;
 
   return (run_command.exitCode() == 0);
 }
