@@ -331,14 +331,12 @@ private:
     QAction *View_Changelog;
     QAction *Erase_adbLink_database;
     QAction *actionReiinstall_Busybox;
-    QAction *actionSet_Kodi_permissions;
     QAction *actionGet_UID_from_APK_file;
     QAction *actionSend_text;
     QAction *actionCreate_kodi_data;
     QAction *actionEdit_XML;
     QAction *actionSwitch_View;
     QAction *actionReload_devices;
-    QAction *actionSize;
 
     const QSize lMainWindowSize = QSize(850, 525);
     const QSize lGridButtonSize = QSize(180, 66);
