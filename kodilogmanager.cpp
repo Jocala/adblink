@@ -3,7 +3,7 @@
 #include "adbutils.h"
 #include "getadbdata.h"
 #include "logfile.h"
-#include "logdialog.h"
+#include "logviewerdialog.h"
 
 #include <QMessageBox>
 #include <QWidget>
@@ -45,7 +45,7 @@ void KodiLogManager::viewKodiLog(QWidget *parentWidget,
     dev.filepath = xpath;
 
     logfile("opening kodi log");
-    logDialog logdialog;
+    LogViewerDialog logdialog(parentWidget);
     logdialog.loadRemoteLog(adbPrefix, dev.filepath);
     logdialog.setModal(true);
     logdialog.exec();

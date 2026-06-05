@@ -20,7 +20,6 @@
     #include "datadialog.h"
     #include "forcequitdialog.h"
     #include "restdialog.h"
-    #include "logdialog.h"
     #include "tcpipdialog.h"
     #include "adbprefdialog.h"
     #include "sleepdialog.h"
@@ -107,7 +106,7 @@
     #include <QNetworkRequest>
     #include <QNetworkReply>
     #include <QtNetwork/QNetworkInterface>
-    #include "adblogdialog.h"
+    #include "logviewerdialog.h"
     #include <QFileInfo>
     #include<QClipboard>
     #include <QShortcut>
@@ -890,7 +889,8 @@
     ////////////////////////////////////////////////////
     void MainWindow::on_actionView_adbLink_Log_triggered()
     {
-        adblogDialog dialog;
+        LogViewerDialog dialog(this);
+        dialog.loadAdblinkLog();
         dialog.setModal(true);
         dialog.exec();
 

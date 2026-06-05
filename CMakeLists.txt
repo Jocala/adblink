@@ -59,16 +59,15 @@ set(SOURCES
     uninstalldialog.cpp
     devicerecorddialog.cpp
     usbfiledialog.cpp
-    adblogdialog.cpp
+    logviewerdialog.cpp
     datadialog.cpp
+    listfiledialog.cpp
     restdialog.cpp
     backupdialog.cpp
     cachedialog.cpp
     keyboarddialog.cpp
     keypadmanager.cpp
     killservermanager.cpp
-    listfiledialog.cpp
-    logdialog.cpp
     editordialog.cpp
     searchdialog.cpp
     sendtextmanager.cpp
@@ -138,16 +137,15 @@ set(HEADERS
     uninstalldialog.h
     devicerecorddialog.h
     usbfiledialog.h
-    adblogdialog.h
+    logviewerdialog.h
     datadialog.h
-    restdialog.h
     listfiledialog.h
+    restdialog.h
     backupdialog.h
     cachedialog.h
     keyboarddialog.h
     keypadmanager.h
     killservermanager.h
-    logdialog.h
     editordialog.h
     searchdialog.h
     sendtextmanager.h
