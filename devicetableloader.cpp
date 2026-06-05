@@ -105,7 +105,7 @@ void DeviceTableLoader::loadTable(QTableWidget *table, int windowSizeSelector,
     table->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
     table->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     table->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    table->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    table->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     QSettings settings("jocala", "adblink");
     int sortColumn = settings.value("DeviceTableSortColumn", 0).toInt();

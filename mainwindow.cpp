@@ -2111,23 +2111,22 @@ centralWidget = new QWidget(this);
 setCentralWidget(centralWidget);
 mainLayout = new QVBoxLayout(centralWidget);
 mainLayout->setContentsMargins(0, 0, 0, 0);
-mainLayout->setSpacing(0);
+mainLayout->setSpacing(18);
 
 topWidget = new QWidget();
 topWidget->setFixedHeight(180);
 upperLayout = new QHBoxLayout(topWidget);
 upperLayout->setSpacing(0);
-upperLayout->setContentsMargins(28, 0, 0, 0);
+upperLayout->setContentsMargins(28, 0, 12, 0);
 upperLayout->setAlignment(Qt::AlignTop);
 
 
 
-deviceTable->setFixedSize(450, 150);
-deviceTable->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+deviceTable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
 deviceTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
 deviceTable->horizontalHeader()->setMinimumSectionSize(150);
-deviceTable->horizontalHeader()->setMaximumSectionSize(150);
+deviceTable->horizontalHeader()->setMaximumSectionSize(250);
 deviceTable->horizontalHeader()->setVisible(true);
 deviceTable->verticalHeader()->setVisible(false);
 deviceTable->setColumnWidth(0, 150);
