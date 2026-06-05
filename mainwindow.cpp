@@ -67,9 +67,9 @@
 #include "rebootmanager.h"
     #include "deviceeditor.h"
 
-    #ifdef __WIN32__
-      #include "windows.h"
-    #endif
+#ifdef Q_OS_WIN
+    #include "windows.h"
+#endif
 
     #include <QApplication>
     #include <QtConcurrent/QtConcurrent>

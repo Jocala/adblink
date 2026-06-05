@@ -7,6 +7,8 @@
 bool getreturncode(const QString &cstring)
 {
   QStringList args = QProcess::splitCommand(cstring);
+  if (args.isEmpty())
+    return false;
   QString program = args.takeFirst();
 
   QProcess run_command;

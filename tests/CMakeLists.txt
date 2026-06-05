@@ -56,3 +56,27 @@ add_test(NAME iptablesort COMMAND tst_iptablesort)
 qt_add_executable(tst_stringutils tst_stringutils.cpp)
 target_link_libraries(tst_stringutils PRIVATE testsupport Qt6::Test)
 add_test(NAME stringutils COMMAND tst_stringutils)
+
+# --- Test: getreturncode exit-code check ---
+qt_add_executable(tst_getreturncode tst_getreturncode.cpp
+    "${CMAKE_SOURCE_DIR}/getreturncode.cpp"
+    "${CMAKE_SOURCE_DIR}/adbutils.cpp"
+    "${CMAKE_SOURCE_DIR}/getadbdata.cpp")
+target_link_libraries(tst_getreturncode PRIVATE testsupport Qt6::Test Qt6::Widgets)
+add_test(NAME getreturncode COMMAND tst_getreturncode)
+
+# --- Test: DeviceRecordDialog UI fields ---
+qt_add_executable(tst_devicerecorddialog tst_devicerecorddialog.cpp
+    "${CMAKE_SOURCE_DIR}/devicerecorddialog.cpp"
+    "${CMAKE_SOURCE_DIR}/getadbdata.cpp"
+    "${CMAKE_SOURCE_DIR}/adbutils.cpp")
+target_link_libraries(tst_devicerecorddialog PRIVATE testsupport Qt6::Test Qt6::Widgets)
+add_test(NAME devicerecorddialog COMMAND tst_devicerecorddialog)
+
+# --- Test: LogViewerDialog content display ---
+qt_add_executable(tst_logviewerdialog tst_logviewerdialog.cpp
+    "${CMAKE_SOURCE_DIR}/logviewerdialog.cpp"
+    "${CMAKE_SOURCE_DIR}/getadbdata.cpp"
+    "${CMAKE_SOURCE_DIR}/adbutils.cpp")
+target_link_libraries(tst_logviewerdialog PRIVATE testsupport Qt6::Test Qt6::Widgets)
+add_test(NAME logviewerdialog COMMAND tst_logviewerdialog)
