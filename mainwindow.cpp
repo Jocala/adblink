@@ -34,7 +34,6 @@
     #include "adbutils.h"
     #include "getlocaladb.h"
     #include "version.h"
-    #include "point.h"
 #include "adbconnection.h"
 #include "adbdevice.h"
 #include "backupmanager.h"
@@ -307,7 +306,7 @@
       QString dtstr = dateTime.toString("MM/dd/yy hh:mm:ss");
 
 
-      logfile(program+" "+version+point);
+      logfile(program + " " + version);
 
       if (m_os == 1) {
             logfile("Windows");
@@ -782,7 +781,7 @@
     /////////////////////////////////////////////////////////////////////////
     void MainWindow::on_actionAbout_triggered()
     {
-        m_aboutManager->showAbout(this, databasedir, program + " " + version + point);
+        m_aboutManager->showAbout(this, databasedir, program + " " + version);
     }
 
 

@@ -131,7 +131,6 @@ set(HEADERS
     installmanager.h
     kodidatamanager.h
     logfile.h
-    point.h
     scpdialog.h
     screencapmanager.h
     uninstalldialog.h
