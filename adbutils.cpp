@@ -181,7 +181,7 @@ void syncWaitForProcess(QProcess &process, int timeoutMs)
     while (process.state() != QProcess::NotRunning) {
         if (process.waitForFinished(100))
             break;
-        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        QCoreApplication::processEvents();
         if (timeoutMs > 0 && timer.elapsed() >= timeoutMs) {
             process.kill();
             process.waitForFinished(1000);

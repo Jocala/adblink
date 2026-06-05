@@ -111,7 +111,6 @@ private slots:
     void onApplicationQuit();
     bool validateDeviceSelection(QString& selectedDescription);
     void loadDeviceTableX(QTableWidget* table);
-    void onDeviceTableContextMenu(const QPoint &pos);
     void onReqCompleted();
     void adhocip();
     void on_actionAbout_triggered();
@@ -246,7 +245,6 @@ private:
     VersionCheckManager *m_versionCheckManager;
     WirelessAdbManager *m_wirelessAdbManager;
     XmlEditorManager *m_xmlEditor;
-    bool m_isBusy = false;
     KodiDownloader *m_kodiDownloader;
     KodiDownloadCoordinator *m_kodiDownloadCoordinator;
     QTimer m_progressTimer;

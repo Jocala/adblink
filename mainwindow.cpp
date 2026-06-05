@@ -1473,12 +1473,9 @@ void MainWindow::writeInstall (QString install) {
 
 void MainWindow::backupButton_clicked()
 {
-    if (m_isBusy) return;
-    m_isBusy = true;
 
     QString selectedDescription;
     if (!validateDeviceSelection(selectedDescription)) {
-        m_isBusy = false;
         return;
     }
 
@@ -1487,7 +1484,6 @@ void MainWindow::backupButton_clicked()
     if (!::isPackageInstalled(getadb(), device.xbmcpackage)) {
         QMessageBox::critical(this, "", device.xbmcpackage + " not installed");
         logfile(device.daddr + ": Error: " + device.xbmcpackage + " not installed");
-        m_isBusy = false;
         return;
     }
 
@@ -1499,19 +1495,15 @@ void MainWindow::backupButton_clicked()
                                       return RunLongProcess(cmd, title);
                                   });
 
-    m_isBusy = false;
 }
 
 
 /////////////////////////////////////////////
 
 void MainWindow::restoreButton_clicked() {
-    if (m_isBusy) return;
-    m_isBusy = true;
 
     QString selectedDescription;
     if (!validateDeviceSelection(selectedDescription)) {
-        m_isBusy = false;
         return;
     }
 
@@ -1520,7 +1512,6 @@ void MainWindow::restoreButton_clicked() {
     if (!::isPackageInstalled(getadb(), device.xbmcpackage)) {
         QMessageBox::critical(this, "", device.xbmcpackage + " not installed");
         logfile(device.daddr + ": Error: " + device.xbmcpackage + " not installed");
-        m_isBusy = false;
         return;
     }
 
@@ -1532,7 +1523,6 @@ void MainWindow::restoreButton_clicked() {
                                        return RunLongProcess(cmd, title);
                                    });
 
-    m_isBusy = false;
 }
 
 
@@ -1785,38 +1775,6 @@ void MainWindow::createTables()
 void MainWindow::deleteRecord(QString descrip)
 {
     m_dataManager->deleteRecord(descrip);
-}
-
-void MainWindow::onDeviceTableContextMenu(const QPoint &pos)
-{
-    QModelIndex index = deviceTable->indexAt(pos);
-    if (!index.isValid())
-        return;
-    deviceTable->selectRow(index.row());
-
-    QString status = deviceTable->item(index.row(), 2)
-        ? deviceTable->item(index.row(), 2)->text() : QString();
-    QString ip = deviceTable->item(index.row(), 1)
-        ? deviceTable->item(index.row(), 1)->text() : QString();
-    bool isUsb = ip == QLatin1String("USB");
-
-    QMenu menu(this);
-    QAction *connectAction    = menu.addAction(QStringLiteral("Connect"));
-    QAction *disconnectAction = menu.addAction(QStringLiteral("Disconnect"));
-    menu.addSeparator();
-    QAction *editAction       = menu.addAction(QStringLiteral("Edit"));
-    QAction *deleteAction     = menu.addAction(QStringLiteral("Delete"));
-
-    connectAction->setEnabled(status != QStringLiteral("Connected") && !isUsb);
-    disconnectAction->setEnabled(status == QStringLiteral("Connected") && !isUsb);
-    deleteAction->setEnabled(status != QStringLiteral("Connected"));
-
-    connect(connectAction,    &QAction::triggered, this, &MainWindow::connButton_clicked);
-    connect(disconnectAction, &QAction::triggered, this, &MainWindow::disButton_clicked);
-    connect(editAction,       &QAction::triggered, this, [this] { dataentry(false); });
-    connect(deleteAction,     &QAction::triggered, this, &MainWindow::delRecordButton_clicked);
-
-    menu.exec(deviceTable->viewport()->mapToGlobal(pos));
 }
 
 void MainWindow::on_Erase_adbLink_database_triggered()
@@ -2139,10 +2097,6 @@ default:
 }
 deviceTable->setFont(tableFont);
 upperLayout->addWidget(deviceTable);
-
-deviceTable->setContextMenuPolicy(Qt::CustomContextMenu);
-connect(deviceTable, &QTableWidget::customContextMenuRequested,
-        this, &MainWindow::onDeviceTableContextMenu);
 
 cosmeticGap = new QSpacerItem(12, 0, QSizePolicy::Fixed, QSizePolicy::Minimum);
 upperLayout->addItem(cosmeticGap);

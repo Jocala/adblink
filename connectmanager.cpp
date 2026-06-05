@@ -82,6 +82,12 @@ void ConnectManager::connectToDevice(QWidget *parentWidget,
     } else {
         deviceTable->setItem(selectedRow, 2, new QTableWidgetItem("NA"));
         logfile("Unable to connect to: " + daddr);
-        QMessageBox::critical(parentWidget, "", "Unable to connect to: " + daddr);
+        QMessageBox msgBox(parentWidget);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("Unable to connect to: %1").arg(daddr));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
     }
 }

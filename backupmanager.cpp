@@ -162,10 +162,12 @@ bool BackupManager::backupDevice(QWidget *parent, const DeviceRecord &device,
         return false;
     }
 
-    QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(parent, "Backup", "Backup to " + dir + " for " + device.daddr + "?",
-                                  QMessageBox::Yes | QMessageBox::No);
-    if (reply != QMessageBox::Yes)
+    QMessageBox msgBox(parent);
+    msgBox.setWindowTitle(QStringLiteral("Backup"));
+    msgBox.setText(QStringLiteral("Backup to %1 for %2?").arg(dir, device.daddr));
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setWindowModality(Qt::WindowModal);
+    if (msgBox.exec() != QMessageBox::Yes)
         return false;
 
     mcpath = mcpath + "/";
