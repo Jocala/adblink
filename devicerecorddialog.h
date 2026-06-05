@@ -5,11 +5,7 @@
 #include <QPushButton>
 #include <QLineEdit>
 #include <QCheckBox>
-#include <QRadioButton>
-#include <QComboBox>
-#include <QListWidget>
 #include <QLabel>
-#include <QGroupBox>
 #include <QGridLayout>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -27,7 +23,6 @@ public:
     void setscope(const bool &scoped);
     void setwsa(const bool &wsa);
 
-    void setconn(const bool &isconn);
     void setversionLabel(const QString &versiontext);
     void setostype(const QString &ostype);
     void setdaddr(const QString &daddr);
@@ -36,8 +31,6 @@ public:
     void setscrcpy(const QString &scrcpy);
     void setdataroot(const QString &data_root);
     void setport(const QString &port);
-    void setadb_pref(const QString &adb_pref);
-    void setrecnum(const QString &recnum);
     void setdisableroot(const bool &disableroot);
 
     ~DeviceRecordDialog();
@@ -60,17 +53,8 @@ public:
 
 private slots:
     void on_pfolderButton_clicked();
-    void on_kodiButton_clicked();
-    void on_spmcButton_clicked();
-    void on_otherButton_clicked();
-    void on_isusb_clicked(bool checked);
-    void on_listkodirootBox_clicked();
-    void disable_ui();
-    void enable_ui();
-    void on_ostypeBox_currentIndexChanged(int index);
     void on_filepathButton_clicked();
-    void on_wsa_clicked(bool checked);
-    void on_scoped_clicked(bool checked);
+    void on_isusb_clicked(bool checked);
 
 private:
     QPushButton *m_pfolderButton;
@@ -88,23 +72,9 @@ private:
     QLineEdit *m_data_root;
 
     QCheckBox *m_isusb;
-    QCheckBox *m_scoped;
-    QCheckBox *m_wsa;
-    QCheckBox *m_disableroot;
 
-    QRadioButton *m_kodiButton;
-    QRadioButton *m_spmcButton;
-    QRadioButton *m_otherButton;
-
-    QComboBox *m_ostypeBox;
-
-    QListWidget *m_listkodirootBox;
-
-    QLabel *m_versionLabel;
     QLabel *m_kodi2;
     QLabel *m_kodi3;
-
-    QGroupBox *m_mediaBox;
 };
 
 #endif // DEVICERECORDDIALOG_H

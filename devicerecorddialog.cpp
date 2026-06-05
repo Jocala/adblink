@@ -1,11 +1,5 @@
 #include "devicerecorddialog.h"
 #include <QFileDialog>
-#include <QProcess>
-#include <QMessageBox>
-#include <QCoreApplication>
-#include <QDesktopServices>
-#include <QDir>
-#include "getadbdata.h"
 
 DeviceRecordDialog::DeviceRecordDialog(QWidget *parent, bool showkodi) :
     QDialog(parent)
@@ -18,68 +12,6 @@ DeviceRecordDialog::DeviceRecordDialog(QWidget *parent, bool showkodi) :
 
     this->setFixedHeight(280);
     this->setFixedWidth(540);
-
-    // ---------- Widgets ----------
-
-    // Connected devices list
-    // Media Center group box
-    m_mediaBox = new QGroupBox("Media Center", this);
-    m_mediaBox->setGeometry(30, 600, 120, 111);
-
-    m_kodiButton = new QRadioButton("Kodi", m_mediaBox);
-    m_kodiButton->setGeometry(10, 30, 53, 20);
-    m_kodiButton->setToolTip("<html><head/><body><p>Kodi media center</p></body></html>");
-    m_kodiButton->setChecked(true);
-
-    m_spmcButton = new QRadioButton("SPMC", m_mediaBox);
-    m_spmcButton->setGeometry(10, 49, 62, 20);
-    m_spmcButton->setToolTip("<html><head/><body><p>SPMC media center</p></body></html>");
-
-    m_otherButton = new QRadioButton("Other", m_mediaBox);
-    m_otherButton->setGeometry(10, 68, 60, 20);
-    m_otherButton->setToolTip("<html><head/><body><p>Fill in file path and package name</p></body></html>");
-
-    // Scoped storage override
-    m_scoped = new QCheckBox("SS Override", this);
-    m_scoped->setEnabled(true);
-    m_scoped->setGeometry(170, 610, 97, 20);
-    m_scoped->setToolTip("<html><head/><body><p>Android 11 and later typically use scoped storage. "
-                       "Check this to override scoped storage if your Android 11 (or greater) "
-                       "device does not implement it.</p></body></html>");
-
-    // Version label
-    m_versionLabel = new QLabel("adblink version: 9999", this);
-    m_versionLabel->setGeometry(180, 690, 142, 20);
-
-    // WSA checkbox
-    m_wsa = new QCheckBox("WSA", this);
-    m_wsa->setEnabled(true);
-    m_wsa->setGeometry(190, 640, 56, 24);
-    m_wsa->setToolTip("<html><head/><body><p>Windows Subsystem for Android: changes IP to 127.0.0.1 "
-                    "and port to <span style=\" color:#008000;\">58526</span></p></body></html>");
-
-    // OS type combo
-    m_ostypeBox = new QComboBox(this);
-    m_ostypeBox->setGeometry(50, 510, 100, 20);
-    m_ostypeBox->setMinimumSize(100, 20);
-    m_ostypeBox->setMaximumSize(100, 20);
-    m_ostypeBox->setToolTip("Choose Kodi's operating system");
-    m_ostypeBox->addItem("Android");
-    m_ostypeBox->addItem("Windows");
-    m_ostypeBox->addItem("macOS");
-    m_ostypeBox->addItem("Linux");
-
-    // Kodi root list
-    m_listkodirootBox = new QListWidget(this);
-    m_listkodirootBox->setGeometry(350, 610, 150, 100);
-    m_listkodirootBox->setMinimumSize(150, 100);
-    m_listkodirootBox->setMaximumSize(150, 100);
-
-    // Disable root checkbox
-    m_disableroot = new QCheckBox("Disable root", this);
-    m_disableroot->setEnabled(true);
-    m_disableroot->setGeometry(20, 550, 97, 20);
-    m_disableroot->setToolTip("<html><head/><body><p>Disable root for misbehaving su installations</p></body></html>");
 
     // ---------- Layout containers ----------
 
@@ -217,6 +149,12 @@ DeviceRecordDialog::DeviceRecordDialog(QWidget *parent, bool showkodi) :
     gridLayout->addWidget(m_filepathButton, 2, 0);
     gridLayout->addWidget(m_filepath, 2, 1);
 
+    // ---------- Defaults ----------
+
+    m_packagename->setText("org.xbmc.kodi");
+    m_filepath->setText("/files/.kodi");
+    m_data_root->setText("/sdcard/");
+
     // ---------- Connections ----------
 
     connect(m_saveButton, &QPushButton::clicked, this, &QDialog::accept);
@@ -225,19 +163,7 @@ DeviceRecordDialog::DeviceRecordDialog(QWidget *parent, bool showkodi) :
     connect(m_pfolderButton, &QPushButton::clicked, this, &DeviceRecordDialog::on_pfolderButton_clicked);
     connect(m_filepathButton, &QPushButton::clicked, this, &DeviceRecordDialog::on_filepathButton_clicked);
 
-    connect(m_kodiButton, &QRadioButton::clicked, this, [this]() { on_kodiButton_clicked(); });
-    connect(m_spmcButton, &QRadioButton::clicked, this, [this]() { on_spmcButton_clicked(); });
-    connect(m_otherButton, &QRadioButton::clicked, this, [this]() { on_otherButton_clicked(); });
-
     connect(m_isusb, &QCheckBox::clicked, this, &DeviceRecordDialog::on_isusb_clicked);
-    connect(m_wsa, &QCheckBox::clicked, this, &DeviceRecordDialog::on_wsa_clicked);
-    connect(m_scoped, &QCheckBox::clicked, this, &DeviceRecordDialog::on_scoped_clicked);
-
-    connect(m_ostypeBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
-            this, &DeviceRecordDialog::on_ostypeBox_currentIndexChanged);
-
-    connect(m_listkodirootBox, &QListWidget::clicked,
-            this, [this](const QModelIndex&) { on_listkodirootBox_clicked(); });
 
     // ---------- Initial state ----------
 
@@ -245,7 +171,6 @@ DeviceRecordDialog::DeviceRecordDialog(QWidget *parent, bool showkodi) :
         this->setFixedWidth(275);
     }
 
-    m_ostypeBox->setVisible(showkodi);
     m_filepath->setVisible(showkodi);
     m_filepathButton->setVisible(showkodi);
     m_kodi2->setVisible(showkodi);
@@ -297,38 +222,24 @@ bool DeviceRecordDialog::isusb() {
 }
 
 bool DeviceRecordDialog::wsa() {
-    return m_wsa->isChecked();
+    return false;
 }
 
 bool DeviceRecordDialog::scoped() {
-    return m_scoped->isChecked();
+    return false;
 }
 
 QString DeviceRecordDialog::ostype() {
-    QString ost = QString::number(m_ostypeBox->currentIndex());
-    return ost;
+    return QStringLiteral("0");
+}
+
+bool DeviceRecordDialog::disableroot() {
+    return false;
 }
 
 void DeviceRecordDialog::setPackagename(const QString &packagename)
 {
-    bool isset = false;
     m_packagename->setText(packagename);
-
-    static const QString packagepreset1 = QStringLiteral("org.xbmc.kodi");
-    static const QString packagepreset3 = QStringLiteral("com.semperpax.spmc16");
-
-    if (packagename == packagepreset1) {
-        m_kodiButton->setChecked(true);
-        isset = true;
-    }
-
-    if (packagename == packagepreset3) {
-        m_spmcButton->setChecked(true);
-        isset = true;
-    }
-
-    if (!isset)
-        m_otherButton->setChecked(true);
 }
 
 void DeviceRecordDialog::setPulldir(const QString &pulldir)
@@ -348,22 +259,18 @@ void DeviceRecordDialog::setisusb(const bool &isusb)
 
 void DeviceRecordDialog::setscope(const bool &scoped)
 {
-    m_scoped->setChecked(scoped);
 }
 
 void DeviceRecordDialog::setwsa(const bool &wsa)
 {
-    m_wsa->setChecked(wsa);
 }
 
 void DeviceRecordDialog::setversionLabel(const QString &versiontext)
 {
-    m_versionLabel->setText("adblink version: " + versiontext);
 }
 
 void DeviceRecordDialog::setostype(const QString &ostype)
 {
-    m_ostypeBox->setCurrentIndex(ostype.toInt());
 }
 
 void DeviceRecordDialog::setdaddr(const QString &daddr)
@@ -384,13 +291,15 @@ void DeviceRecordDialog::setfilepath(const QString &filepath)
 void DeviceRecordDialog::setdataroot(const QString &data_root)
 {
     m_data_root->setText(data_root);
-    if (m_ostypeBox->currentIndex() == 0) {
-    }
 }
 
 void DeviceRecordDialog::setport(const QString &port)
 {
     m_port->setText(port);
+}
+
+void DeviceRecordDialog::setdisableroot(const bool &disableroot)
+{
 }
 
 void DeviceRecordDialog::on_pfolderButton_clicked()
@@ -405,174 +314,12 @@ void DeviceRecordDialog::on_pfolderButton_clicked()
     }
 }
 
-void DeviceRecordDialog::on_kodiButton_clicked()
-{
-    m_packagename->setText("org.xbmc.kodi");
-    m_filepath->setText("/files/.kodi");
-}
-
-void DeviceRecordDialog::on_spmcButton_clicked()
-{
-    m_packagename->setText("com.semperpax.spmc16");
-    m_filepath->setText("/files/.spmc");
-}
-
-void DeviceRecordDialog::on_otherButton_clicked()
-{
-    m_packagename->setText("");
-    m_filepath->setText("");
-}
-
 void DeviceRecordDialog::on_isusb_clicked(bool checked)
 {
     if (checked) {
         m_port->setText("");
     } else {
         m_port->setText("5555");
-    }
-}
-
-void DeviceRecordDialog::setadb_pref(const QString &adb_pref)
-{
-    m_listkodirootBox->clear();
-    QString command;
-    QString cstring;
-
-    if (ostype() == "0") {
-        cstring = adb_pref + " shell /data/local/tmp/adblink/busybox find /storage -type d -maxdepth 1";
-        QString s = getadbOutput(cstring);
-
-        QStringList list = s.split('\n');
-        for (int i = 0; i < list.size(); i++) {
-            list[i].remove('\r');
-            list[i].remove('\n');
-
-            if (list[i] == "Android" ||
-                list[i] == "Permission denied" ||
-                list[i] == "/storage/emulated" ||
-                list[i] == "/storage" ||
-                list[i] == "/storage/self" ||
-                list[i].contains("unknown") ||
-                list[i].contains("not found")) {
-                list.removeAt(i);
-                i--;
-            }
-        }
-
-        list.insert(0, "/sdcard");
-
-        for (int i = 0; i < list.size(); i++) {
-            m_listkodirootBox->addItem(list[i]);
-        }
-
-        m_listkodirootBox->item(0)->setSelected(true);
-    }
-
-    cstring = adb_pref + " shell /data/local/tmp/adblink/busybox which su";
-    command = getadbOutput(cstring);
-}
-
-void DeviceRecordDialog::on_listkodirootBox_clicked()
-{
-    m_data_root->setText(m_listkodirootBox->currentItem()->text());
-}
-
-void DeviceRecordDialog::disable_ui()
-{
-    m_port->setText("");
-    m_port->setEnabled(false);
-    m_isusb->setEnabled(false);
-    m_scoped->setEnabled(false);
-    m_wsa->setEnabled(false);
-    m_listkodirootBox->setEnabled(false);
-    m_daddr->setText("");
-    m_packagename->setText("");
-    m_data_root->setText("");
-    m_daddr->setEnabled(false);
-    m_packagename->setEnabled(false);
-    m_data_root->setEnabled(false);
-    m_mediaBox->setDisabled(true);
-}
-
-void DeviceRecordDialog::enable_ui()
-{
-    m_port->setEnabled(true);
-    m_port->setText("5555");
-    m_isusb->setEnabled(true);
-    m_scoped->setEnabled(true);
-    m_wsa->setEnabled(true);
-    m_listkodirootBox->setEnabled(true);
-    m_daddr->setEnabled(true);
-    m_packagename->setEnabled(true);
-    m_data_root->setEnabled(true);
-    m_mediaBox->setEnabled(true);
-}
-
-void DeviceRecordDialog::on_ostypeBox_currentIndexChanged(int index)
-{
-    switch (index) {
-    case 0:
-        enable_ui();
-        if (m_kodiButton->isChecked()) {
-            m_packagename->setText("org.xbmc.kodi");
-            m_filepath->setText("/files/.kodi");
-        }
-        if (m_spmcButton->isChecked()) {
-            m_packagename->setText("com.semperpax.spmc16");
-            m_filepath->setText("/files/.spmc");
-        }
-        if (m_otherButton->isChecked()) {
-            m_packagename->setText("");
-            m_filepath->setText("");
-        }
-        if (m_data_root->text().isEmpty())
-            m_data_root->setText("/sdcard/");
-        m_daddr->setText("");
-        break;
-
-    case 1:
-        m_daddr->setText("");
-        m_packagename->setText("");
-        m_data_root->setText("");
-        { QString homedir = QDir::homePath();
-        QString tmpdir1 = homedir + "/AppData/Roaming/Kodi";
-        m_filepath->setText(tmpdir1); }
-        disable_ui();
-        break;
-
-    case 2:
-        { QString homedir = QDir::homePath();
-        QString tmpdir1 = homedir + "/Library/Application Support/Kodi";
-        m_daddr->setText("");
-        m_packagename->setText("");
-        m_data_root->setText("");
-        m_filepath->setText(tmpdir1); }
-        disable_ui();
-        break;
-
-    case 3:
-        { QString homedir = QDir::homePath();
-        QString tmpdir1 = homedir + "/.kodi";
-        m_daddr->setText("");
-        m_packagename->setText("");
-        m_data_root->setText("");
-        m_filepath->setText(tmpdir1); }
-        disable_ui();
-        break;
-
-    case 4:
-        enable_ui();
-        m_daddr->setText("127.0.0.1");
-        m_port->setText("58526");
-        m_data_root->setText("/sdcard/");
-        m_filepath->setText("kodi_data/.kodi");
-        break;
-
-    case 5:
-        enable_ui();
-        m_data_root->setText("/sdcard/");
-        m_filepath->setText("kodi_data/files/.kodi");
-        break;
     }
 }
 
@@ -586,48 +333,4 @@ void DeviceRecordDialog::on_filepathButton_clicked()
     if (!dir.isEmpty()) {
         m_filepath->setText(dir);
     }
-}
-
-bool DeviceRecordDialog::disableroot() {
-    return m_disableroot->isChecked();
-}
-
-void DeviceRecordDialog::setdisableroot(const bool &disableroot)
-{
-    m_disableroot->setChecked(disableroot);
-}
-
-void DeviceRecordDialog::on_wsa_clicked(bool checked)
-{
-    enable_ui();
-    if (checked) {
-        m_daddr->setText("127.0.0.1");
-        m_port->setText("58526");
-        m_data_root->setText("/sdcard/");
-        m_filepath->setText("kodi_data/files/.kodi");
-        m_scoped->setChecked(true);
-    } else {
-        m_daddr->setText("");
-        m_filepath->setText("/files/.kodi");
-        m_port->setText("5555");
-        m_data_root->setText("/sdcard/");
-    }
-}
-
-void DeviceRecordDialog::on_scoped_clicked(bool checked)
-{
-    if (checked) {
-        m_data_root->setText("/sdcard/");
-        m_filepath->setText("kodi_data/files/.kodi");
-    } else {
-        m_filepath->setText("/files/.kodi");
-        m_data_root->setText("/sdcard/");
-    }
-}
-
-QString strip2(QString str)
-{
-    str = str.simplified();
-    str.replace(" ", "");
-    return str;
 }
