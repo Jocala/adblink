@@ -63,8 +63,13 @@ void KodiDownloadCoordinator::downloadKodi(QWidget *parentWidget,
         }
 
         if (kodiVersion == "Unknown") {
-            QMessageBox::critical(parentWidget, "Error",
-                "Cannot download: Kodi version unknown. See log");
+            QMessageBox msgBox(parentWidget);
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setWindowTitle(QStringLiteral("Error"));
+            msgBox.setText(QStringLiteral("Cannot download: Kodi version unknown. See log"));
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setWindowModality(Qt::WindowModal);
+            msgBox.exec();
             logfile("Download aborted: Unknown Kodi version");
             return;
         }
@@ -116,8 +121,13 @@ void KodiDownloadCoordinator::downloadKodi(QWidget *parentWidget,
                 this, [parentWidget, hideProgress](const QString &error) {
             hideProgress();
             logfile("Kodi download failed: " + error);
-            QMessageBox::critical(parentWidget, "Download Failed",
-                "Failed to download Kodi. See log");
+            QMessageBox msgBox(parentWidget);
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setWindowTitle(QStringLiteral("Download Failed"));
+            msgBox.setText(QStringLiteral("Failed to download Kodi. See log"));
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setWindowModality(Qt::WindowModal);
+            msgBox.exec();
         });
 
         downloader->startDownload(kodiVersion, arch, downloadDir);

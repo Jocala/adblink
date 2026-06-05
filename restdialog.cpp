@@ -70,7 +70,13 @@ QString restDialog::restore_data_root()
         m_listDirectories->setCurrentRow(0);
         return m_listDirectories->currentItem()->text();
     } else {
-        QMessageBox::information(this, QStringLiteral("No Items"), QStringLiteral("No items available in the list."));
+        QMessageBox msgBox(this);
+        msgBox.setIcon(QMessageBox::Information);
+        msgBox.setWindowTitle(QStringLiteral("No Items"));
+        msgBox.setText(QStringLiteral("No items available in the list."));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         return QString();
     }
 }
@@ -83,7 +89,13 @@ void restDialog::on_listDirectories_doubleClicked()
         m_listDirectories->setCurrentRow(0);
         restDialog::accept();
     } else {
-        QMessageBox::information(this, QStringLiteral("No Items"), QStringLiteral("No items available in the list."));
+        QMessageBox msgBox(this);
+        msgBox.setIcon(QMessageBox::Information);
+        msgBox.setWindowTitle(QStringLiteral("No Items"));
+        msgBox.setText(QStringLiteral("No items available in the list."));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
     }
 }
 

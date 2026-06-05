@@ -29,7 +29,13 @@ void DeviceEditorManager::openEditor(QWidget *parentWidget, bool isNewRecord,
             selectedDescription = deviceTable->item(selectedRow, 0)->text();
             device = queryDevice(selectedDescription);
         } else {
-            QMessageBox::critical(parentWidget, "", "No device selected in table");
+            QMessageBox msgBox(parentWidget);
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setWindowTitle(QString());
+            msgBox.setText(QStringLiteral("No device selected in table"));
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setWindowModality(Qt::WindowModal);
+            msgBox.exec();
             return;
         }
     }

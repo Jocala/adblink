@@ -40,7 +40,13 @@ void ApkUidManager::getApkPackageName(QWidget *parentWidget, const QString &aapt
             QStringList query = item.split(rx);
             QString packagename = query.at(1);
             logfile("package name query: " + packagename);
-            QMessageBox::information(parentWidget, "", packagename);
+            QMessageBox msgBox(parentWidget);
+            msgBox.setIcon(QMessageBox::Information);
+            msgBox.setWindowTitle(QString());
+            msgBox.setText(packagename);
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setWindowModality(Qt::WindowModal);
+            msgBox.exec();
         }
     }
 }

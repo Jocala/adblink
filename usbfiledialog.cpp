@@ -241,12 +241,23 @@ void usbfileDialog::on_pullButton_clicked()
 {
 
        if (!QDir(pulldir_ufd).exists()) {
-        QMessageBox::critical(this, "", "Pull destination does not exist");
+        QMessageBox msgBox1(this);
+        msgBox1.setIcon(QMessageBox::Critical);
+        msgBox1.setWindowTitle(QString());
+        msgBox1.setText(QStringLiteral("Pull destination does not exist"));
+        msgBox1.setStandardButtons(QMessageBox::Ok);
+        msgBox1.setWindowModality(Qt::WindowModal);
+        msgBox1.exec();
         return;
        }
 
-       QMessageBox::StandardButton reply;
-       reply = QMessageBox::question(this, "", "Pull file(s)?", QMessageBox::Yes | QMessageBox::No);
+       QMessageBox msgBox2(this);
+       msgBox2.setIcon(QMessageBox::Question);
+       msgBox2.setWindowTitle(QString());
+       msgBox2.setText(QStringLiteral("Pull file(s)?"));
+       msgBox2.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+       msgBox2.setWindowModality(Qt::WindowModal);
+       QMessageBox::StandardButton reply = static_cast<QMessageBox::StandardButton>(msgBox2.exec());
        if (reply == QMessageBox::No)
         return;
 
@@ -297,9 +308,13 @@ void usbfileDialog::on_pullButton_clicked()
 
         // Check if the file already exists at the destination
         if (QFile::exists(destFilePath)) {
-            QMessageBox::StandardButton overwriteReply;
-            overwriteReply = QMessageBox::question(this, "", QString("File %1 already exists. Overwrite?").arg(fname),
-                                                   QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+            QMessageBox msgBox3(this);
+            msgBox3.setIcon(QMessageBox::Question);
+            msgBox3.setWindowTitle(QString());
+            msgBox3.setText(QStringLiteral("File %1 already exists. Overwrite?").arg(fname));
+            msgBox3.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+            msgBox3.setWindowModality(Qt::WindowModal);
+            QMessageBox::StandardButton overwriteReply = static_cast<QMessageBox::StandardButton>(msgBox3.exec());
             if (overwriteReply == QMessageBox::Cancel) {
                 // Cancel the entire pull process
                 return;
@@ -341,7 +356,13 @@ void usbfileDialog::on_pullButton_clicked()
             if (!command.isEmpty()) {
                 error = error + 1;
                 logfile("Error: " + command);
-                QMessageBox::critical(this, "", "Error(s). See log");
+                QMessageBox msgBox4(this);
+                msgBox4.setIcon(QMessageBox::Critical);
+                msgBox4.setWindowTitle(QString());
+                msgBox4.setText(QStringLiteral("Error(s). See log"));
+                msgBox4.setStandardButtons(QMessageBox::Ok);
+                msgBox4.setWindowModality(Qt::WindowModal);
+                msgBox4.exec();
                 return;
             }
 
@@ -373,11 +394,29 @@ void usbfileDialog::on_pullButton_clicked()
 
        // Display the final status message
        if (error > 0) {
-        QMessageBox::critical(this, "", "Error(s). See log");
+        QMessageBox msgBox5(this);
+        msgBox5.setIcon(QMessageBox::Critical);
+        msgBox5.setWindowTitle(QString());
+        msgBox5.setText(QStringLiteral("Error(s). See log"));
+        msgBox5.setStandardButtons(QMessageBox::Ok);
+        msgBox5.setWindowModality(Qt::WindowModal);
+        msgBox5.exec();
        } else if (overwriteRejected) {
-        QMessageBox::information(this, "", "Pull(s) complete. Some files were not overwritten. See log.");
+        QMessageBox msgBox6(this);
+        msgBox6.setIcon(QMessageBox::Information);
+        msgBox6.setWindowTitle(QString());
+        msgBox6.setText(QStringLiteral("Pull(s) complete. Some files were not overwritten. See log."));
+        msgBox6.setStandardButtons(QMessageBox::Ok);
+        msgBox6.setWindowModality(Qt::WindowModal);
+        msgBox6.exec();
        } else {
-        QMessageBox::information(this, "", "Pull(s) complete. See log.");
+        QMessageBox msgBox7(this);
+        msgBox7.setIcon(QMessageBox::Information);
+        msgBox7.setWindowTitle(QString());
+        msgBox7.setText(QStringLiteral("Pull(s) complete. See log."));
+        msgBox7.setStandardButtons(QMessageBox::Ok);
+        msgBox7.setWindowModality(Qt::WindowModal);
+        msgBox7.exec();
        }
 
        // Clear selections and reset paths
@@ -441,8 +480,13 @@ else
 
 
   QMessageBox::StandardButton reply3;
-      reply3 = QMessageBox::question(this, "", "Delete files(s)?",
-                                    QMessageBox::Yes|QMessageBox::No);
+      QMessageBox msgBox8(this);
+      msgBox8.setIcon(QMessageBox::Question);
+      msgBox8.setWindowTitle(QString());
+      msgBox8.setText(QStringLiteral("Delete files(s)?"));
+      msgBox8.setStandardButtons(QMessageBox::Yes|QMessageBox::No);
+      msgBox8.setWindowModality(Qt::WindowModal);
+      reply3 = static_cast<QMessageBox::StandardButton>(msgBox8.exec());
       if (reply3 == QMessageBox::No)
           return;
 
@@ -469,7 +513,13 @@ logfile("----------");
               {
                  logfile(command);
                  logfile( "Deletion failed");
-                 QMessageBox::critical(this,"",fileName+":deletion failed");
+                 QMessageBox msgBox9(this);
+                 msgBox9.setIcon(QMessageBox::Critical);
+                 msgBox9.setWindowTitle(QString());
+                 msgBox9.setText(QStringLiteral("%1:deletion failed").arg(fileName));
+                 msgBox9.setStandardButtons(QMessageBox::Ok);
+                 msgBox9.setWindowModality(Qt::WindowModal);
+                 msgBox9.exec();
                  error=error+1;
                }
 
@@ -501,7 +551,15 @@ logfile("----------");
 
 
         if (error > 0)
-            QMessageBox::critical(this,"","Delete(s) failed. See log.");
+        {
+            QMessageBox msgBox10(this);
+            msgBox10.setIcon(QMessageBox::Critical);
+            msgBox10.setWindowTitle(QString());
+            msgBox10.setText(QStringLiteral("Delete(s) failed. See log."));
+            msgBox10.setStandardButtons(QMessageBox::Ok);
+            msgBox10.setWindowModality(Qt::WindowModal);
+            msgBox10.exec();
+        }
 
 
 
@@ -680,7 +738,13 @@ void usbfileDialog::on_goButton_clicked()
 
    if(!is_directory(xpath))
     {
-     QMessageBox::critical(this,"",xpath+" :Directory not found.");
+     QMessageBox msgBox11(this);
+     msgBox11.setIcon(QMessageBox::Critical);
+     msgBox11.setWindowTitle(QString());
+     msgBox11.setText(QStringLiteral("%1 :Directory not found.").arg(xpath));
+     msgBox11.setStandardButtons(QMessageBox::Ok);
+     msgBox11.setWindowModality(Qt::WindowModal);
+     msgBox11.exec();
      return;
      }
 
@@ -779,7 +843,13 @@ void usbfileDialog::on_renameButton_clicked()
         if (selected_items < 1 || selected_items > 1)
          {
            
-             QMessageBox::critical(this,"","Must select 1 item only");
+              QMessageBox msgBox12(this);
+              msgBox12.setIcon(QMessageBox::Critical);
+              msgBox12.setWindowTitle(QString());
+              msgBox12.setText(QStringLiteral("Must select 1 item only"));
+              msgBox12.setStandardButtons(QMessageBox::Ok);
+              msgBox12.setWindowModality(Qt::WindowModal);
+              msgBox12.exec();
             return;
            }
 
@@ -928,8 +998,15 @@ QString destdir;
     setPath2(current_directory2);
 
 
-   if (error)
-     QMessageBox::critical(this,"","File(s) not pushed. See log.");
+   if (error) {
+     QMessageBox msgBox(this);
+     msgBox.setIcon(QMessageBox::Critical);
+     msgBox.setWindowTitle(QString());
+     msgBox.setText(QStringLiteral("File(s) not pushed. See log."));
+     msgBox.setStandardButtons(QMessageBox::Ok);
+     msgBox.setWindowModality(Qt::WindowModal);
+     msgBox.exec();
+   }
 
 
 }
@@ -1190,7 +1267,13 @@ command = getadbOutput(cstring);
 
 if (command.contains("true"))
 {
-    QMessageBox::critical(this, "", "Can't edit directory " + fileName);
+    QMessageBox msgBox13(this);
+    msgBox13.setIcon(QMessageBox::Critical);
+    msgBox13.setWindowTitle(QString());
+    msgBox13.setText(QStringLiteral("Can't edit directory %1").arg(fileName));
+    msgBox13.setStandardButtons(QMessageBox::Ok);
+    msgBox13.setWindowModality(Qt::WindowModal);
+    msgBox13.exec();
     return;
 }
 
@@ -1205,7 +1288,13 @@ if (!command.contains("bytes"))
 {
     logfile("edit failed");
     logfile(command);
-    QMessageBox::critical(this, "", "Exit failed " + command);
+    QMessageBox msgBox14(this);
+    msgBox14.setIcon(QMessageBox::Critical);
+    msgBox14.setWindowTitle(QString());
+    msgBox14.setText(QStringLiteral("Exit failed %1").arg(command));
+    msgBox14.setStandardButtons(QMessageBox::Ok);
+    msgBox14.setWindowModality(Qt::WindowModal);
+    msgBox14.exec();
     return;
 }
 
@@ -1230,7 +1319,13 @@ dialog.setModal(true);
 if (dialog.exec() == QDialog::Accepted)
 {
     QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(this, "Save", "Save " + fileName + "?", QMessageBox::Yes | QMessageBox::No);
+    QMessageBox msgBox15(this);
+    msgBox15.setIcon(QMessageBox::Question);
+    msgBox15.setWindowTitle(QStringLiteral("Save"));
+    msgBox15.setText(QStringLiteral("Save %1?").arg(fileName));
+    msgBox15.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox15.setWindowModality(Qt::WindowModal);
+    reply = static_cast<QMessageBox::StandardButton>(msgBox15.exec());
     if (reply == QMessageBox::No)
                               return;
 
@@ -1301,7 +1396,13 @@ dialog.setModal(true);
 if (dialog.exec() == QDialog::Accepted)
 {
     QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(this, "Save", "Save " + filename + "?", QMessageBox::Yes | QMessageBox::No);
+    QMessageBox msgBox16(this);
+    msgBox16.setIcon(QMessageBox::Question);
+    msgBox16.setWindowTitle(QStringLiteral("Save"));
+    msgBox16.setText(QStringLiteral("Save %1?").arg(filename));
+    msgBox16.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox16.setWindowModality(Qt::WindowModal);
+    reply = static_cast<QMessageBox::StandardButton>(msgBox16.exec());
     if (reply == QMessageBox::No)
                               return;
 
@@ -1477,8 +1578,13 @@ void usbfileDialog::on_copyButton_clicked()
 
 
        QMessageBox::StandardButton reply3;
-       reply3 = QMessageBox::question(this, "", optext+" item(s)?",
-                                      QMessageBox::Yes|QMessageBox::No);
+       QMessageBox msgBox17(this);
+       msgBox17.setIcon(QMessageBox::Question);
+       msgBox17.setWindowTitle(QString());
+       msgBox17.setText(QStringLiteral("%1 item(s)?").arg(optext));
+       msgBox17.setStandardButtons(QMessageBox::Yes|QMessageBox::No);
+       msgBox17.setWindowModality(Qt::WindowModal);
+       reply3 = static_cast<QMessageBox::StandardButton>(msgBox17.exec());
        if (reply3 == QMessageBox::No)
          return;
 
@@ -1512,7 +1618,13 @@ void usbfileDialog::on_copyButton_clicked()
 
              logfile(command);
              logfile( optext+" failed");
-             QMessageBox::critical(this,"",fileName+" "+optext+ " failed");
+             QMessageBox msgBox18(this);
+             msgBox18.setIcon(QMessageBox::Critical);
+             msgBox18.setWindowTitle(QString());
+             msgBox18.setText(QStringLiteral("%1 %2 failed").arg(fileName).arg(optext));
+             msgBox18.setStandardButtons(QMessageBox::Ok);
+             msgBox18.setWindowModality(Qt::WindowModal);
+             msgBox18.exec();
              error=error+1;
          }
 
@@ -1528,7 +1640,15 @@ void usbfileDialog::on_copyButton_clicked()
 
 
        if (error>0)
-         QMessageBox::critical(this,"",optext+ "(s) failed. See log.");
+       {
+         QMessageBox msgBox19(this);
+         msgBox19.setIcon(QMessageBox::Critical);
+         msgBox19.setWindowTitle(QString());
+         msgBox19.setText(QStringLiteral("%1(s) failed. See log.").arg(optext));
+         msgBox19.setStandardButtons(QMessageBox::Ok);
+         msgBox19.setWindowModality(Qt::WindowModal);
+         msgBox19.exec();
+       }
 
 
 
@@ -1619,19 +1739,31 @@ void usbfileDialog::on_copyButton_clicked()
 
          command = RunLongProcess_ufd(cstring);
 
-         if (!command.isEmpty()) {
-             logfile(command);
-             logfile(optext + " failed");
-             QMessageBox::critical(this, "", fileName + " " + optext + " failed");
-             error = error + 1;
-         } else {
+          if (!command.isEmpty()) {
+              logfile(command);
+              logfile(optext + " failed");
+              QMessageBox msgBox20(this);
+              msgBox20.setIcon(QMessageBox::Critical);
+              msgBox20.setWindowTitle(QString());
+              msgBox20.setText(QStringLiteral("%1 %2 failed").arg(fileName).arg(optext));
+              msgBox20.setStandardButtons(QMessageBox::Ok);
+              msgBox20.setWindowModality(Qt::WindowModal);
+              msgBox20.exec();
+              error = error + 1;
+          } else {
              logfile(fileName + " " + optext + " succeeded");
          }
        }
 
-       if (error > 0) {
-         QMessageBox::critical(this, "", optext + "(s) failed. See log.");
-       }
+        if (error > 0) {
+          QMessageBox msgBox21(this);
+          msgBox21.setIcon(QMessageBox::Critical);
+          msgBox21.setWindowTitle(QString());
+          msgBox21.setText(QStringLiteral("%1(s) failed. See log.").arg(optext));
+          msgBox21.setStandardButtons(QMessageBox::Ok);
+          msgBox21.setWindowModality(Qt::WindowModal);
+          msgBox21.exec();
+        }
 
        // Refresh widgets
        setPath1(current_directory1);

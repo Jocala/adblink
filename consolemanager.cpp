@@ -126,7 +126,13 @@ void ConsoleManager::openConsole(const QString &scriptDir, const QString &appHom
         if (!file.open(QFile::WriteOnly | QFile::Text))
         {
             logfile("error creating cpath.bat!");
-            QMessageBox::critical(nullptr, "", "Error creating bat file!");
+            QMessageBox msgBox;
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setWindowTitle(QString());
+            msgBox.setText(QStringLiteral("Error creating bat file!"));
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setWindowModality(Qt::ApplicationModal);
+            msgBox.exec();
             return;
         }
 
@@ -161,7 +167,13 @@ void ConsoleManager::openConsole(const QString &scriptDir, const QString &appHom
         if (!file.open(QFile::WriteOnly | QFile::Text))
         {
             logfile("error creating cpath!");
-            QMessageBox::critical(nullptr, "", "Error creating sh file!");
+            QMessageBox msgBox;
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setWindowTitle(QString());
+            msgBox.setText(QStringLiteral("Error creating sh file!"));
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setWindowModality(Qt::ApplicationModal);
+            msgBox.exec();
             return;
         }
 
@@ -251,7 +263,13 @@ void ConsoleManager::openAdbShell(const QString &daddr, const QString &scriptDir
         if (!file.open(QFile::WriteOnly | QFile::Text))
         {
             logfile("error creating shell.bat!");
-            QMessageBox::critical(nullptr, "", "Error creating bat file!");
+            QMessageBox msgBox;
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setWindowTitle(QString());
+            msgBox.setText(QStringLiteral("Error creating bat file!"));
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setWindowModality(Qt::ApplicationModal);
+            msgBox.exec();
             return;
         }
 
@@ -285,7 +303,13 @@ void ConsoleManager::openAdbShell(const QString &daddr, const QString &scriptDir
         if (!file.open(QFile::WriteOnly))
         {
             logfile("error creating console.sh!");
-            QMessageBox::critical(nullptr, "", "Error creating command file!");
+            QMessageBox msgBox;
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setWindowTitle(QString());
+            msgBox.setText(QStringLiteral("Error creating command file!"));
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setWindowModality(Qt::ApplicationModal);
+            msgBox.exec();
             return;
         }
 
@@ -382,7 +406,13 @@ void ConsoleManager::openScrcpy(QWidget *parent, const QString &daddr,
     {
         QFile argfile(scrcpytxt);
         if (!argfile.open(QIODevice::ReadOnly)) {
-            QMessageBox::information(nullptr, "error", argfile.errorString());
+            QMessageBox msgBox;
+            msgBox.setIcon(QMessageBox::Information);
+            msgBox.setWindowTitle(QStringLiteral("error"));
+            msgBox.setText(argfile.errorString());
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setWindowModality(Qt::ApplicationModal);
+            msgBox.exec();
         }
 
         QTextStream in(&argfile);
@@ -419,7 +449,13 @@ void ConsoleManager::openScrcpy(QWidget *parent, const QString &daddr,
         if (!file2.open(QFile::WriteOnly | QFile::Text))
         {
             logfile("error creating scrcpy.txt!");
-            QMessageBox::critical(parent, "", "Error saving arguments!");
+            QMessageBox msgBox(parent);
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setWindowTitle(QString());
+            msgBox.setText(QStringLiteral("Error saving arguments!"));
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setWindowModality(Qt::WindowModal);
+            msgBox.exec();
             return;
         }
         QTextStream out2(&file2);
@@ -432,7 +468,13 @@ void ConsoleManager::openScrcpy(QWidget *parent, const QString &daddr,
         if (!batFile.open(QFile::WriteOnly | QFile::Text))
         {
             logfile("error creating scrcpy.bat!");
-            QMessageBox::critical(parent, "", "Error creating bat file!");
+            QMessageBox msgBox2(parent);
+            msgBox2.setIcon(QMessageBox::Critical);
+            msgBox2.setWindowTitle(QString());
+            msgBox2.setText(QStringLiteral("Error creating bat file!"));
+            msgBox2.setStandardButtons(QMessageBox::Ok);
+            msgBox2.setWindowModality(Qt::WindowModal);
+            msgBox2.exec();
             return;
         }
         QTextStream out(&batFile);
@@ -452,7 +494,13 @@ void ConsoleManager::openScrcpy(QWidget *parent, const QString &daddr,
         if (!file2.open(QFile::WriteOnly | QFile::Text))
         {
             logfile("error saving arguments!");
-            QMessageBox::critical(parent, "", "Error saving arguments!");
+            QMessageBox msgBox(parent);
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setWindowTitle(QString());
+            msgBox.setText(QStringLiteral("Error saving arguments!"));
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setWindowModality(Qt::WindowModal);
+            msgBox.exec();
             return;
         }
         QTextStream out2(&file2);
@@ -465,7 +513,13 @@ void ConsoleManager::openScrcpy(QWidget *parent, const QString &daddr,
         if (!shFile.open(QFile::WriteOnly | QFile::Text))
         {
             logfile("error creating cpath!");
-            QMessageBox::critical(parent, "", "Error creating script!");
+            QMessageBox msgBox2(parent);
+            msgBox2.setIcon(QMessageBox::Critical);
+            msgBox2.setWindowTitle(QString());
+            msgBox2.setText(QStringLiteral("Error creating script!"));
+            msgBox2.setStandardButtons(QMessageBox::Ok);
+            msgBox2.setWindowModality(Qt::WindowModal);
+            msgBox2.exec();
             return;
         }
 

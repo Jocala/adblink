@@ -105,7 +105,13 @@ void dataDialog::on_listDirectories1_doubleClicked()
         m_listDirectories->setCurrentRow(0);
         m_externalLocation = m_listDirectories->currentItem()->text();
     } else {
-        QMessageBox::information(this, "No Items", "No items available in the list.");
+        QMessageBox msgBox(this);
+        msgBox.setIcon(QMessageBox::Information);
+        msgBox.setWindowTitle(QStringLiteral("No Items"));
+        msgBox.setText(QStringLiteral("No items available in the list."));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         return;
     }
 

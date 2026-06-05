@@ -84,7 +84,13 @@ void TimerManager::pushTimers(QWidget *parentWidget,
         screen1 = screen1.simplified();
         screen1.replace(" ", "");
 
-        QMessageBox::information(parentWidget, "", "Sleep/Screensaver values adjusted");
+        QMessageBox msgBox(parentWidget);
+        msgBox.setIcon(QMessageBox::Information);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("Sleep/Screensaver values adjusted"));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         logfile("Sleep/Screensaver values adjusted");
         logfile("Screensaver:" + screenval);
         logfile("Sleep:" + sleepval);

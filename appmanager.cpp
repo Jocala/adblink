@@ -27,7 +27,13 @@ void AppManager::stopApp(QWidget *parentWidget, const DeviceRecord & /*device*/,
     QFile file(jsonPath);
     if (file.exists()) {
         if (!file.open(QIODevice::ReadOnly)) {
-            QMessageBox::critical(parentWidget, "Error", "Cannot read " + configBasename + ".");
+            QMessageBox msgBox(parentWidget);
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setWindowTitle(QStringLiteral("Error"));
+            msgBox.setText(QStringLiteral("Cannot read %1.").arg(configBasename));
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setWindowModality(Qt::WindowModal);
+            msgBox.exec();
             return;
         }
         QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
@@ -48,21 +54,40 @@ void AppManager::stopApp(QWidget *parentWidget, const DeviceRecord & /*device*/,
 
     QString package = dialog.packagename();
     if (package.isEmpty()) {
-        QMessageBox::critical(parentWidget, "Error", "Invalid package name.");
+        QMessageBox msgBox(parentWidget);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QStringLiteral("Error"));
+        msgBox.setText(QStringLiteral("Invalid package name."));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         return;
     }
 
     QString cstring = adbPrefix + " shell am force-stop " + package;
     QString command = getadbOutput(cstring);
-    if (command.contains("error", Qt::CaseInsensitive))
-        QMessageBox::warning(parentWidget, "Warning", "Failed to stop application.");
+    if (command.contains("error", Qt::CaseInsensitive)) {
+        QMessageBox msgBox(parentWidget);
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setWindowTitle(QStringLiteral("Warning"));
+        msgBox.setText(QStringLiteral("Failed to stop application."));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
+    }
     logfile(cstring);
     logfile(command);
 
     if (stopapp != package) {
         jsonObj["stopapp"] = package;
         if (!file.open(QIODevice::WriteOnly)) {
-            QMessageBox::critical(parentWidget, "Error", "Cannot save configuration.");
+            QMessageBox msgBox(parentWidget);
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setWindowTitle(QStringLiteral("Error"));
+            msgBox.setText(QStringLiteral("Cannot save configuration."));
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setWindowModality(Qt::WindowModal);
+            msgBox.exec();
             return;
         }
         file.write(QJsonDocument(jsonObj).toJson());
@@ -81,7 +106,13 @@ void AppManager::startApp(QWidget *parentWidget, const DeviceRecord & /*device*/
     QFile file(jsonPath);
     if (file.exists()) {
         if (!file.open(QIODevice::ReadOnly)) {
-            QMessageBox::critical(parentWidget, "Error", "Cannot read " + configBasename + ".");
+            QMessageBox msgBox(parentWidget);
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setWindowTitle(QStringLiteral("Error"));
+            msgBox.setText(QStringLiteral("Cannot read %1.").arg(configBasename));
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setWindowModality(Qt::WindowModal);
+            msgBox.exec();
             return;
         }
         QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
@@ -102,21 +133,40 @@ void AppManager::startApp(QWidget *parentWidget, const DeviceRecord & /*device*/
 
     QString package = dialog.packagename();
     if (package.isEmpty()) {
-        QMessageBox::critical(parentWidget, "Error", "Invalid package name.");
+        QMessageBox msgBox(parentWidget);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QStringLiteral("Error"));
+        msgBox.setText(QStringLiteral("Invalid package name."));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         return;
     }
 
     QString cstring = adbPrefix + " shell am start -n " + package;
     QString command = getadbOutput(cstring);
-    if (command.contains("error", Qt::CaseInsensitive))
-        QMessageBox::warning(parentWidget, "Warning", "Failed to start application.");
+    if (command.contains("error", Qt::CaseInsensitive)) {
+        QMessageBox msgBox(parentWidget);
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setWindowTitle(QStringLiteral("Warning"));
+        msgBox.setText(QStringLiteral("Failed to start application."));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
+    }
     logfile(cstring);
     logfile(command);
 
     if (startapp != package) {
         jsonObj["startapp"] = package;
         if (!file.open(QIODevice::WriteOnly)) {
-            QMessageBox::critical(parentWidget, "Error", "Cannot save configuration.");
+            QMessageBox msgBox(parentWidget);
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setWindowTitle(QStringLiteral("Error"));
+            msgBox.setText(QStringLiteral("Cannot save configuration."));
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setWindowModality(Qt::WindowModal);
+            msgBox.exec();
             return;
         }
         file.write(QJsonDocument(jsonObj).toJson());

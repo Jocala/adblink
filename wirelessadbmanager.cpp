@@ -20,7 +20,13 @@ void WirelessAdbManager::enableWirelessAdb(QWidget *parentWidget,
                                             const QString &adbPrefix)
 {
     if (!device.isusb) {
-        QMessageBox::critical(parentWidget, "", "USB devices only!");
+        QMessageBox msgBox(parentWidget);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("USB devices only!"));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         return;
     }
 
@@ -59,15 +65,25 @@ void WirelessAdbManager::enableWirelessAdb(QWidget *parentWidget,
             logfile("adb connect: " + command);
 
             if (command.contains("connected to")) {
-                QMessageBox::information(parentWidget, "Success",
-                                         "Wireless ADB enabled for " + ip);
+                QMessageBox msgBox(parentWidget);
+                msgBox.setIcon(QMessageBox::Information);
+                msgBox.setWindowTitle(QStringLiteral("Success"));
+                msgBox.setText(QStringLiteral("Wireless ADB enabled for %1").arg(ip));
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.setWindowModality(Qt::WindowModal);
+                msgBox.exec();
 
                 cstring = getadbpath() + " disconnect " + ip + ":5555";
                 command = getadbOutput(cstring);
                 logfile("adb disconnect: " + command);
             } else {
-                QMessageBox::warning(parentWidget, "Failure",
-                                     "Failed to connect over TCP/IP to " + ip);
+                QMessageBox msgBox(parentWidget);
+                msgBox.setIcon(QMessageBox::Warning);
+                msgBox.setWindowTitle(QStringLiteral("Failure"));
+                msgBox.setText(QStringLiteral("Failed to connect over TCP/IP to %1").arg(ip));
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.setWindowModality(Qt::WindowModal);
+                msgBox.exec();
             }
         });
     }

@@ -13,8 +13,12 @@ KillServerManager::KillServerManager(QObject *parent)
 
 void KillServerManager::killServer(QWidget *parentWidget, QTableWidget *deviceTable)
 {
-    if (QMessageBox::question(parentWidget, "Disconnect", "Disconnect all IPs?",
-                              QMessageBox::Cancel | QMessageBox::Ok) == QMessageBox::Cancel)
+    QMessageBox msgBox(parentWidget);
+    msgBox.setWindowTitle(QStringLiteral("Disconnect"));
+    msgBox.setText(QStringLiteral("Disconnect all IPs?"));
+    msgBox.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
+    msgBox.setWindowModality(Qt::WindowModal);
+    if (msgBox.exec() == QMessageBox::Cancel)
         return;
 
     QString cstring = getadbpath() + " kill-server";
@@ -27,7 +31,7 @@ void KillServerManager::killServer(QWidget *parentWidget, QTableWidget *deviceTa
         QTableWidgetItem *statusItem = deviceTable->item(row, 2);
         QString currentStatus = statusItem ? statusItem->text() : "";
 
-        bool isUsb = descItem->data(Qt::UserRole + 1).toBool();
+        bool isUsb = !descItem->data(Qt::UserRole + 1).toString().isEmpty();
 
         if (currentStatus != "USB") {
             QString status = isUsb ? "USB" : "Disconnected";

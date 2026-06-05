@@ -30,7 +30,13 @@ void XmlEditorManager::editXml(QWidget *parent, const DeviceRecord &device,
     QStringList filelist = command.split(QRegularExpression("[\r\n]"), Qt::SkipEmptyParts);
 
     if (command.isEmpty() || command.contains("No such file or directory")) {
-        QMessageBox::critical(parent, "", "No files found");
+        QMessageBox msgBox(parent);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("No files found"));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         logfile(command);
         logfile("no files found!");
         return;
@@ -47,7 +53,13 @@ void XmlEditorManager::editXml(QWidget *parent, const DeviceRecord &device,
     fileName = fdialog.return_fitem();
 
     if (fileName.isEmpty()) {
-        QMessageBox::critical(parent, "", "No file selected");
+        QMessageBox msgBox(parent);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("No file selected"));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         logfile("no file selected");
         return;
     }
@@ -60,7 +72,13 @@ void XmlEditorManager::editXml(QWidget *parent, const DeviceRecord &device,
     if (!command.contains("bytes")) {
         logfile("edit failed");
         logfile(command);
-        QMessageBox::critical(parent, "", "Edit failed " + command);
+        QMessageBox msgBox(parent);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("Edit failed %1").arg(command));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         return;
     }
 
@@ -81,9 +99,12 @@ void XmlEditorManager::editXml(QWidget *parent, const DeviceRecord &device,
     if (dialog.exec() != QDialog::Accepted)
         return;
 
-    QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(parent, "Save", "Save " + fileName + "?",
-                                  QMessageBox::Yes | QMessageBox::No);
+    QMessageBox msgBox(parent);
+    msgBox.setWindowTitle(QStringLiteral("Save"));
+    msgBox.setText(QStringLiteral("Save %1?").arg(fileName));
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setWindowModality(Qt::WindowModal);
+    QMessageBox::StandardButton reply = static_cast<QMessageBox::StandardButton>(msgBox.exec());
     if (reply == QMessageBox::No)
         return;
 
@@ -101,7 +122,13 @@ void XmlEditorManager::editXml(QWidget *parent, const DeviceRecord &device,
     logfile(command);
 
     if (!command.contains("bytes")) {
-        QMessageBox::critical(parent, "", "Backup of " + filename + " failed. Edit abandoned.");
+        QMessageBox msgBox(parent);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("Backup of %1 failed. Edit abandoned.").arg(filename));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         logfile("Backup of " + filename + " failed");
         return;
     }
@@ -111,7 +138,13 @@ void XmlEditorManager::editXml(QWidget *parent, const DeviceRecord &device,
     logfile(command);
 
     if (!command.contains("bytes")) {
-        QMessageBox::critical(parent, "", "Problem replacing " + filename + ". Edit abandoned.");
+        QMessageBox msgBox(parent);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("Problem replacing %1. Edit abandoned.").arg(filename));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         logfile("Problem replacing " + filename + ". Edit abandoned.");
         return;
     }

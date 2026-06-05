@@ -40,7 +40,13 @@ void ScreenCapManager::captureScreenshot(QWidget *parentWidget,
 
     if (!command.isEmpty()) {
         logfile(command);
-        QMessageBox::critical(parentWidget, "", "Screenshot failed: " + command);
+        QMessageBox msgBox(parentWidget);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("Screenshot failed: %1").arg(command));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         return;
     }
 
@@ -57,7 +63,13 @@ void ScreenCapManager::captureScreenshot(QWidget *parentWidget,
     QFileInfo fileInfo(localFilePath);
     if (!fileInfo.exists()) {
         logfile("Error: Pulled file does not exist at " + localFilePath);
-        QMessageBox::critical(parentWidget, "", "Failed to pull screenshot: File not found at " + localFilePath);
+        QMessageBox msgBox(parentWidget);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("Failed to pull screenshot: File not found at %1").arg(localFilePath));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         return;
     }
 
@@ -67,5 +79,11 @@ void ScreenCapManager::captureScreenshot(QWidget *parentWidget,
     logfile(cstring);
     logfile(command);
 
-    QMessageBox::information(parentWidget, "", "Screenshot " + dtstr + " copied to " + pulldir);
+    QMessageBox msgBox(parentWidget);
+    msgBox.setIcon(QMessageBox::Information);
+    msgBox.setWindowTitle(QString());
+    msgBox.setText(QStringLiteral("Screenshot %1 copied to %2").arg(dtstr, pulldir));
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setWindowModality(Qt::WindowModal);
+    msgBox.exec();
 }

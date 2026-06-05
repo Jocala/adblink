@@ -145,7 +145,13 @@ bool BackupManager::backupDevice(QWidget *parent, const DeviceRecord &device,
 
     cstring = adbPrefix + "shell ls " + mcpath + "/files/.kodi";
     if (!getreturncode(cstring)) {
-        QMessageBox::critical(parent, "", "Kodi's files not found at " + mcpath);
+        QMessageBox msgBox(parent);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("Kodi's files not found at %1").arg(mcpath));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         logfile(device.daddr + ": Error: Kodi's files not found at " + mcpath);
         return false;
     }
@@ -185,7 +191,13 @@ bool BackupManager::backupDevice(QWidget *parent, const DeviceRecord &device,
         logfile("backup location: " + dir);
         return true;
     } else {
-        QMessageBox::critical(parent, "", "Backup failed for " + device.daddr + ". See log.");
+        QMessageBox msgBox(parent);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("Backup failed for %1. See log.").arg(device.daddr));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         logfile(device.daddr + ": Error: Backup failed: " + command);
         return false;
     }
@@ -222,11 +234,12 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
     command = getadbOutput(cstring);
 
     if (command.contains(device.xbmcpackage)) {
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(parent, "Stop Kodi",
-                                      "Cannot restore while Kodi is running on " + device.daddr +
-                                      ".\n Stop " + device.xbmcpackage + "?",
-                                      QMessageBox::Yes | QMessageBox::No);
+        QMessageBox msgBox(parent);
+        msgBox.setWindowTitle(QStringLiteral("Stop Kodi"));
+        msgBox.setText(QStringLiteral("Cannot restore while Kodi is running on %1.\n Stop %2?").arg(device.daddr, device.xbmcpackage));
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setWindowModality(Qt::WindowModal);
+        QMessageBox::StandardButton reply = static_cast<QMessageBox::StandardButton>(msgBox.exec());
         if (reply == QMessageBox::Yes) {
             cstring = getadbpath() + " -s " + device.daddr + " shell am force-stop " + device.xbmcpackage;
             getadbOutput(cstring);
@@ -284,7 +297,13 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
             cstring = getadbpath() + " -s " + device.daddr + " shell mkdir -p " + kbase;
             command = getadbOutput(cstring);
             if (command.contains("No such file or directory")) {
-                QMessageBox::critical(parent, "", "Failed to create kodi_data directory on " + device.daddr);
+                QMessageBox msgBox(parent);
+                msgBox.setIcon(QMessageBox::Critical);
+                msgBox.setWindowTitle(QString());
+                msgBox.setText(QStringLiteral("Failed to create kodi_data directory on %1").arg(device.daddr));
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.setWindowModality(Qt::WindowModal);
+                msgBox.exec();
                 logfile(device.daddr + ": Error creating kodi_data: " + command);
                 return false;
             }
@@ -305,21 +324,34 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
         return false;
 
     if (!QDir(dir + "/userdata").exists()) {
-        QMessageBox::critical(parent, "", "Invalid backup for " + device.daddr + ". No userdata folder.");
+        QMessageBox msgBox(parent);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("Invalid backup for %1. No userdata folder.").arg(device.daddr));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         logfile(device.daddr + ": Error: Invalid backup. No userdata folder.");
         return false;
     }
     if (!QDir(dir + "/addons").exists()) {
-        QMessageBox::critical(parent, "", "Invalid backup for " + device.daddr + ". addons folder not found.");
+        QMessageBox msgBox(parent);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("Invalid backup for %1. addons folder not found.").arg(device.daddr));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         logfile(device.daddr + ": Error: Invalid backup. addons folder not found.");
         return false;
     }
 
-    QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(parent, "Restore",
-                                  "Restore this backup to " + device.daddr +
-                                  "? This will overwrite existing Kodi data.",
-                                  QMessageBox::Yes | QMessageBox::No);
+    QMessageBox msgBox(parent);
+    msgBox.setWindowTitle(QStringLiteral("Restore"));
+    msgBox.setText(QStringLiteral("Restore this backup to %1? This will overwrite existing Kodi data.").arg(device.daddr));
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setWindowModality(Qt::WindowModal);
+    QMessageBox::StandardButton reply = static_cast<QMessageBox::StandardButton>(msgBox.exec());
     if (reply == QMessageBox::No)
         return false;
 
@@ -338,7 +370,13 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
         command = getadbOutput(cstring);
 
         if (command.contains("No such file or directory")) {
-            QMessageBox::critical(parent, "", "Error creating restore point on " + device.daddr);
+            QMessageBox msgBox(parent);
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setWindowTitle(QString());
+            msgBox.setText(QStringLiteral("Error creating restore point on %1").arg(device.daddr));
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setWindowModality(Qt::WindowModal);
+            msgBox.exec();
             logfile(device.daddr + ": Error creating restore point: " + errorOutput);
             return false;
         }
@@ -357,7 +395,13 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
             cstring = getadbpath() + " -s " + device.daddr + " shell echo xbmc.data=" + mcpath + "/files > /sdcard/xbmc_env.properties";
             command = getadbOutput(cstring);
             if (command.contains("No such file or directory") || !command.isEmpty()) {
-                QMessageBox::critical(parent, "", "Failed to create xbmc_env.properties on " + device.daddr);
+                QMessageBox msgBox(parent);
+                msgBox.setIcon(QMessageBox::Critical);
+                msgBox.setWindowTitle(QString());
+                msgBox.setText(QStringLiteral("Failed to create xbmc_env.properties on %1").arg(device.daddr));
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.setWindowModality(Qt::WindowModal);
+                msgBox.exec();
                 logfile(device.daddr + ": Error creating xbmc_env.properties: " + command);
                 return false;
             }
@@ -371,7 +415,13 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
         logfile("Restore completed successfully for " + device.daddr);
         return true;
     } else {
-        QMessageBox::critical(parent, "", "Restore failed for " + device.daddr + ". See log.");
+        QMessageBox msgBox(parent);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("Restore failed for %1. See log.").arg(device.daddr));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         logfile(device.daddr + ": Error: Restore failed: " + command);
         return false;
     }

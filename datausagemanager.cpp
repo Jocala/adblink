@@ -54,6 +54,11 @@ void DataUsageManager::showKodiDataUsage(QWidget *parentWidget,
             kodidata = command.mid(0, z + 1);
     }
 
-    QMessageBox::information(parentWidget, "Kodi Data",
-                             "Kodi data size:  " + kodidata);
+    QMessageBox msgBox(parentWidget);
+    msgBox.setIcon(QMessageBox::Information);
+    msgBox.setWindowTitle(QStringLiteral("Kodi Data"));
+    msgBox.setText(QStringLiteral("Kodi data size:  %1").arg(kodidata));
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setWindowModality(Qt::WindowModal);
+    msgBox.exec();
 }

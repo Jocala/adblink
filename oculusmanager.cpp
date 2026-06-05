@@ -24,10 +24,12 @@ void OculusManager::exec()
     QString temp = ::getadbOutput(cstring);
 
     if (temp.contains("Can't find service: CompanionService")) {
-        QMessageBox::StandardButton reply = QMessageBox::question(
-            m_parent, "Quest", "Not a Quest device. Proceed?",
-            QMessageBox::Yes | QMessageBox::No);
-        if (reply == QMessageBox::No)
+        QMessageBox msgBox(m_parent);
+        msgBox.setWindowTitle(QStringLiteral("Quest"));
+        msgBox.setText(QStringLiteral("Not a Quest device. Proceed?"));
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setWindowModality(Qt::WindowModal);
+        if (msgBox.exec() == QMessageBox::No)
             return;
         notQuest = true;
     }
@@ -672,6 +674,13 @@ void OculusManager::applySettings(oculusDialog &dialog, bool &execute_true)
         break;
     }
 
-    if (execute_true)
-        QMessageBox::information(m_parent, "", "Values adjusted.\n\nThese changes are not persistent. Reboot headset to return values to default.");
+    if (execute_true) {
+        QMessageBox msgBox(m_parent);
+        msgBox.setIcon(QMessageBox::Information);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("Values adjusted.\n\nThese changes are not persistent. Reboot headset to return values to default."));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
+    }
 }

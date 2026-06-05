@@ -41,7 +41,13 @@ void ConnectManager::connectToDevice(QWidget *parentWidget,
     if (selectedRow >= 0 && deviceTable->item(selectedRow, 0)) {
         selectedDescription = deviceTable->item(selectedRow, 0)->text();
     } else {
-        QMessageBox::critical(parentWidget, "", "No device selected in table");
+        QMessageBox msgBox(parentWidget);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("No device selected in table"));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         return;
     }
 
@@ -49,12 +55,24 @@ void ConnectManager::connectToDevice(QWidget *parentWidget,
 
     if (device.isusb) {
         logfile("USB connection attempted, not supported");
-        QMessageBox::critical(parentWidget, "", "Inactive for USB connections");
+        QMessageBox msgBox(parentWidget);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("Inactive for USB connections"));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         return;
     }
 
     if (!validateIP(device.daddr)) {
-        QMessageBox::critical(parentWidget, "Error", "Invalid IP address");
+        QMessageBox msgBox(parentWidget);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QStringLiteral("Error"));
+        msgBox.setText(QStringLiteral("Invalid IP address"));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         return;
     }
 

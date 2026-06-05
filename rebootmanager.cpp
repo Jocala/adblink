@@ -16,10 +16,13 @@ RebootManager::RebootManager(QObject *parent)
 void RebootManager::rebootDevice(QWidget *parentWidget, QTableWidget *deviceTable,
                                   bool isUsb, const QString &adbPrefix)
 {
-    QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(parentWidget, "Reboot Device", "Reboot Device?",
-                                  QMessageBox::Yes | QMessageBox::No);
-    if (reply == QMessageBox::Yes) {
+    QMessageBox msgBox(parentWidget);
+    msgBox.setWindowTitle(QStringLiteral("Reboot Device"));
+    msgBox.setText(QStringLiteral("Reboot Device?"));
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setWindowModality(Qt::WindowModal);
+    if (msgBox.exec() != QMessageBox::Yes)
+        return;
         logfile("rebooting device");
 
         QProcess reboot_device;
@@ -42,5 +45,4 @@ void RebootManager::rebootDevice(QWidget *parentWidget, QTableWidget *deviceTabl
         if (selectedRow >= 0 && deviceTable->item(selectedRow, 2)) {
             deviceTable->setItem(selectedRow, 2, new QTableWidgetItem("Disconnected"));
         }
-    }
 }

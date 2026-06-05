@@ -26,18 +26,25 @@ void SideloadManager::sideloadApks(QWidget *parentWidget,
         tr("APK files (*.apk);;All files (.*)"), install);
 
     if (!filenames.isEmpty()) {
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(parentWidget, "Install", "Install APKs?",
-                                      QMessageBox::Yes | QMessageBox::No);
-        if (reply == QMessageBox::Yes) {
+        QMessageBox msgBox(parentWidget);
+        msgBox.setWindowTitle(QStringLiteral("Install"));
+        msgBox.setText(QStringLiteral("Install APKs?"));
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setWindowModality(Qt::WindowModal);
+        if (msgBox.exec() == QMessageBox::Yes) {
             logfile("starting APK installation(s)");
             for (int i = 0; i < filenames.count(); i++)
                 installer = installApk(filenames.at(i));
 
             if (installer) {
                 writeInstall(filenames[0].left(filenames[0].lastIndexOf('/')));
-                QMessageBox::information(parentWidget, "",
-                    "APK(s) installed.\nSee log for details.");
+                QMessageBox msgBox(parentWidget);
+                msgBox.setIcon(QMessageBox::Information);
+                msgBox.setWindowTitle(QString());
+                msgBox.setText(QStringLiteral("APK(s) installed.\nSee log for details."));
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.setWindowModality(Qt::WindowModal);
+                msgBox.exec();
 
                 install = filenames[0].left(filenames[0].lastIndexOf('/'));
                 writeInstall(install);

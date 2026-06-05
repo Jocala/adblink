@@ -21,7 +21,13 @@ bool InstallManager::installApk(QWidget *parentWidget, const QString &adbPrefix,
     logfile(command);
 
     if (!command.contains("uccess") || command.contains("Failure")) {
-        QMessageBox::critical(parentWidget, "", filename + " install failed.\nSee log.");
+        QMessageBox msgBox(parentWidget);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("%1 install failed.\nSee log.").arg(filename));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         return false;
     }
     return true;

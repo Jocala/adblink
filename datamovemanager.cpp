@@ -22,10 +22,12 @@ void DataMoveManager::moveKodiData(QWidget *parent, const DeviceRecord &device,
 
     if (command.contains(device.xbmcpackage))
     {
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(parent, "Stop Kodi", "Cannot move data while Kodi is running.\n Stop " + device.xbmcpackage + " on device?",
-                                      QMessageBox::Yes | QMessageBox::No);
-        if (reply == QMessageBox::Yes)
+        QMessageBox msgBox(parent);
+        msgBox.setWindowTitle(QStringLiteral("Stop Kodi"));
+        msgBox.setText(QStringLiteral("Cannot move data while Kodi is running.\n Stop %1 on device?").arg(device.xbmcpackage));
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setWindowModality(Qt::WindowModal);
+        if (msgBox.exec() == QMessageBox::Yes)
         {
             QString cstring = adbPrefix + " shell am force-stop " + device.xbmcpackage;
             QString command = getadbOutput(cstring);
@@ -62,7 +64,13 @@ void DataMoveManager::moveKodiData(QWidget *parent, const DeviceRecord &device,
 
     if (list.size() <= 0)
     {
-        QMessageBox::critical(parent, "", "No external devices found");
+        QMessageBox msgBox(parent);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("No external devices found"));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         return;
     }
 
@@ -120,7 +128,13 @@ void DataMoveManager::moveKodiData(QWidget *parent, const DeviceRecord &device,
 
     if (!getreturncode(cstring))
     {
-        QMessageBox::critical(parent, "", "Kodi's files not found at " + source);
+        QMessageBox msgBox(parent);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("Kodi's files not found at %1").arg(source));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         logfile("Data move: files not found at " + source);
         return;
     }
@@ -129,9 +143,12 @@ void DataMoveManager::moveKodiData(QWidget *parent, const DeviceRecord &device,
 
     if (getreturncode(cstring))
     {
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(parent, "", "Kodi data already exists. Overwrite?",
-                                      QMessageBox::Yes | QMessageBox::No);
+        QMessageBox msgBox(parent);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("Kodi data already exists. Overwrite?"));
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setWindowModality(Qt::WindowModal);
+        QMessageBox::StandardButton reply = static_cast<QMessageBox::StandardButton>(msgBox.exec());
         if (reply == QMessageBox::No)
         {
             return;
@@ -156,7 +173,13 @@ void DataMoveManager::moveKodiData(QWidget *parent, const DeviceRecord &device,
 
     if (!getreturncode(cstring))
     {
-        QMessageBox::critical(parent, "", "File copy failed. See log.");
+        QMessageBox msgBox(parent);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("File copy failed. See log."));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         return;
     }
 
@@ -174,12 +197,20 @@ void DataMoveManager::moveKodiData(QWidget *parent, const DeviceRecord &device,
             logfile("ERROR: " + command);
     }
 
-    QMessageBox::StandardButton reply2;
-    reply2 = QMessageBox::question(parent, "", "Erase " + kbase + "?",
-                                   QMessageBox::Yes | QMessageBox::No);
-    if (reply2 == QMessageBox::No)
+    QMessageBox msgBox(parent);
+    msgBox.setWindowTitle(QString());
+    msgBox.setText(QStringLiteral("Erase %1?").arg(kbase));
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setWindowModality(Qt::WindowModal);
+    if (msgBox.exec() == QMessageBox::No)
     {
-        QMessageBox::information(parent, "", "Data copy complete");
+        QMessageBox doneBox(parent);
+        doneBox.setIcon(QMessageBox::Information);
+        doneBox.setWindowTitle(QString());
+        doneBox.setText(QStringLiteral("Data copy complete"));
+        doneBox.setStandardButtons(QMessageBox::Ok);
+        doneBox.setWindowModality(Qt::WindowModal);
+        doneBox.exec();
         return;
     }
 
@@ -187,7 +218,13 @@ void DataMoveManager::moveKodiData(QWidget *parent, const DeviceRecord &device,
     command = runLongProcess(cstring, "Erasing " + kbase);
     logfile("Erasing: " + cstring);
 
-    QMessageBox::information(parent, "", "Data move complete");
+    QMessageBox doneBox2(parent);
+    doneBox2.setIcon(QMessageBox::Information);
+    doneBox2.setWindowTitle(QString());
+    doneBox2.setText(QStringLiteral("Data move complete"));
+    doneBox2.setStandardButtons(QMessageBox::Ok);
+    doneBox2.setWindowModality(Qt::WindowModal);
+    doneBox2.exec();
 }
 
 DataMoveManager::DataMoveManager(QObject *parent)

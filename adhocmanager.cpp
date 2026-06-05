@@ -32,7 +32,13 @@ void AdhocManager::createAdhocRecord(QWidget *parentWidget, QLineEdit *adhocIpEd
         int portNum = port.toInt(&ok);
         if (!ok || portNum < 1 || portNum > 65535) {
             logfile("Invalid port: " + port);
-            QMessageBox::critical(parentWidget, "", "Invalid port: " + port);
+            QMessageBox msgBox(parentWidget);
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setWindowTitle(QString());
+            msgBox.setText(QStringLiteral("Invalid port: %1").arg(port));
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setWindowModality(Qt::WindowModal);
+            msgBox.exec();
             return;
         }
 

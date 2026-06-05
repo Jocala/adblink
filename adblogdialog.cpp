@@ -18,7 +18,13 @@ void adblogDialog::getlog()
     QFile file(m_logdir + fn);
 
     if (!file.exists()) {
-        QMessageBox::critical(0, "", "Can't find " + fn + "\n", QMessageBox::Cancel);
+        QMessageBox msgBox;
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("Can't find %1\n").arg(fn));
+        msgBox.setStandardButtons(QMessageBox::Cancel);
+        msgBox.setWindowModality(Qt::ApplicationModal);
+        msgBox.exec();
         m_getfile = true;
         return;
     }

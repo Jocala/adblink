@@ -131,10 +131,12 @@ bool ensureBusyboxInstalled(QWidget *parent, const QString &adbPrefix, const QSt
     QString cstring;
     QString command;
 
-    QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(parent, "", msg,
-                                  QMessageBox::Yes | QMessageBox::No);
-    if (reply == QMessageBox::No)
+    QMessageBox msgBox(parent);
+    msgBox.setWindowTitle(QString());
+    msgBox.setText(msg);
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setWindowModality(Qt::WindowModal);
+    if (msgBox.exec() == QMessageBox::No)
         return false;
 
     cstring = adbPrefix + " shell rm -r /data/local/tmp/adblink";
@@ -149,7 +151,13 @@ bool ensureBusyboxInstalled(QWidget *parent, const QString &adbPrefix, const QSt
     if (!command.contains("bytes")) {
         logfile("busybox install failed ");
         logfile(command);
-        QMessageBox::critical(nullptr, "", "busybox install failed. See log.");
+        QMessageBox msgBox;
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("busybox install failed. See log."));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::ApplicationModal);
+        msgBox.exec();
         return false;
     }
 
@@ -161,7 +169,13 @@ bool ensureBusyboxInstalled(QWidget *parent, const QString &adbPrefix, const QSt
     ::getadbOutput(cstring);
 
     busybox_permissions(adbPrefix);
-    QMessageBox::information(parent, "", "Busybox installed.");
+    QMessageBox infoBox(parent);
+    infoBox.setIcon(QMessageBox::Information);
+    infoBox.setWindowTitle(QString());
+    infoBox.setText(QStringLiteral("Busybox installed."));
+    infoBox.setStandardButtons(QMessageBox::Ok);
+    infoBox.setWindowModality(Qt::WindowModal);
+    infoBox.exec();
     return true;
 }
 

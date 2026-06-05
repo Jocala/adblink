@@ -28,10 +28,12 @@ void KodiSetupManager::createKodiData(QWidget *parentWidget,
     command = getadbOutput(cstring);
 
     if (command.contains(device.xbmcpackage)) {
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(parentWidget, "Stop Kodi",
-            "Cannot create path while Kodi is running.\n Stop " + device.xbmcpackage + " on device?",
-            QMessageBox::Yes | QMessageBox::No);
+        QMessageBox msgBox(parentWidget);
+        msgBox.setWindowTitle(QStringLiteral("Stop Kodi"));
+        msgBox.setText(QStringLiteral("Cannot create path while Kodi is running.\n Stop %1 on device?").arg(device.xbmcpackage));
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setWindowModality(Qt::WindowModal);
+        QMessageBox::StandardButton reply = static_cast<QMessageBox::StandardButton>(msgBox.exec());
         if (reply == QMessageBox::Yes) {
             cstring = adbPrefix + " shell am force-stop " + device.xbmcpackage;
             command = getadbOutput(cstring);
@@ -46,10 +48,12 @@ void KodiSetupManager::createKodiData(QWidget *parentWidget,
     command = getadbOutput(cstring);
 
     if (!command.contains("No such file or directory")) {
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(parentWidget, "Create Kodi Data",
-            "This will overwrite /sdcard/kodi_data/\nProceed?",
-            QMessageBox::Yes | QMessageBox::No);
+        QMessageBox msgBox(parentWidget);
+        msgBox.setWindowTitle(QStringLiteral("Create Kodi Data"));
+        msgBox.setText(QStringLiteral("This will overwrite /sdcard/kodi_data/\nProceed?"));
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setWindowModality(Qt::WindowModal);
+        QMessageBox::StandardButton reply = static_cast<QMessageBox::StandardButton>(msgBox.exec());
         if (reply == QMessageBox::No)
             return;
     }
@@ -60,8 +64,15 @@ void KodiSetupManager::createKodiData(QWidget *parentWidget,
         if (android.toInt() >= 11) {
             if (isPackageInstalled(adbPrefix, device.xbmcpackage)) {
                 cstring = adbPrefix + " shell appops set --uid " + device.xbmcpackage + " MANAGE_EXTERNAL_STORAGE allow";
-                if (!getreturncode(cstring))
-                    QMessageBox::critical(parentWidget, "", "Error setting Kodi permissions");
+                if (!getreturncode(cstring)) {
+                    QMessageBox msgBox(parentWidget);
+                    msgBox.setIcon(QMessageBox::Critical);
+                    msgBox.setWindowTitle(QString());
+                    msgBox.setText(QStringLiteral("Error setting Kodi permissions"));
+                    msgBox.setStandardButtons(QMessageBox::Ok);
+                    msgBox.setWindowModality(Qt::WindowModal);
+                    msgBox.exec();
+                }
             }
         }
     }
@@ -82,7 +93,13 @@ void KodiSetupManager::createKodiData(QWidget *parentWidget,
         command = getadbOutput(cstring);
 
         if (command.contains("No such file or directory")) {
-            QMessageBox::critical(parentWidget, "", "Error creating Kodi data folder");
+            QMessageBox msgBox(parentWidget);
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setWindowTitle(QString());
+            msgBox.setText(QStringLiteral("Error creating Kodi data folder"));
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setWindowModality(Qt::WindowModal);
+            msgBox.exec();
             logfile("Restore error:" + errorp);
             return;
         }
@@ -93,5 +110,11 @@ void KodiSetupManager::createKodiData(QWidget *parentWidget,
     logfile("create /sdcard/xbmc_env.properties");
     logfile(command);
 
-    QMessageBox::information(parentWidget, "", "Kodi data area created");
+    QMessageBox msgBox(parentWidget);
+    msgBox.setIcon(QMessageBox::Information);
+    msgBox.setWindowTitle(QString());
+    msgBox.setText(QStringLiteral("Kodi data area created"));
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setWindowModality(Qt::WindowModal);
+    msgBox.exec();
 }

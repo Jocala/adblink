@@ -84,7 +84,13 @@ bool DeviceEditor::exec()
 
     if (description.isEmpty())
     {
-        QMessageBox::critical(m_parent, "", "Description cannot be empty.");
+        QMessageBox msgBox(m_parent);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("Description cannot be empty."));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         return false;
     }
 
@@ -95,7 +101,13 @@ bool DeviceEditor::exec()
         checkQuery.addBindValue(description);
         if (checkQuery.exec() && checkQuery.first() && checkQuery.value(0).toInt() > 0)
         {
-            QMessageBox::critical(m_parent, "", "A device with this description already exists.");
+            QMessageBox msgBox(m_parent);
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setWindowTitle(QString());
+            msgBox.setText(QStringLiteral("A device with this description already exists."));
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setWindowModality(Qt::WindowModal);
+            msgBox.exec();
             return false;
         }
     }
@@ -189,8 +201,13 @@ bool DeviceEditor::exec()
         }
         else
         {
-            QMessageBox::critical(m_parent, "",
-                                  (!m_isUpdate ? "Failed to insert into database: " : "Failed to update database: ") + errorMessage);
+            QMessageBox msgBox(m_parent);
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setWindowTitle(QString());
+            msgBox.setText(QStringLiteral("%1%2").arg(!m_isUpdate ? "Failed to insert into database: " : "Failed to update database: ", errorMessage));
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setWindowModality(Qt::WindowModal);
+            msgBox.exec();
             return false;
         }
     }

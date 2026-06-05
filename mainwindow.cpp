@@ -199,7 +199,13 @@
 
 
        if (!QFile::exists(getadbpath())) {
-           QMessageBox::critical(0, "", "adb binary missing!\n", QMessageBox::Cancel);
+           QMessageBox msgBox;
+           msgBox.setIcon(QMessageBox::Critical);
+           msgBox.setWindowTitle(QString());
+           msgBox.setText(QStringLiteral("adb binary missing!\n"));
+           msgBox.setStandardButtons(QMessageBox::Cancel);
+           msgBox.setWindowModality(Qt::ApplicationModal);
+           msgBox.exec();
 
      }
 
@@ -359,9 +365,13 @@
         if (!m_dataManager->initializeDatabase(dbstring)) {
             QString errorMsg = QSqlDatabase::database().lastError().text();
             logfile(QString("Error opening database: %1 - %2").arg(dbstring, errorMsg));
-            QMessageBox::critical(0, qApp->tr("Cannot open database"),
-                                  QString("Failed to open database:\n%1\nError: %2").arg(dbstring, errorMsg),
-                                  QMessageBox::Cancel);
+            QMessageBox msgBox;
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setWindowTitle(qApp->tr("Cannot open database"));
+            msgBox.setText(QStringLiteral("Failed to open database:\n%1\nError: %2").arg(dbstring, errorMsg));
+            msgBox.setStandardButtons(QMessageBox::Cancel);
+            msgBox.setWindowModality(Qt::ApplicationModal);
+            msgBox.exec();
             return;
         }
 
@@ -549,7 +559,13 @@
     QFile file(logfiledir+"adblink.log");
        if(!file.open(QFile::WriteOnly | QFile::Text | QFile::Append))
           {
-           QMessageBox::critical(0, "","Can't create logfile!\n",QMessageBox::Cancel);
+           QMessageBox msgBox;
+           msgBox.setIcon(QMessageBox::Critical);
+           msgBox.setWindowTitle(QString());
+           msgBox.setText(QStringLiteral("Can't create logfile!\n"));
+           msgBox.setStandardButtons(QMessageBox::Cancel);
+           msgBox.setWindowModality(Qt::ApplicationModal);
+           msgBox.exec();
            return;
           }
 
@@ -613,7 +629,13 @@
         }
 
         if (reply->error() != QNetworkReply::NoError) {
-            QMessageBox::critical(this, "", "Network error: " + reply->errorString(), QMessageBox::Cancel);
+            QMessageBox msgBox(this);
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setWindowTitle(QString());
+            msgBox.setText(QStringLiteral("Network error: %1").arg(reply->errorString()));
+            msgBox.setStandardButtons(QMessageBox::Cancel);
+            msgBox.setWindowModality(Qt::WindowModal);
+            msgBox.exec();
             reply->deleteLater();
             return;
         }
@@ -1104,7 +1126,13 @@
                  if (msgBox.clickedButton() == downloadBtn)
                      on_actionDownload_Kodi_triggered();
              } else {
-                 QMessageBox::information(this, "Kodi Version Check", message);
+                 QMessageBox msgBox(this);
+                msgBox.setIcon(QMessageBox::Information);
+                msgBox.setWindowTitle(QStringLiteral("Kodi Version Check"));
+                msgBox.setText(message);
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.setWindowModality(Qt::WindowModal);
+                msgBox.exec();
              }
          });
 
@@ -1482,7 +1510,13 @@ void MainWindow::backupButton_clicked()
     DeviceRecord device = queryDeviceRecord(selectedDescription);
 
     if (!::isPackageInstalled(getadb(), device.xbmcpackage)) {
-        QMessageBox::critical(this, "", device.xbmcpackage + " not installed");
+        QMessageBox msgBox(this);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("%1 not installed").arg(device.xbmcpackage));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         logfile(device.daddr + ": Error: " + device.xbmcpackage + " not installed");
         return;
     }
@@ -1510,7 +1544,13 @@ void MainWindow::restoreButton_clicked() {
     DeviceRecord device = queryDeviceRecord(selectedDescription);
 
     if (!::isPackageInstalled(getadb(), device.xbmcpackage)) {
-        QMessageBox::critical(this, "", device.xbmcpackage + " not installed");
+        QMessageBox msgBox(this);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("%1 not installed").arg(device.xbmcpackage));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         logfile(device.daddr + ": Error: " + device.xbmcpackage + " not installed");
         return;
     }
@@ -1658,7 +1698,13 @@ QString MainWindow::getadb()
            if (selectedRow >= 0 && deviceTable->item(selectedRow, 0)) {
               selectedDescription = deviceTable->item(selectedRow, 0)->text();
            } else {
-              QMessageBox::critical(this, "Error", "No device selected in table");
+               QMessageBox msgBox(this);
+               msgBox.setIcon(QMessageBox::Critical);
+               msgBox.setWindowTitle(QStringLiteral("Error"));
+               msgBox.setText(QStringLiteral("No device selected in table"));
+               msgBox.setStandardButtons(QMessageBox::Ok);
+               msgBox.setWindowModality(Qt::WindowModal);
+               msgBox.exec();
               return "error";
            }
 
@@ -1704,7 +1750,13 @@ bool MainWindow::validateDeviceSelection(QString& selectedDescription) {
                }
  }
  if (!hasConnectedDevice) {
-               QMessageBox::critical(this, "", "No devices connected");
+               QMessageBox msgBox(this);
+               msgBox.setIcon(QMessageBox::Critical);
+               msgBox.setWindowTitle(QString());
+               msgBox.setText(QStringLiteral("No devices connected"));
+               msgBox.setStandardButtons(QMessageBox::Ok);
+               msgBox.setWindowModality(Qt::WindowModal);
+               msgBox.exec();
                return false;
  }
 
@@ -1713,14 +1765,26 @@ bool MainWindow::validateDeviceSelection(QString& selectedDescription) {
  if (selectedRow >= 0 && deviceTable->item(selectedRow, 0)) {
                selectedDescription = deviceTable->item(selectedRow, 0)->text();
  } else {
-               QMessageBox::critical(this, "", "No device selected in table");
+               QMessageBox msgBox(this);
+               msgBox.setIcon(QMessageBox::Critical);
+               msgBox.setWindowTitle(QString());
+               msgBox.setText(QStringLiteral("No device selected in table"));
+               msgBox.setStandardButtons(QMessageBox::Ok);
+               msgBox.setWindowModality(Qt::WindowModal);
+               msgBox.exec();
                return false;
  }
 
  // Check if the selected device is connected
  if (deviceTable->item(selectedRow, 2) &&
      deviceTable->item(selectedRow, 2)->text() != "Connected") {
-               QMessageBox::critical(this, "", "Selected device is not connected");
+               QMessageBox msgBox(this);
+               msgBox.setIcon(QMessageBox::Critical);
+               msgBox.setWindowTitle(QString());
+               msgBox.setText(QStringLiteral("Selected device is not connected"));
+               msgBox.setStandardButtons(QMessageBox::Ok);
+               msgBox.setWindowModality(Qt::WindowModal);
+               msgBox.exec();
                return false;
  }
 

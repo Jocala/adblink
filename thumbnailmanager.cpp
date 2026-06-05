@@ -28,14 +28,22 @@ void ThumbnailManager::deleteThumbnails(QWidget *parentWidget,
     command = getadbOutput(cstring);
 
     if (command.contains("No such file or directory")) {
-        QMessageBox::critical(parentWidget, "", "Thumbnails not found!");
+        QMessageBox msgBox(parentWidget);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("Thumbnails not found!"));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         return;
     }
 
-    QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(parentWidget, "", "Delete Thumbnails?",
-                                  QMessageBox::Yes | QMessageBox::No);
-    if (reply == QMessageBox::Yes) {
+    QMessageBox msgBox(parentWidget);
+    msgBox.setWindowTitle(QString());
+    msgBox.setText(QStringLiteral("Delete Thumbnails?"));
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setWindowModality(Qt::WindowModal);
+    if (msgBox.exec() == QMessageBox::Yes) {
         logfile("Removing Thumbnails");
         cstring = adbPrefix + " shell rm -r " + thumb;
         command = runLongProcess(cstring, "Removing Thumbnails");
@@ -47,8 +55,21 @@ void ThumbnailManager::deleteThumbnails(QWidget *parentWidget,
             logfile("Textures database issue: " + command);
     }
 
-    if (command.length() > 0)
-        QMessageBox::critical(parentWidget, "", "Errors. See log");
-    else
-        QMessageBox::information(parentWidget, "", "Thumnails deleted");
+    if (command.length() > 0) {
+        QMessageBox msgBox(parentWidget);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("Errors. See log"));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
+    } else {
+        QMessageBox msgBox(parentWidget);
+        msgBox.setIcon(QMessageBox::Information);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("Thumnails deleted"));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
+    }
 }

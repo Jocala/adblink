@@ -29,7 +29,13 @@ void KodiLogManager::viewKodiLog(QWidget *parentWidget,
     QString command = getadbOutput(cstring);
 
     if (command.isEmpty() || command.contains("No such file or directory")) {
-        QMessageBox::critical(parentWidget, "", "Kodi log not found");
+        QMessageBox msgBox(parentWidget);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("Kodi log not found"));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         logfile(command);
         logfile("Kodi log not found!");
         return;

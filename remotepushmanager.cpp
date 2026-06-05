@@ -22,7 +22,13 @@ void RemotePushManager::pushRemoteXml(QWidget *parentWidget,
     QString mcpath;
 
     if (!isPackageInstalled(adbPrefix, device.xbmcpackage)) {
-        QMessageBox::critical(parentWidget, "", device.xbmcpackage + " not installed");
+        QMessageBox msgBox(parentWidget);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("%1 not installed").arg(device.xbmcpackage));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         return;
     }
 
@@ -32,7 +38,13 @@ void RemotePushManager::pushRemoteXml(QWidget *parentWidget,
     command = getadbOutput(cstring);
 
     if (command.contains("No such file or directory")) {
-        QMessageBox::critical(parentWidget, "", "Kodi data not found" + mcpath);
+        QMessageBox msgBox(parentWidget);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("Kodi data not found%1").arg(mcpath));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         return;
     }
 
@@ -49,10 +61,12 @@ void RemotePushManager::pushRemoteXml(QWidget *parentWidget,
         "Choose remote xml file", QDir::homePath(), tr("Files (*.xml)"));
 
     if (!fileName.isEmpty()) {
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(parentWidget, "Push",
-            fileName + " selected. Continue?",
-            QMessageBox::Yes | QMessageBox::No);
+        QMessageBox msgBox(parentWidget);
+        msgBox.setWindowTitle(QStringLiteral("Push"));
+        msgBox.setText(QStringLiteral("%1 selected. Continue?").arg(fileName));
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setWindowModality(Qt::WindowModal);
+        QMessageBox::StandardButton reply = static_cast<QMessageBox::StandardButton>(msgBox.exec());
 
         if (reply == QMessageBox::No)
             return;
@@ -63,9 +77,21 @@ void RemotePushManager::pushRemoteXml(QWidget *parentWidget,
         logfile("push remote:" + command);
 
         if (command.contains("bytes")) {
-            QMessageBox::information(parentWidget, "", "Remote xml installed.");
+            QMessageBox msgBox(parentWidget);
+            msgBox.setIcon(QMessageBox::Information);
+            msgBox.setWindowTitle(QString());
+            msgBox.setText(QStringLiteral("Remote xml installed."));
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setWindowModality(Qt::WindowModal);
+            msgBox.exec();
         } else {
-            QMessageBox::critical(parentWidget, "", "Remote xml installation failed.");
+            QMessageBox msgBox(parentWidget);
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setWindowTitle(QString());
+            msgBox.setText(QStringLiteral("Remote xml installation failed."));
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setWindowModality(Qt::WindowModal);
+            msgBox.exec();
         }
     }
 }

@@ -17,16 +17,34 @@ void DisconnectManager::disconnectDevice(QWidget *parentWidget, QTableWidget *de
     int selectedRow = deviceTable->currentRow();
 
     if (selectedRow < 0 || !deviceTable->item(selectedRow, 2) || !deviceTable->item(selectedRow, 1)) {
-        QMessageBox::critical(parentWidget, "", "No valid device selected");
+        QMessageBox msgBox(parentWidget);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("No valid device selected"));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         return;
     }
     if (deviceTable->item(selectedRow, 2)->text() != "Connected") {
-        QMessageBox::critical(parentWidget, "", "Selected device is not connected");
+        QMessageBox msgBox(parentWidget);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("Selected device is not connected"));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         return;
     }
 
     if (deviceTable->item(selectedRow, 1)->text().contains("USB")) {
-        QMessageBox::critical(parentWidget, "", "Inactive for USB connections");
+        QMessageBox msgBox(parentWidget);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("Inactive for USB connections"));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         return;
     }
 

@@ -230,7 +230,13 @@ void adbprefDialog::onRequestCompleted()
         return;
 
     if (reply->error() != QNetworkReply::NoError) {
-        QMessageBox::critical(this, "Network error", reply->errorString(), QMessageBox::Ok);
+        QMessageBox msgBox(this);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QStringLiteral("Network error"));
+        msgBox.setText(reply->errorString());
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         reply->deleteLater();
         return;
     }
@@ -262,7 +268,13 @@ void adbprefDialog::onRequestCompleted()
 
         dialog.exec();
     } else {
-        QMessageBox::information(this, "Update", "No adblink update available", QMessageBox::Ok);
+        QMessageBox msgBox(this);
+        msgBox.setIcon(QMessageBox::Information);
+        msgBox.setWindowTitle(QStringLiteral("Update"));
+        msgBox.setText(QStringLiteral("No adblink update available"));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
     }
 
     reply->deleteLater();

@@ -33,7 +33,13 @@ bool CacheManager::configureCache(QWidget *parent, const DeviceRecord &device,
     QString command = getadbOutput(cstring);
 
     if (command.contains("No such file or directory")) {
-        QMessageBox::critical(parent, "", "Cache folder missing. Run Kodi to create it.");
+        QMessageBox msgBox(parent);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("Cache folder missing. Run Kodi to create it."));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         return false;
     }
 
@@ -79,7 +85,13 @@ bool CacheManager::configureCache(QWidget *parent, const DeviceRecord &device,
         cstring = adbPrefix + " shell ls " + mcpath;
         command = getadbOutput(cstring);
         if (command.contains("No such file or directory")) {
-            QMessageBox::critical(parent, "", "Destination path missing");
+            QMessageBox msgBox(parent);
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setWindowTitle(QString());
+            msgBox.setText(QStringLiteral("Destination path missing"));
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setWindowModality(Qt::WindowModal);
+            msgBox.exec();
             return false;
         }
 
@@ -93,10 +105,12 @@ bool CacheManager::configureCache(QWidget *parent, const DeviceRecord &device,
         if (!command.contains("No such file or directory")) {
             logfile("advancedsettings.xml exists");
 
-            QMessageBox::StandardButton reply;
-            reply = QMessageBox::question(parent, "XML",
-                                          "advancedsettings.xml exists. Overwrite?\n(will backup original)",
-                                          QMessageBox::Yes | QMessageBox::No);
+            QMessageBox msgBox(parent);
+            msgBox.setWindowTitle(QStringLiteral("XML"));
+            msgBox.setText(QStringLiteral("advancedsettings.xml exists. Overwrite?\n(will backup original)"));
+            msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+            msgBox.setWindowModality(Qt::WindowModal);
+            QMessageBox::StandardButton reply = static_cast<QMessageBox::StandardButton>(msgBox.exec());
             if (reply == QMessageBox::No) {
                 logfile("abort xml write");
                 return false;
@@ -112,7 +126,13 @@ bool CacheManager::configureCache(QWidget *parent, const DeviceRecord &device,
         QFile file(filename2);
         if (!file.open(QFile::WriteOnly)) {
             logfile("error creating advancedsettings.xml.");
-            QMessageBox::critical(parent, "", "Unknown error creating xml file!");
+            QMessageBox msgBox(parent);
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setWindowTitle(QString());
+            msgBox.setText(QStringLiteral("Unknown error creating xml file!"));
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setWindowModality(Qt::WindowModal);
+            msgBox.exec();
             return false;
         }
 
@@ -136,10 +156,22 @@ bool CacheManager::configureCache(QWidget *parent, const DeviceRecord &device,
             logfile(cstring);
             logfile(command);
             logfile("=============");
-            QMessageBox::critical(parent, "", "See log: error pushing xml from PC to device");
+            QMessageBox msgBox(parent);
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setWindowTitle(QString());
+            msgBox.setText(QStringLiteral("See log: error pushing xml from PC to device"));
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setWindowModality(Qt::WindowModal);
+            msgBox.exec();
             return false;
         } else {
-            QMessageBox::information(parent, "", "advancedsettings.xml written");
+            QMessageBox msgBox(parent);
+            msgBox.setIcon(QMessageBox::Information);
+            msgBox.setWindowTitle(QString());
+            msgBox.setText(QStringLiteral("advancedsettings.xml written"));
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setWindowModality(Qt::WindowModal);
+            msgBox.exec();
         }
     }
 

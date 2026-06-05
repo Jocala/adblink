@@ -113,7 +113,13 @@ void backupDialog::setadb_backup(const QString &adbPrefix, const QString &dataRo
 
     if(!file21.open(QFile::WriteOnly))
     {
-        QMessageBox::critical(this, QString(), QStringLiteral("Error creating file!"));
+        QMessageBox msgBox(this);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("Error creating file!"));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
         return;
     }
 
@@ -129,7 +135,13 @@ void backupDialog::setadb_backup(const QString &adbPrefix, const QString &dataRo
 
     if (!file32.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        QMessageBox::critical(0, QString(), QStringLiteral("Error reading file!"));
+        QMessageBox msgBox;
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("Error reading file!"));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::ApplicationModal);
+        msgBox.exec();
         return;
     }
 

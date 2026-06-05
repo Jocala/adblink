@@ -52,7 +52,13 @@ void VersionCheckManager::checkVersion(QWidget *parentWidget,
 
     if (checkversion) {
         if (!QUrl(versionUrl).isValid()) {
-            QMessageBox::critical(parentWidget, "", "Invalid URL for version check", QMessageBox::Cancel);
+            QMessageBox msgBox(parentWidget);
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setWindowTitle(QString());
+            msgBox.setText(QStringLiteral("Invalid URL for version check"));
+            msgBox.setStandardButtons(QMessageBox::Cancel);
+            msgBox.setWindowModality(Qt::WindowModal);
+            msgBox.exec();
             return;
         }
         QNetworkRequest request;
