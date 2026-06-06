@@ -2110,14 +2110,14 @@ void MainWindow::setupUI() {
 centralWidget = new QWidget(this);
 setCentralWidget(centralWidget);
 mainLayout = new QVBoxLayout(centralWidget);
-mainLayout->setContentsMargins(0, 0, 0, 0);
+mainLayout->setContentsMargins(28, 0, 28, 0);
 mainLayout->setSpacing(18);
 
 topWidget = new QWidget();
 topWidget->setFixedHeight(180);
 upperLayout = new QHBoxLayout(topWidget);
 upperLayout->setSpacing(0);
-upperLayout->setContentsMargins(28, 0, 12, 0);
+upperLayout->setContentsMargins(0, 0, 0, 0);
 upperLayout->setAlignment(Qt::AlignTop);
 
 
