@@ -1,7 +1,8 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html><head><title>Add USB Devices</title></head><body>
+<!DOCTYPE html>
+<html><head><title>Add USB Devices</title>
+<link rel="stylesheet" href="style.css"></head><body>
 
-<b><u>Adding USB Devices to the adblink Database</u></b><br>
+<h2>Adding USB Devices to the adblink Database</h2>
 <p>
 adbLink automatically detects USB-connected Android devices and
 adds them to its internal SQLite device database. There are three
@@ -9,10 +10,10 @@ ways a device can be added to the database.
 <p>
 
 <b>1. Automatic USB Discovery</b><br>
-Every three seconds adbLink runs the <code>adb devices</code>
-command to poll for newly attached USB devices. When a USB device
-serial number is discovered that does not already exist in the
-database, adbLink automatically inserts a new device record.
+adbLink runs the <code>adb track-devices</code> command, which
+continuously monitors for newly attached USB devices. When a USB
+device serial number is discovered that does not already exist in
+the database, adbLink automatically inserts a new device record.
 <p>
 The auto-created record uses the device's USB serial number as its
 description, making it easy to identify which physical device the record
@@ -77,11 +78,9 @@ buffermode, buffersize, bufferfactor, filepath, port, isusb,
 ostype, logfilename, disableroot, flag1 (scoped storage),
 flag2 (WSA), flag3, flag4, and flag5 (scrcpy args).
 <p>
-
-If you have questions or comments, please email jocala@jocala.com
- adbLink produces a log
-file, adblink.log, with each run. Include it in your email or
-post if you're having problems.
 <p>
-<a href="menu.html">main menu</a>
+<p>If you have questions or comments, please email jocala@jocala.com.
+adbLink produces a log file, adblink.log, with each run. Include it in your
+email or post if you're having problems.</p>
+<p><a href="menu.html">main menu</a></p>
 </body></html>

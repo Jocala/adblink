@@ -1,11 +1,12 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html><head><title>Kodi Cache</title></head><body>
+<!DOCTYPE html>
+<html><head><title>Kodi Cache</title>
+<link rel="stylesheet" href="style.css"></head><body>
 
-<u><b>Video Cache in Kodi</b></u>
+<h3>Video Cache in Kodi</h3>
 <p>
 Each device you set up with adbLink can have its own custom video cache. This is done via the advancedsettings.xml file that is stored in the Kodi userdata directory. The preferences screen contains individual data for each defined device and this is where you set up custom cache for Kodi.<p>
 
-<u><b>Set buffer mode</b></u>
+<h3>Set buffer mode</h3>
 <p>
 
 &lt;buffermode&gt;1&lt;/buffermode&gt;
@@ -18,7 +19,7 @@ This setting will force Kodi to use a cache for all video files, including local
 3	No buffer<br>
 
 <p>
-<u><b>Define the cache size</b></u>
+<h3>Define the cache size</h3>
 <p>
 &lt;memorysize&gt;20971520&lt;/memorysize&gt;
 <p>
@@ -32,7 +33,7 @@ Note: This will likely cause increased wear-and-tear on your drive.
 <p>
 
 
-<u><b>Increase the fill-rate of the cache</b></u>
+<h3>Increase the fill-rate of the cache</h3>
 <p>
 &lt;readfactor&gt;1&lt;/readfactor&gt;
 <p>
@@ -43,7 +44,7 @@ The value of this setting is a multiplier of the default limit. If Kodi is loadi
 
 <p>
 
-<u><b>Some popular settings</b></u><br>
+<h3>Some popular settings</h3>
 These settings come from the Kodi Fire TV Wiki (see below) and are included as selectable presets under Device Setup. Device Setup also allows you to fine-tune cache.<br>
 <p>
 <u>Preset 1</u><br>
@@ -75,11 +76,9 @@ Replace the &lt;readfactor&gt;&lt;/readfactor&gt; tags with &lt;readbufferfactor
 <p>
 The <b><u>Old cache xml</u></b> checkbox will tell adbLink to write the advancedsettings.xml file using the 16.1 cache tags. Left unchecked, it defaults to the new 17.x style.
 <p>
-
-If you have questions or comments, please email jocala@jocala.com adbLink produces a log file, adblink.log, with each run. Include it in your email or post if you're having problems.<p>
-<a href="menu.html">main menu</a>
+<p>
+<p>If you have questions or comments, please email jocala@jocala.com.
+adbLink produces a log file, adblink.log, with each run. Include it in your
+email or post if you're having problems.</p>
+<p><a href="menu.html">main menu</a></p>
 </body></html>
-
-
-
-

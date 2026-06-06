@@ -1,12 +1,12 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html><head><title>The Device Setup Dialog</title></head><body>
-<b><u>adbLink Device Record</b></u>
+<!DOCTYPE html>
+<html><head><title>The Device Setup Dialog</title>
+<link rel="stylesheet" href="style.css"></head><body><h2>adbLink Device Record</h2>
 <p>
 
 
 Other than <a href="atvsetup.html">device settings</a> specific to your system, there is little required for a basic connection between your media device and adbLink.
 <p>
-If you are connecting your device via a USB cable, plug in the cable and enable USB debugging on the device. adbLink polls every three seconds and will auto-detect the device, adding it to the device table. You are now ready to use other adbLink features such as installing Kodi, doing backups, etc.
+If you are connecting your device via a USB cable, plug in the cable and enable USB debugging on the device. adbLink uses <code>adb track-devices</code> to auto-detect the device as soon as it is connected, adding it to the device table automatically. You are now ready to use other adbLink features such as installing Kodi, doing backups, etc.
 <p>
 If you are connecting your device via IP address, enter the IP address into the "Ad Hoc IP" text entry field, then press "Connect". The device will appear in the device table. You are now ready to use other adbLink features such as installing Kodi, doing backups, etc.
 <p>
@@ -46,6 +46,9 @@ IP address port: Default is 5555.
 <p>
 Scoped storage checkbox. Check this if your device enforces scoped storage (Android 11+).
 <p>
-If you have questions or comments, please email jocala@jocala.com adbLink produces a log file, adblink.log, with each run. Include it in your email or post if you're having problems.<p>
-<a href="menu.html">main menu</a>
+<p>
+<p>If you have questions or comments, please email jocala@jocala.com.
+adbLink produces a log file, adblink.log, with each run. Include it in your
+email or post if you're having problems.</p>
+<p><a href="menu.html">main menu</a></p>
 </body></html>

@@ -38,8 +38,8 @@
         <file>assets/klog.html</file>
         <file>assets/authorize.html</file>
         <file>assets/kodifolders.html</file>
-        <file>assets/stext.html</file>        
-        <file>assets/change.html</file>                
+        <file>assets/stext.html</file>
+        <file>assets/change.html</file>
         <file>assets/quest.html</file>
         <file>assets/erase.html</file>
         <file>assets/download.html</file>
@@ -59,9 +59,8 @@
         <file>assets/usbserial.html</file>
         <file>assets/scrcpy.html</file>
         <file>assets/delthumb.html</file>
-        <file>assets/xapk.html</file>
+        <file>assets/style.css</file>
         <file>assets/style.qss</file>
         <file>assets/DejaVuSans.ttf</file>
     </qresource>
 </RCC>
-
