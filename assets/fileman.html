@@ -4,40 +4,64 @@
   <title>File Manager</title>
 <link rel="stylesheet" href="style.css">
 </head>
-<body><h2>File Manager</h2>
+<body>
+<h2>File Manager</h2>
 <p>
-The File Manager is a dual-pane style dialog, reminiscent of Norton Commander or Midnight Commander. It allows users to open two separate folders simultaneously and perform operations such as copying, moving, renaming, deleting, creating directories, and editing files. File Manager supports intuitive drag-and-drop functionality, enabling users to easily move or copy files and folders between panes or to other compatible applications by dragging and dropping.
+The File Manager is a dual-pane dialog for browsing and managing files on
+your connected Android device. It provides full access to the device's
+filesystem, including <code>/sdcard/</code>, <code>/storage/</code>, and
+<code>/data/local/tmp/</code>.
 </p>
+
+<h3>Navigation</h3>
 <p>
-Navigate by clicking through the file hierarchy or by selecting a preset and clicking the go button. You can also type your location into the dialog and hit return or click the go button.
-<p>
-To use drag-and-drop, simply select a file or folder in one pane, drag it to the desired location in the other pane, and release to complete the action.
+Use the <b>Presets</b> drop-down to jump to common locations
+(<code>/sdcard/</code>, <code>/storage/</code>,
+<code>/data/local/tmp/</code>, and Kodi data folders if available), then
+click <b>Go</b>. You can also type any path directly into the address bar
+and press Enter or click <b>Go</b>. Click through the folder hierarchy in
+either pane to navigate.
 </p>
+
+<h3>Right-click context menu</h3>
 <p>
-To copy a file from your computer to the Android device, simply select a file or folder on the PC, drag it to the desired location on the File Manager, and release to complete the action.
+Right-click on a file or folder to access these operations:
 </p>
+<ul>
+  <li><b>Copy</b> &mdash; copy selected item(s) to the opposite pane</li>
+  <li><b>Move</b> &mdash; move selected item(s) to the opposite pane</li>
+  <li><b>Rename</b> &mdash; rename the selected item</li>
+  <li><b>Delete</b> &mdash; delete selected item(s)</li>
+  <li><b>Mkdir</b> &mdash; create a new directory</li>
+  <li><b>Pull</b> &mdash; copy selected item(s) from the device to your
+      computer. If the initial pull fails, adblink retries via
+      <code>/data/local/tmp/</code> as a fallback.</li>
+  <li><b>Edit text</b> &mdash; edit a text file on the device</li>
+  <li><b>New text</b> &mdash; create a new text file on the device</li>
+  <li><b>Home</b> &mdash; reset both panes to <code>/sdcard/</code></li>
+  <li><b>Close</b> &mdash; close the file manager</li>
+</ul>
+
+<h3>Drag and drop</h3>
 <p>
-Drag and drop streamlines file management tasks and enhances usability, especially for users accustomed to graphical interfaces.
+Drag files between the two panes to copy or move them on the device. You
+can also drag files from your computer directly into a pane to push them
+to the device via <code>adb push</code>.
 </p>
-<h2>Right-click context menu</h2>
-<p>
-Copy: Copy item to opposite pane<br>
-Move: Move item to opposite pane<br>
-Rename: Rename item<br>
-Delete: Delete item(s)<br>
-Mkdir: Make new directory<br>
-Pull: Pull item(s) from device to PC<br>
-Edit text: Edit text file<br>
-New text: Create new text file<br>
-Home: Reset both panes to /sdcard/<br>
-Close: Close file manager<br>
-<p>
-For drag-and-drop operations, compatibility depends on the target application or location. Some directories or external applications may not support drag-and-drop due to permissions or platform restrictions. Ensure that the target location is writable and compatible with File Manager's drag-and-drop feature.
-</p>
-<p>
-<p>
+
+<h3>Known limitations</h3>
+<ul>
+  <li>Files and directories whose names contain embedded double-quote
+      characters (<code>"</code>) cannot be edited, copied, renamed,
+      deleted, or browsed.</li>
+  <li>Directories or files the ADB shell cannot list are silently hidden
+      from the file listing (no error is shown).</li>
+  <li>The two panes share the window equally with no adjustable splitter
+      handle.</li>
+</ul>
+
 <p>If you have questions or comments, please email jocala@jocala.com.
-adbLink produces a log file, adblink.log, with each run. Include it in your
+adblink produces a log file, adblink.log, with each run. Include it in your
 email or post if you're having problems.</p>
 <p><a href="menu.html">main menu</a></p>
 </body></html>

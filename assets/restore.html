@@ -4,22 +4,12 @@
 The <b>"Restore Kodi"</b> button restores a backed up copy of Kodi's data to the device. Kodi must be closed in order to restore.
 <p>
 
-Default Kodi data locations:<p>
-For Android:<p>
-/sdcard/Android/data/org.xbmc.kodi/files/.kodi
-<p>
-For Windows:<p>
-/Users/[userid]/AppData/Roaming/Kodi
-<p>
-For macOS:<p>
-/Users/[userid]/Library/Application Support/Kodi
-<p>
-For Linux:<p>
-/home/[userid]/.kodi
+Default Kodi data location:<p>
+/sdcard/Android/data/org.xbmc.kodi/files/.kodi (Android 10 and earlier)<br>
+/sdcard/kodi_data/org.xbmc.kodi/files/.kodi (Android 11 and later, scoped storage)
 
 
-<p><h2>Android device external data locations</h2><p>
-For Android:
+<p><h2>External data locations</h2>
 <ul>
 <li>/storage/sdcard1/</li>
 <li>/storage/usbotg/</li>
@@ -28,16 +18,16 @@ For Android:
 </ul>
 <p>
 
-If your data is stored on an external location, choose the location from the displayed presets, and adbLink will restore your data to that point. <p>Please note that this applies to entire datasets only. If you have elected to move thumbnails only to external, you will have to complete this after the restore completes, using
-adbLink's <a href="mvdata.html">move data dialog</a>,
+If your data is stored on an external location, choose the location from the displayed presets, and adblink will restore your data to that point. <p>Please note that this applies to entire datasets only. If you have elected to move thumbnails only to external, you will have to complete this after the restore completes, using
+adblink's <a href="mvdata.html">move data dialog</a>,
 <p>
-adbLink will not restore backups created by other programs or addons.
+adblink will not restore backups created by other programs or addons.
 <p>
-Addons: adbLink is tested with official Kodi repository addons only. If you have issues restoring a non-repository addon, write jocala@jocala.com with full details.
+Addons: adblink is tested with official Kodi repository addons only. If you have issues restoring a non-repository addon, write jocala@jocala.com with full details.
 <p>
 <p>
 <p>If you have questions or comments, please email jocala@jocala.com.
-adbLink produces a log file, adblink.log, with each run. Include it in your
+adblink produces a log file, adblink.log, with each run. Include it in your
 email or post if you're having problems.</p>
 <p><a href="menu.html">main menu</a></p>
 </body></html>

@@ -1,21 +1,58 @@
 <!DOCTYPE html>
 <html><head><title>Backup Kodi</title>
 <link rel="stylesheet" href="style.css"></head><body>
-The <b>"Backup"</b> button backs up the contents of the .kodi/Kodi folder on the device. Please note that Kodi <u>MUST</u> have been run for the first time before using this function. Under Android, empty directories are not backed up.
-Android users running something other than <a href="kodi.html">Kodi</a> such as the SPMC fork, will need to change the package name and File Path
-in the <a href="preferences.html">Device Setup</a> dialog to whatever package name and File Path your software uses.
+<h2>Backup Kodi</h2>
 <p>
+The <b>Kodi Backup</b> button backs up the contents of Kodi's
+<code>.kodi</code> folder on the connected device. Kodi <b>must</b> have been
+run at least once before using this function. Under Android, empty directories
+are not backed up.
+</p>
 
-Android: Choose your Kodi partition:
-/sdcard/ is the default partition for Android Kodi data. If you have <a href="mvdata.html">moved data</a>, adbLink displays all system-approved external partitions, select the external partition where the data resides.
+<h3>Android 11+ / Scoped Storage</h3>
 <p>
-Other OS Versions: adbLink will attempt to back up the default Kodi data location for your operating system. The default can be changed in the device <a href="preferences.html">preferences</a> dialog.
+On Android 11 and later (including Fire OS 8), scoped storage restricts ADB
+access to <code>/sdcard/Android/data/</code>. If your device has the
+<strong>Scoped storage</strong> checkbox enabled in the
+<a href="devicerecord.html">Device Setup</a> dialog, adblink handles this
+automatically:
+</p>
+<ul>
+  <li>Kodi data is relocated to <code>/sdcard/kodi_data/</code> via the
+      <code>xbmc_env.properties</code> file.</li>
+  <li>Backup pulls from <code>kodi_data/</code> instead of the inaccessible
+      <code>Android/data/</code> path.</li>
+  <li>See <a href="createkodi.html">Create kodi_data</a> and
+      <a href="android11.html">Scoped Storage</a> for setup details.</li>
+</ul>
+
+<h3>Partition selection</h3>
 <p>
-Addons: adbLink is tested with official Kodi repository addons only. If you have issues backing up a non-repository addon, write jocala@jocala.com with full details.
+You will be prompted to choose where Kodi's data resides on the device:
+</p>
+<ul>
+  <li><b>/sdcard/</b> &mdash; default location for Android Kodi data.</li>
+  <li><b>External storage</b> &mdash; if you have
+      <a href="mvdata.html">moved data</a> to an SD card or USB drive,
+      adblink lists all available external partitions.</li>
+</ul>
+
+<h3>Non-Android devices</h3>
 <p>
+adblink uses the default Kodi data location for the operating system
+(macOS, Linux, Windows). This can be overridden in the
+<a href="devicerecord.html">Device Setup</a> dialog.
+</p>
+
+<h3>Kodi forks</h3>
 <p>
+If you are using a Kodi fork such as SPMC, change the package name and
+file path in the <a href="devicerecord.html">Device Setup</a> dialog to
+match your software.
+</p>
+
 <p>If you have questions or comments, please email jocala@jocala.com.
-adbLink produces a log file, adblink.log, with each run. Include it in your
+adblink produces a log file, adblink.log, with each run. Include it in your
 email or post if you're having problems.</p>
 <p><a href="menu.html">main menu</a></p>
 </body></html>

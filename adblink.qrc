@@ -5,7 +5,6 @@
         <file>assets/donatel.png</file>
         <file>assets/kodi.png</file>
         <file>assets/adblink.png</file>
-        <file>assets/kodi.html</file>
         <file>assets/busybox.html</file>
         <file>assets/switch.html</file>
         <file>assets/about.html</file>
@@ -25,7 +24,7 @@
         <file>assets/installapk.html</file>
         <file>assets/offline.html</file>
         <file>assets/menu.html</file>
-        <file>assets/preferences.html</file>
+        <file>assets/devicerecord.html</file>
         <file>assets/fileman.html</file>
         <file>assets/reboot.html</file>
         <file>assets/reload.html</file>
@@ -34,8 +33,6 @@
         <file>assets/splash.html</file>
         <file>assets/screen.html</file>
         <file>assets/uninapk.html</file>
-        <file>assets/vlog.html</file>
-        <file>assets/klog.html</file>
         <file>assets/authorize.html</file>
         <file>assets/kodifolders.html</file>
         <file>assets/stext.html</file>
@@ -50,6 +47,7 @@
         <file>assets/logcat.html</file>
         <file>assets/startstop.html</file>
         <file>assets/kodidata.html</file>
+        <file>assets/logviewer.html</file>
         <file>assets/generalpref.html</file>
         <file>assets/usbdevices.html</file>
         <file>assets/shortcuts.html</file>

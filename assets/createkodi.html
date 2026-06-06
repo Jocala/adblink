@@ -1,12 +1,47 @@
 <!DOCTYPE html>
 <html><head><title>Create kodi_data</title>
 <link rel="stylesheet" href="style.css"></head><body>
+<h2>Create kodi_data</h2>
 <p>
-Creates a blank Kodi file area /sdcard/kodi_data/
+On Android 11+ and Fire OS 8, scoped storage prevents ADB from accessing
+Kodi's data at <code>/sdcard/Android/data/org.xbmc.kodi/files/.kodi</code>.
+This function relocates Kodi's data to <code>/sdcard/kodi_data/</code> and
+creates the <code>xbmc_env.properties</code> file that tells Kodi where to
+find it at startup.
+</p>
+
+<h3>What it does</h3>
+<ol>
+  <li>Stops Kodi if it is running on the device.</li>
+  <li>On Android 11+, Kodi should ask for <strong>MANAGE_EXTERNAL_STORAGE</strong>
+      permission at first run. If it doesn't, grant it manually via the
+      device's <b>Settings &rarr; Apps &rarr; Kodi &rarr; Permissions</b>.</li>
+  <li>Removes any existing <code>/sdcard/kodi_data/</code> directory.</li>
+  <li>Creates <code>/sdcard/kodi_data/<i>package</i>/files/.kodi</code>
+      (where <i>package</i> is <code>org.xbmc.kodi</code> by default).</li>
+  <li>Writes <code>/sdcard/xbmc_env.properties</code> with the line:
+      <code>xbmc.data=/sdcard/kodi_data/<i>package</i>/files</code>.
+      Kodi reads this file at startup to locate its data area.</li>
+</ol>
+
+<h3>When to use</h3>
+<ul>
+  <li>Setting up a new device with scoped storage enabled.</li>
+  <li>After restoring a backup to a scoped-storage device
+      (adblink creates this automatically during restore).</li>
+  <li>If Kodi cannot find its data after you have enabled scoped storage.</li>
+</ul>
+
+<h3>After creation</h3>
 <p>
-<p>
+Kodi's data now lives at <code>/sdcard/kodi_data/</code> instead of the
+inaccessible <code>Android/data/</code> path. You can now back up, restore,
+and edit Kodi files normally. See <a href="android11.html">Scoped Storage</a>
+for more details.
+</p>
+
 <p>If you have questions or comments, please email jocala@jocala.com.
-adbLink produces a log file, adblink.log, with each run. Include it in your
+adblink produces a log file, adblink.log, with each run. Include it in your
 email or post if you're having problems.</p>
 <p><a href="menu.html">main menu</a></p>
 </body></html>

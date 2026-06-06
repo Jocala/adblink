@@ -4,16 +4,16 @@
 
 <h2>Adding USB Devices to the adblink Database</h2>
 <p>
-adbLink automatically detects USB-connected Android devices and
+adblink automatically detects USB-connected Android devices and
 adds them to its internal SQLite device database. There are three
 ways a device can be added to the database.
 <p>
 
 <b>1. Automatic USB Discovery</b><br>
-adbLink runs the <code>adb track-devices</code> command, which
+adblink runs the <code>adb track-devices</code> command, which
 continuously monitors for newly attached USB devices. When a USB
 device serial number is discovered that does not already exist in
-the database, adbLink automatically inserts a new device record.
+the database, adblink automatically inserts a new device record.
 <p>
 The auto-created record uses the device's USB serial number as its
 description, making it easy to identify which physical device the record
@@ -23,12 +23,11 @@ represents. Other default values are:
 <tr><td><b>Description</b></td><td>The device's USB serial number (e.g. "G0909N1823520BPE")</td></tr>
 <tr><td><b>daddr (serial)</b></td><td>USB serial number from adb devices output</td></tr>
 <tr><td><b>isusb</b></td><td>true</td></tr>
-<tr><td><b>ostype</b></td><td>"0"</td></tr>
+<tr><td><b>ostype</b></td><td>"0" (Android)</td></tr>
 <tr><td><b>data_root</b></td><td>"/sdcard/"</td></tr>
 <tr><td><b>xbmcpackage</b></td><td>"org.xbmc.kodi"</td></tr>
 <tr><td><b>filepath</b></td><td>"files/.kodi"</td></tr>
 <tr><td><b>port</b></td><td>empty</td></tr>
-<tr><td><b>disableroot</b></td><td>false</td></tr>
 </table>
 <p>
 After auto-insertion, the device table is reloaded and the new
@@ -38,7 +37,7 @@ a meaningful description and adjust its settings.
 
 <b>2. Manual Device Entry (New Button / Ctrl+G)</b><br>
 A device can be added manually by clicking the <b>New</b> button
-or pressing <b>Ctrl+G</b>. This opens the Device Editor dialog
+or pressing <b>Ctrl+G</b>. This opens the Device Record dialog
 where you can fill in all fields:
 <p>
 <table border="0" cellpadding="3" cellspacing="0">
@@ -51,7 +50,6 @@ where you can fill in all fields:
 <tr><td><b>File Path</b></td><td>Kodi data subdirectory (default "files/.kodi")</td></tr>
 <tr><td><b>Pull Directory</b></td><td>Local directory for pulled files</td></tr>
 <tr><td><b>Scrcpy Args</b></td><td>Optional arguments passed to scrcpy</td></tr>
-<tr><td><b>Disable Root</b></td><td>Check to skip su-based operations</td></tr>
 </table>
 <p>
 When you confirm the dialog, the record is inserted into the
@@ -73,14 +71,14 @@ and the entered IP and port.
 <b>Database Storage</b><br>
 All device records are stored in a SQLite database file. The
 schema for the <code>device</code> table includes these columns:
-id, daddr, description, pulldir, xbmcpackage, data_root,
-buffermode, buffersize, bufferfactor, filepath, port, isusb,
-ostype, logfilename, disableroot, flag1 (scoped storage),
-flag2 (WSA), flag3, flag4, and flag5 (scrcpy args).
+id, description, daddr, port, isusb, ostype, data_root,
+xbmcpackage, pulldir, disableroot, filepath, buffermode,
+buffersize, bufferfactor, logfilename, flag1 (scoped storage),
+flag2, flag3, flag4, and flag5 (scrcpy args).
 <p>
 <p>
 <p>If you have questions or comments, please email jocala@jocala.com.
-adbLink produces a log file, adblink.log, with each run. Include it in your
+adblink produces a log file, adblink.log, with each run. Include it in your
 email or post if you're having problems.</p>
 <p><a href="menu.html">main menu</a></p>
 </body></html>
