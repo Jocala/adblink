@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html><head><title>Ad Hoc IP</title>
+<link rel="stylesheet" href="style.css"></head><body>
+<h2>Ad Hoc IP</h2>
+<p>
+The <b>Ad hoc IP</b> field allows quick connection to a device by IP address
+without permanently adding it to the device database.
+</p>
+
+<h3>Usage</h3>
+<p>
+Enter the device's IP address in the field (placeholder shows "IP
+Address:port"). Add an optional port separated by a colon (e.g.
+<code>192.168.1.100:5555</code>). If no port is given, 5555 is used by
+default.
+</p>
+<p>
+Click <b>Connect</b> or press Ctrl+D. adblink creates a temporary device
+record with the description "Ad hoc" and connects to it. The "Ad hoc"
+record replaces any previous ad hoc entry each time.
+</p>
+
+<h3>Clear</h3>
+<p>
+Use the <b>Clear</b> button (Ctrl+J) or the <b>Clear</b> menu item to empty
+the field.
+</p>
+
+<h3>Notes</h3>
+<ul>
+<li>Port must be between 1 and 65535.</li>
+<li>The temporary record uses default values for data root ("/sdcard/")
+and package name ("org.xbmc.kodi").</li>
+<li>To make the connection permanent, edit the "Ad hoc" device record after
+connecting and give it a proper description.</li>
+</ul>
+
+<p>If you have questions or comments, please email jocala@jocala.com.
+adblink produces a log file, adblink.log, with each run. Include it in your
+email or post if you're having problems.</p>
+<p><a href="buttons.html">Back</a></p>
+</body></html>

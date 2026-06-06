@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html><head><title>Delete Device</title>
+<link rel="stylesheet" href="style.css"></head><body>
+<h2>Delete Device</h2>
+<p>
+The <b>Delete</b> button (Ctrl+I) removes a device record from the database.
+</p>
+
+<h3>Usage</h3>
+<p>
+Select a device in the device table and click <b>Delete</b>. A confirmation
+dialog asks "Delete &lt;device&gt;?". Click <b>Yes</b> to remove the record.
+After deletion, adblink runs <code>adb disconnect</code> to clean up any
+lingering ADB connection.
+</p>
+
+<h3>Notes</h3>
+<ul>
+<li>You cannot delete a device that is currently connected &mdash; disconnect it first.</li>
+<li>Deletion is permanent and cannot be undone.</li>
+<li>The device is removed from both the database and the device table.</li>
+</ul>
+
+<p>If you have questions or comments, please email jocala@jocala.com.
+adblink produces a log file, adblink.log, with each run. Include it in your
+email or post if you're having problems.</p>
+<p><a href="buttons.html">Back</a></p>
+</body></html>

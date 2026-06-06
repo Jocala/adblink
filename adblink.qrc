@@ -8,6 +8,7 @@
         <file>assets/busybox.html</file>
         <file>assets/switch.html</file>
         <file>assets/about.html</file>
+        <file>assets/adhoc.html</file>
         <file>assets/adbwifi.html</file>
         <file>assets/main.html</file>
         <file>assets/mvdata.html</file>
@@ -17,6 +18,8 @@
         <file>assets/shieldsetup.html</file>
         <file>assets/keyboard.html</file>
         <file>assets/backup.html</file>
+        <file>assets/clear.html</file>
+        <file>assets/connect.html</file>
         <file>assets/cache.html</file>
         <file>assets/console.html</file>
         <file>assets/editor.html</file>
@@ -55,6 +58,10 @@
         <file>assets/usbserial.html</file>
         <file>assets/scrcpy.html</file>
         <file>assets/delthumb.html</file>
+        <file>assets/deletedevice.html</file>
+        <file>assets/disconnect.html</file>
+        <file>assets/editdevice.html</file>
+        <file>assets/newdevice.html</file>
         <file>assets/style.css</file>
         <file>assets/style.qss</file>
         <file>assets/DejaVuSans.ttf</file>

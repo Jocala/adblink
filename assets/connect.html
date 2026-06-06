@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html><head><title>Connect</title>
+<link rel="stylesheet" href="style.css"></head><body>
+<h2>Connect</h2>
+<p>
+The <b>Connect</b> button (Ctrl+D) connects to a network device via ADB.
+</p>
+
+<h3>Usage</h3>
+<p>
+Select a device in the device table and click <b>Connect</b>. The device's
+IP address and port (default 5555) from the device record are used to issue
+<code>adb connect &lt;ip&gt;:&lt;port&gt;</code>.
+</p>
+
+<h3>States after connect attempt</h3>
+<ul>
+<li><strong>Connected</strong> &mdash; device is reachable and ready for use</li>
+<li><strong>Offline</strong> &mdash; device was found but is in an offline state</li>
+<li><strong>Unauthorized</strong> &mdash; device rejected the connection; check for an authorization prompt on the device</li>
+<li><strong>Unable to connect</strong> &mdash; device is unreachable or refused the connection</li>
+</ul>
+
+<h3>Notes</h3>
+<ul>
+<li>USB-connected devices cannot use Connect &mdash; they are auto-detected.</li>
+<li>If the <b>Ad hoc IP</b> field has an IP address, Connect creates a temporary device record first, then connects.</li>
+<li>Double-clicking a "Disconnected" row in the device table also triggers Connect.</li>
+</ul>
+
+<p>If you have questions or comments, please email jocala@jocala.com.
+adblink produces a log file, adblink.log, with each run. Include it in your
+email or post if you're having problems.</p>
+<p><a href="buttons.html">Back</a></p>
+</body></html>

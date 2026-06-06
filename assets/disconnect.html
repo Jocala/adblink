@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html><head><title>Disconnect</title>
+<link rel="stylesheet" href="style.css"></head><body>
+<h2>Disconnect</h2>
+<p>
+The <b>Disconnect</b> button (Ctrl+E) disconnects a connected network device.
+</p>
+
+<h3>Usage</h3>
+<p>
+Select a connected device in the device table and click <b>Disconnect</b>.
+A confirmation dialog appears before disconnecting. After confirmation,
+<code>adb disconnect &lt;ip&gt;</code> is issued and the device status
+changes to "Disconnected".
+</p>
+
+<h3>Notes</h3>
+<ul>
+<li>Only network-connected devices can be disconnected &mdash; USB connections are handled automatically.</li>
+<li>If the device is already disconnected, a warning is shown.</li>
+<li>Double-clicking a "Connected" row in the device table also triggers Disconnect.</li>
+</ul>
+
+<p>If you have questions or comments, please email jocala@jocala.com.
+adblink produces a log file, adblink.log, with each run. Include it in your
+email or post if you're having problems.</p>
+<p><a href="buttons.html">Back</a></p>
+</body></html>

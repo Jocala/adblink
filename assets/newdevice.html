@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html><head><title>New Device</title>
+<link rel="stylesheet" href="style.css"></head><body>
+<h2>New Device</h2>
+<p>
+The <b>New</b> button (Ctrl+G) opens the Device Record dialog to add a new
+device to the adblink database.
+</p>
+
+<h3>Fields</h3>
+<ul>
+<li><strong>Description</strong> &mdash; a friendly name for the device (required)</li>
+<li><strong>IP Address</strong> &mdash; network address or USB serial</li>
+<li><strong>Port</strong> &mdash; ADB port (default 5555)</li>
+<li><strong>USB Connection</strong> &mdash; check if the device connects via USB</li>
+<li><strong>Package Name</strong> &mdash; Kodi package (default "org.xbmc.kodi")</li>
+<li><strong>Data Root</strong> &mdash; device data root path (default "/sdcard/")</li>
+<li><strong>File Path</strong> &mdash; Kodi data subdirectory (default "/files/.kodi")</li>
+<li><strong>Pull Directory</strong> &mdash; local directory for pulled files</li>
+<li><strong>Scrcpy Args</strong> &mdash; optional arguments passed to scrcpy</li>
+</ul>
+
+<h3>Notes</h3>
+<ul>
+<li>A duplicate description is not allowed &mdash; the database prevents it.</li>
+<li>The Kodi-specific fields (Package Name, Data Root, File Path) are available in Kodi view only.</li>
+</ul>
+
+<p>If you have questions or comments, please email jocala@jocala.com.
+adblink produces a log file, adblink.log, with each run. Include it in your
+email or post if you're having problems.</p>
+<p><a href="buttons.html">Back</a></p>
+</body></html>
