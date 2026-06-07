@@ -348,7 +348,6 @@ elseif(APPLE)
         "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.macos/fastboot"
         "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.macos/sqlite3"
         DESTINATION adblink.app/Contents/MacOS/adbfiles
-        USE_SOURCE_PERMISSIONS
     )
 
 else()
@@ -359,11 +358,12 @@ else()
         "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.linux/busybox"
         "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.linux/fastboot"
         DESTINATION adbfiles
-        USE_SOURCE_PERMISSIONS
     )
     install(DIRECTORY
         "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.linux/icons/"
         DESTINATION adbfiles/icons
+        PATTERN "adblink.desktop" EXCLUDE
+        PATTERN "adblink.png" EXCLUDE
     )
 
     install(FILES
@@ -395,6 +395,7 @@ elseif(APPLE)
 elseif(UNIX)
     set(CPACK_GENERATOR "TGZ")
     set(CPACK_BINARY_TZ OFF)
+    set(CPACK_STRIP_FILES ON)
 endif()
 
 include(CPack)

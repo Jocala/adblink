@@ -1,8 +1,8 @@
 [Desktop Entry]
 Type=Application
-Name=adbLink
-GenericName=adbLink
-Comment=adbLink
+Name=adblink
+GenericName=adblink
+Comment=adblink
 Exec=adblink
 Icon=adblink
 Categories=Media;X-Gnome-Other;
