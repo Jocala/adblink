@@ -384,7 +384,7 @@ endif()
 
 set(CPACK_PACKAGE_VENDOR "jocala")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "ADB-based remote control for Android/Kodi devices")
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/license.txt")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/assets/INSTALLER_NOTICE.txt")
 
 if(WIN32)
     set(CPACK_GENERATOR "NSIS")
