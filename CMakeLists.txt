@@ -309,6 +309,12 @@ if(WIN32)
             "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.windows"
             "$<TARGET_FILE_DIR:adblink>/adbfiles"
     )
+elseif(APPLE)
+    add_custom_command(TARGET adblink POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.macos"
+            "$<TARGET_FILE_DIR:adblink>/adbfiles"
+    )
 elseif(UNIX AND NOT APPLE)
     add_custom_command(TARGET adblink POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -335,22 +341,29 @@ if(WIN32)
 
 elseif(APPLE)
 
-    install(TARGETS adblink
-        BUNDLE DESTINATION .
-    )
-
-    install(DIRECTORY
-        "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.macos/"
+    install(PROGRAMS
+        "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.macos/aapt"
+        "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.macos/adb"
+        "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.macos/busybox"
+        "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.macos/fastboot"
+        "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.macos/sqlite3"
         DESTINATION adblink.app/Contents/MacOS/adbfiles
         USE_SOURCE_PERMISSIONS
     )
 
 else()
 
-    install(DIRECTORY
-        "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.linux/"
+    install(PROGRAMS
+        "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.linux/aapt"
+        "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.linux/adb"
+        "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.linux/busybox"
+        "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.linux/fastboot"
         DESTINATION adbfiles
         USE_SOURCE_PERMISSIONS
+    )
+    install(DIRECTORY
+        "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.linux/icons/"
+        DESTINATION adbfiles/icons
     )
 
     install(FILES
@@ -368,6 +381,19 @@ endif()
 # -------------------------
 # Packaging
 # -------------------------
+
+set(CPACK_PACKAGE_VENDOR "jocala")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "ADB-based remote control for Android/Kodi devices")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/license.txt")
+
+if(WIN32)
+    set(CPACK_GENERATOR "NSIS")
+    set(CPACK_NSIS_DISPLAY_NAME "adblink")
+elseif(APPLE)
+    set(CPACK_GENERATOR "DragNDrop")
+elseif(UNIX)
+    set(CPACK_GENERATOR "TGZ")
+endif()
 
 include(CPack)
 enable_testing()
