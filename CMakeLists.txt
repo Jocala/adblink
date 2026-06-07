@@ -6,28 +6,37 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
+# -------------------------
+# Platform-specific config
+# -------------------------
+
 if(WIN32)
     set(CMAKE_WIN32_EXECUTABLE ON)
-    set(OPENSSL_ROOT_DIR "C:/openssl-static" CACHE PATH "Static OpenSSL path")
-    set(OPENSSL_INCLUDE_DIR "C:/openssl-static/include" CACHE PATH "OpenSSL include dir")
-    set(OPENSSL_SSL_LIBRARY "C:/openssl-static/lib/libssl.lib" CACHE FILEPATH "OpenSSL SSL library")
-    set(OPENSSL_CRYPTO_LIBRARY "C:/openssl-static/lib/libcrypto.lib" CACHE FILEPATH "OpenSSL Crypto library")
-    set(OPENSSL_USE_STATIC_LIBS ON CACHE BOOL "Use static OpenSSL libs")
+
+    set(OPENSSL_ROOT_DIR "C:/openssl-static" CACHE PATH "")
+    set(OPENSSL_INCLUDE_DIR "C:/openssl-static/include" CACHE PATH "")
+    set(OPENSSL_SSL_LIBRARY "C:/openssl-static/lib/libssl.lib" CACHE FILEPATH "")
+    set(OPENSSL_CRYPTO_LIBRARY "C:/openssl-static/lib/libcrypto.lib" CACHE FILEPATH "")
+    set(OPENSSL_USE_STATIC_LIBS ON CACHE BOOL "")
 endif()
 
 if(UNIX AND NOT APPLE)
-    set(OPENSSL_ROOT_DIR "/home/jeff/openssl-static" CACHE PATH "Static OpenSSL path")
-    set(OPENSSL_USE_STATIC_LIBS ON CACHE BOOL "Use static OpenSSL libs")
+    set(OPENSSL_ROOT_DIR "/home/jeff/openssl-static" CACHE PATH "")
+    set(OPENSSL_USE_STATIC_LIBS ON CACHE BOOL "")
 endif()
 
 if(APPLE)
-    set(CMAKE_PREFIX_PATH "/Users/jeff/Qt/Qt.6.11.1-static" CACHE PATH "Qt 6.11.1 static installation")
-    set(OPENSSL_ROOT_DIR "/Users/jeff/openssl/openssl-universal" CACHE PATH "Static OpenSSL path")
-    set(OPENSSL_USE_STATIC_LIBS ON CACHE BOOL "Use static OpenSSL libs")
-    set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "Build universal binary")
+    set(CMAKE_PREFIX_PATH "/Users/jeff/Qt/Qt.6.11.1-static" CACHE PATH "")
+    set(OPENSSL_ROOT_DIR "/Users/jeff/openssl/openssl-universal" CACHE PATH "")
+    set(OPENSSL_USE_STATIC_LIBS ON CACHE BOOL "")
+    set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "")
 endif()
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Sql Network Concurrent)
+
+# -------------------------
+# Sources
+# -------------------------
 
 set(SOURCES
     main.cpp
@@ -186,15 +195,17 @@ set(HEADERS
 )
 
 set(ADBLINK_RESOURCES adblink.qrc)
+
 if(WIN32)
     list(APPEND ADBLINK_RESOURCES adblink.rc)
 endif()
 
 set(ADBLINK_EXTRA_FILES)
+
 if(APPLE)
     list(APPEND ADBLINK_EXTRA_FILES adblink.icns)
     set_source_files_properties(adblink.icns PROPERTIES
-        MACOSX_PACKAGE_LOCATION "Resources"
+        MACOSX_BUNDLE_LOCATION "Resources"
     )
 endif()
 
@@ -208,13 +219,12 @@ qt_add_executable(adblink
 target_include_directories(adblink PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(adblink PRIVATE
-    Qt6::Core
-    Qt6::Gui
-    Qt6::Widgets
-    Qt6::Sql
-    Qt6::Network
-    Qt6::Concurrent
+    Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Sql Qt6::Network Qt6::Concurrent
 )
+
+# -------------------------
+# Platform linking tweaks
+# -------------------------
 
 if(MSVC)
     target_compile_options(adblink PRIVATE /wd4996)
@@ -230,6 +240,7 @@ if(APPLE)
     find_library(IOKIT_FRAMEWORK IOKit)
     find_library(SECURITY_FRAMEWORK Security)
     find_library(SYSTEMCONFIGURATION_FRAMEWORK SystemConfiguration)
+
     target_link_libraries(adblink PRIVATE
         ${COCOA_FRAMEWORK}
         ${CARBON_FRAMEWORK}
@@ -238,6 +249,10 @@ if(APPLE)
         ${SYSTEMCONFIGURATION_FRAMEWORK}
     )
 endif()
+
+# -------------------------
+# Plugins
+# -------------------------
 
 set(ADBLINK_COMMON_PLUGINS
     Qt6::QSQLiteDriverPlugin
@@ -256,6 +271,7 @@ if(WIN32)
         INCLUDE Qt6::QSchannelBackendPlugin
         INCLUDE Qt6::QTlsBackendOpenSSLPlugin
     )
+
 elseif(APPLE)
     set_target_properties(adblink PROPERTIES
         MACOSX_BUNDLE TRUE
@@ -265,6 +281,7 @@ elseif(APPLE)
         MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
         MACOSX_BUNDLE_ICON_FILE "adblink.icns"
     )
+
     qt_import_plugins(adblink
         INCLUDE Qt6::QCocoaIntegrationPlugin
         INCLUDE Qt6::QMacStylePlugin
@@ -273,12 +290,7 @@ elseif(APPLE)
         INCLUDE Qt6::QSecureTransportBackendPlugin
         INCLUDE Qt6::QTlsBackendOpenSSLPlugin
     )
-    add_custom_command(TARGET adblink POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-            "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.macos"
-            "$<TARGET_BUNDLE_CONTENT_DIR:adblink>/MacOS/adbfiles"
-        COMMENT "Bundling adbfiles into app"
-    )
+
 elseif(UNIX)
     qt_import_plugins(adblink
         INCLUDE Qt6::QXcbIntegrationPlugin
@@ -287,54 +299,66 @@ elseif(UNIX)
     )
 endif()
 
-# ---- Packaging: install rules ----
+# -------------------------
+# Runtime folder copying (DEV convenience)
+# -------------------------
+
+if(WIN32)
+    add_custom_command(TARGET adblink POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.windows"
+            "$<TARGET_FILE_DIR:adblink>/adbfiles"
+    )
+elseif(UNIX AND NOT APPLE)
+    add_custom_command(TARGET adblink POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.linux"
+            "$<TARGET_FILE_DIR:adblink>/adbfiles"
+    )
+endif()
+
+# -------------------------
+# Install layout (REAL deployment)
+# -------------------------
+
 install(TARGETS adblink
-    BUNDLE DESTINATION .
     RUNTIME DESTINATION .
+    BUNDLE DESTINATION .
 )
 
 if(WIN32)
-    install(DIRECTORY "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.windows/"
-            DESTINATION ./adbfiles
-            USE_SOURCE_PERMISSIONS)
+    install(DIRECTORY
+        "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.windows/"
+        DESTINATION adbfiles
+    )
+
 elseif(APPLE)
-    install(DIRECTORY "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.macos/"
-            DESTINATION adblink.app/Contents/MacOS/adbfiles
-            USE_SOURCE_PERMISSIONS)
+    install(DIRECTORY
+        "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.macos/"
+        DESTINATION adblink.app/Contents/MacOS/adbfiles
+    )
+
 else()
-    install(DIRECTORY "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.linux/"
-            DESTINATION ./adbfiles
-            USE_SOURCE_PERMISSIONS
-            PATTERN "icons" EXCLUDE)
-    install(FILES "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.linux/icons/adblink.desktop"
-            DESTINATION .)
-    install(FILES "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.linux/icons/adblink.png"
-            DESTINATION .)
+    install(DIRECTORY
+        "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.linux/"
+        DESTINATION adbfiles
+    )
+
+    install(FILES
+        "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.linux/icons/adblink.desktop"
+        DESTINATION .
+    )
+
+    install(FILES
+        "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.linux/icons/adblink.png"
+        DESTINATION .
+    )
 endif()
 
-# ---- CPack packaging ----
-set(CPACK_PACKAGE_NAME "adblink")
-set(CPACK_PACKAGE_VENDOR "jocala.com")
-set(CPACK_PACKAGE_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")
-set(CPACK_PACKAGE_VERSION_MINOR "${PROJECT_VERSION_MINOR}")
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/license.txt")
-
-if(WIN32)
-    set(CPACK_GENERATOR "NSIS")
-    set(CPACK_NSIS_DISPLAY_NAME "adblink")
-    set(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")
-    set(CPACK_NSIS_MENU_LINKS "adblink.exe" "adblink")
-    set(CPACK_NSIS_CREATE_ICONS_EXTRA
-        "CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\adblink.lnk' '$INSTDIR\\\\adblink.exe'")
-    set(CPACK_NSIS_DELETE_ICONS_EXTRA
-        "Delete '$SMPROGRAMS\\\\$MUI_TEMP\\\\adblink.lnk'")
-elseif(APPLE)
-    set(CPACK_GENERATOR "DragNDrop")
-else()
-    set(CPACK_GENERATOR "TGZ")
-endif()
+# -------------------------
+# Packaging
+# -------------------------
 
 include(CPack)
-
 enable_testing()
 add_subdirectory(tests)
