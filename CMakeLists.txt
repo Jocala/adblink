@@ -6,6 +6,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
+if("${CMAKE_BUILD_TYPE}" STREQUAL "")
+    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
+endif()
+
 # -------------------------
 # Platform-specific config
 # -------------------------
@@ -13,6 +17,7 @@ set(CMAKE_AUTORCC ON)
 if(WIN32)
     set(CMAKE_WIN32_EXECUTABLE ON)
 
+    set(CMAKE_PREFIX_PATH "C:/Qt/Qt.6.11.1-static" CACHE PATH "")
     set(OPENSSL_ROOT_DIR "C:/openssl-static" CACHE PATH "")
     set(OPENSSL_INCLUDE_DIR "C:/openssl-static/include" CACHE PATH "")
     set(OPENSSL_SSL_LIBRARY "C:/openssl-static/lib/libssl.lib" CACHE FILEPATH "")
@@ -21,6 +26,7 @@ if(WIN32)
 endif()
 
 if(UNIX AND NOT APPLE)
+    set(CMAKE_PREFIX_PATH "/home/jeff/Qt/Qt.6.11.1-static" CACHE PATH "")
     set(OPENSSL_ROOT_DIR "/home/jeff/openssl-static" CACHE PATH "")
     set(OPENSSL_USE_STATIC_LIBS ON CACHE BOOL "")
 endif()
