@@ -3,14 +3,19 @@
 ## Build & test
 
 ```sh
-cmake -S . -B build
-cmake --build build
-ctest --test-dir build --output-on-failure
+cmake -S . -B "$Env:USERPROFILE\build-adblink" -DCMAKE_PREFIX_PATH="C:\Qt\Qt.6.11.1-static"
+cmake --build "$Env:USERPROFILE\build-adblink" --config Release
+ctest --test-dir "$Env:USERPROFILE\build-adblink" --output-on-failure -C Release
 ```
 
 Single test:
 ```sh
-cmake --build build --target <test_name> && ./build/tests/<test_name>
+cmake --build "$Env:USERPROFILE\build-adblink" --target <test_name> --config Release
+```
+
+Or use the build script:
+```sh
+X:\adblink\build-adblink-windows.ps1
 ```
 
 11 test executables: `adbstring`, `database`, `jsonconfig`, `logfile`, `getadbpath`, `devicerecord`, `iptablesort`, `stringutils`, `getreturncode`, `devicerecorddialog`, `logviewerdialog`.
