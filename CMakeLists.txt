@@ -327,21 +327,30 @@ install(TARGETS adblink
 )
 
 if(WIN32)
+
     install(DIRECTORY
         "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.windows/"
         DESTINATION adbfiles
     )
 
 elseif(APPLE)
+
+    install(TARGETS adblink
+        BUNDLE DESTINATION .
+    )
+
     install(DIRECTORY
         "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.macos/"
         DESTINATION adblink.app/Contents/MacOS/adbfiles
+        USE_SOURCE_PERMISSIONS
     )
 
 else()
+
     install(DIRECTORY
         "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.linux/"
         DESTINATION adbfiles
+        USE_SOURCE_PERMISSIONS
     )
 
     install(FILES
@@ -353,6 +362,7 @@ else()
         "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.linux/icons/adblink.png"
         DESTINATION .
     )
+
 endif()
 
 # -------------------------
