@@ -210,9 +210,6 @@ set(ADBLINK_EXTRA_FILES)
 
 if(APPLE)
     list(APPEND ADBLINK_EXTRA_FILES adblink.icns)
-    set_source_files_properties(adblink.icns PROPERTIES
-        MACOSX_BUNDLE_LOCATION "Resources"
-    )
 endif()
 
 qt_add_executable(adblink
@@ -320,6 +317,12 @@ elseif(APPLE)
         COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.macos"
             "$<TARGET_FILE_DIR:adblink>/adbfiles"
+    )
+    add_custom_command(TARGET adblink POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:adblink>/../Resources"
+        COMMAND ${CMAKE_COMMAND} -E copy
+            "${CMAKE_CURRENT_SOURCE_DIR}/adblink.icns"
+            "$<TARGET_FILE_DIR:adblink>/../Resources/adblink.icns"
     )
 elseif(UNIX AND NOT APPLE)
     add_custom_command(TARGET adblink POST_BUILD
