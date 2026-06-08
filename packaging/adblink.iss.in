@@ -1,0 +1,40 @@
+; Inno Setup script for adblink
+#define MyAppName "adblink"
+#define MyAppVersion "@PROJECT_VERSION@"
+#define MyAppPublisher "jocala.com"
+#define MyAppURL "http://www.jocala.com"
+#define MyAppExeName "adblink.exe"
+
+[Setup]
+AppId={{522B4431-156E-4CDE-B560-AD63B71EF021}
+AppName={#MyAppName}
+AppVersion={#MyAppVersion}
+AppPublisher={#MyAppPublisher}
+AppPublisherURL={#MyAppURL}
+AppSupportURL={#MyAppURL}
+AppUpdatesURL={#MyAppURL}
+DefaultDirName={commonpf64}\{#MyAppName}
+DisableDirPage=no
+DisableProgramGroupPage=yes
+OutputBaseFilename=adblink-{#MyAppVersion}-win64
+OutputDir=@CMAKE_BINARY_DIR@\packages
+Compression=lzma
+SolidCompression=yes
+UninstallDisplayIcon={app}\{#MyAppExeName}
+
+[Languages]
+Name: "english"; MessagesFile: "compiler:Default.isl"
+
+[Tasks]
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+
+[Files]
+Source: "@CMAKE_BINARY_DIR@\adblink.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "@CMAKE_BINARY_DIR@\adbfiles\*"; DestDir: "{app}\adbfiles"; Flags: ignoreversion recursesubdirs createallsubdirs
+
+[Icons]
+Name: "{commonprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
+Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
+
+[Run]
+Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent

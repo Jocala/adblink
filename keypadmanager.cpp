@@ -12,12 +12,16 @@ KeypadManager::KeypadManager(QObject *parent)
 void KeypadManager::openKeypad(QWidget *parentWidget,
                                  const DeviceRecord &device)
 {
-    QString port = device.port.isEmpty() ? "5555" : device.port;
-    QString daddr = device.daddr + ":" + port;
+    QString daddr;
+    if (device.isusb) {
+        daddr = device.daddr;
+    } else {
+        QString port = device.port.isEmpty() ? "5555" : device.port;
+        daddr = device.daddr + ":" + port;
+    }
 
-    QString cstring = daddr + " shell input keyevent ";
     keyboardDialog dialog(parentWidget);
     dialog.setWindowModality(Qt::WindowModal);
-    dialog.setdaddr(cstring);
+    dialog.setdaddr(daddr);
     dialog.exec();
 }

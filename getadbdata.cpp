@@ -1,6 +1,5 @@
 #include "getadbdata.h"
 #include "adbutils.h"
-#include "logfile.h"
 #include <QProcess>
 
 QString getadbOutput(const QString &cstring)

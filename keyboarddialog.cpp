@@ -2,6 +2,7 @@
 #include "adbutils.h"
 #include "getadbdata.h"
 
+#include <QAbstractButton>
 #include <QGridLayout>
 #include <QLabel>
 #include <QMessageBox>
@@ -128,6 +129,19 @@ keyboardDialog::keyboardDialog(QWidget *parent) :
     grid->addWidget(fastforwardButton, 3, 0);
     grid->addWidget(rewindButton, 3, 1);
     grid->addWidget(playpauseButton, 3, 2);
+
+    connect(upButton, &QAbstractButton::clicked, this, &keyboardDialog::on_upButton_clicked);
+    connect(downButton, &QAbstractButton::clicked, this, &keyboardDialog::on_downButton_clicked);
+    connect(leftButton, &QAbstractButton::clicked, this, &keyboardDialog::on_leftButton_clicked);
+    connect(rightButton, &QAbstractButton::clicked, this, &keyboardDialog::on_rightButton_clicked);
+    connect(homeButton, &QAbstractButton::clicked, this, &keyboardDialog::on_homeButton_clicked);
+    connect(selectButton, &QAbstractButton::clicked, this, &keyboardDialog::on_selectButton_clicked);
+    connect(menuButton, &QAbstractButton::clicked, this, &keyboardDialog::on_menuButton_clicked);
+    connect(backButton, &QAbstractButton::clicked, this, &keyboardDialog::on_backButton_clicked);
+    connect(powerButton, &QAbstractButton::clicked, this, &keyboardDialog::on_powerButton_clicked);
+    connect(fastforwardButton, &QAbstractButton::clicked, this, &keyboardDialog::on_fastforwardButton_clicked);
+    connect(rewindButton, &QAbstractButton::clicked, this, &keyboardDialog::on_rewindButton_clicked);
+    connect(playpauseButton, &QAbstractButton::clicked, this, &keyboardDialog::on_playpauseButton_clicked);
 
     m_closeButton = new QPushButton(QStringLiteral("Exit"), this);
     m_closeButton->setObjectName(QStringLiteral("closeButton"));

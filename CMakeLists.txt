@@ -391,22 +391,32 @@ endif()
 # Packaging
 # -------------------------
 
-set(CPACK_PACKAGE_VENDOR "jocala")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "ADB-based remote control for Android/Kodi devices")
-
 if(WIN32)
-    set(CPACK_GENERATOR "NSIS")
-    set(CPACK_NSIS_DISPLAY_NAME "adblink")
-    set(CPACK_BINARY_TZ OFF)
-elseif(APPLE)
-    set(CPACK_GENERATOR "DragNDrop")
-    set(CPACK_BINARY_TZ OFF)
-elseif(UNIX)
-    set(CPACK_GENERATOR "TGZ")
-    set(CPACK_BINARY_TZ OFF)
-    set(CPACK_STRIP_FILES ON)
-endif()
+    configure_file(
+        "${CMAKE_SOURCE_DIR}/packaging/adblink.iss.in"
+        "${CMAKE_BINARY_DIR}/adblink.iss"
+        @ONLY
+    )
 
-include(CPack)
+    add_custom_target(package-win
+        COMMAND "c:/bin/inno/iscc" "${CMAKE_BINARY_DIR}/adblink.iss"
+        DEPENDS adblink
+        COMMENT "Generating Inno Setup installer..."
+    )
+else()
+    set(CPACK_PACKAGE_VENDOR "jocala")
+    set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "ADB-based remote control for Android/Kodi devices")
+
+    if(APPLE)
+        set(CPACK_GENERATOR "DragNDrop")
+        set(CPACK_BINARY_TZ OFF)
+    elseif(UNIX)
+        set(CPACK_GENERATOR "TGZ")
+        set(CPACK_BINARY_TZ OFF)
+        set(CPACK_STRIP_FILES ON)
+    endif()
+
+    include(CPack)
+endif()
 enable_testing()
 add_subdirectory(tests)
