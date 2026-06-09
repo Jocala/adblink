@@ -1,0 +1,36 @@
+*~
+*.old
+*.pro.user.*
+*.pro.user
+*.bak
+oldui
+.DS_Store
+*.autosave
+mksrc
+mainwindow.ui.bkup
+# Ignore clangd cache files and related
+.qtc_clangd/
+*.idx
+*.idx.tmp
+*.idx.tmp.*
+compile_commands.json
+qt build/
+.aider*
+# Qt generated UI headers
+ui_*.h
+
+# Other common build artifacts
+*.moc
+moc_*.cpp
+*.o
+*.obj
+build/
+Makefile*
+*.pro.user
+.qmake.stash
+build-mac
+build-linux
+build-win
+.qtcreator
+reset
+checklist.txt
