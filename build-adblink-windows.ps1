@@ -1,6 +1,6 @@
 param()
 
-$SourceDir = "X:\adblink"
+$SourceDir = "C:\source\adblink"
 $BuildDir = "C:\Users\jeff\build-adblink"
 
 # Load Visual Studio environment so Ninja uses MSVC
