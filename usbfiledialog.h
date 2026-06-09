@@ -62,7 +62,7 @@ public:
     QString current_directory2;
     QString current_directory1;
     QString rootShell;
-    QTimer* operationTimer;
+    QTimer* operationTimer = nullptr;
 
 
     inline static const QString adbShell = QStringLiteral(" shell ");
