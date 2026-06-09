@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SOURCE_DIR="/Volumes/source/adblink"
+SOURCE_DIR="/Users/jeff/source/adblink"
 BUILD_DIR="/Users/jeff/build-adblink"
 
 cmake -S "$SOURCE_DIR" -B "$BUILD_DIR"
