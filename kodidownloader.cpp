@@ -31,16 +31,21 @@ bool KodiDownloader::isNewerVersionAvailable(const QString &installed,
     if (installed == "Unknown" || latest == "Unknown")
         return false;
 
+    auto toNum = [](const QString &s) {
+        int idx = s.indexOf('-');
+        return (idx >= 0 ? s.left(idx) : s).toInt();
+    };
+
     QStringList installedParts = installed.split('.');
     QStringList latestParts = latest.split('.');
 
     if (installedParts.size() < 2 || latestParts.size() < 2)
         return installed != latest;
 
-    int installedMajor = installedParts[0].toInt();
-    int installedMinor = installedParts[1].toInt();
-    int latestMajor = latestParts[0].toInt();
-    int latestMinor = latestParts[1].toInt();
+    int installedMajor = toNum(installedParts[0]);
+    int installedMinor = toNum(installedParts[1]);
+    int latestMajor = toNum(latestParts[0]);
+    int latestMinor = toNum(latestParts[1]);
 
     return (installedMajor < latestMajor)
         || (installedMajor == latestMajor && installedMinor < latestMinor);
