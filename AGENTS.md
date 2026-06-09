@@ -33,7 +33,7 @@ ctest --test-dir "%USERPROFILE%\build-adblink" --output-on-failure
 cmake --build "%USERPROFILE%\build-adblink" --target package-win
 ```
 Qt Creator uses the same build dir with Ninja — run vcvars64.bat first or let Qt Creator handle it.
-Or use: `X:\adblink\build-adblink-windows.ps1`
+Or use: `C:\source\adblink\build-adblink-windows.ps1`
 The `package-win` target wraps `iscc` and produces `packages/adblink-8.0-win64.exe`.
 
 Single test (any platform):
@@ -255,7 +255,7 @@ Hardcoded (widgets removed, setters are no-ops): `ostype()` = `"0"`, `scoped()` 
 |---|---|---|
 | macOS | `/Volumes/source/adblink` | `/Users/jeff/build-adblink` |
 | Linux | `/zstore/source/adblink` | `/home/jeff/build-adblink` |
-| Windows | `X:\adblink` | `%USERPROFILE%\build-adblink` |
+| Windows | `C:\source\adblink` | `%USERPROFILE%\build-adblink` |
 
 Builds are out-of-source (Samba share → local disk). Each platform has a build script in the source root. **Always use the platform build script** for builds, tests, and packaging — they handle environment setup (vcvars64.bat on Windows, etc.) and ensure consistent results.
 
