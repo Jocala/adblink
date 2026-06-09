@@ -202,6 +202,54 @@ Hardcoded (widgets removed, setters are no-ops): `ostype()` = `"0"`, `scoped()` 
 - `kodidatamanager.cpp` — CRUD for device records, schema creation, JSON config defaults
 - `mainwindow.cpp` (2815 lines) — all button slots, track-devices, view switching, layout
 
+## jocala.com website
+
+### Git repo
+- **Bare repo (server)**: `jeff@192.168.1.39:/zstore/source/git/jocala.com.git`
+- **Debian working tree**: `/zstore/source/www/jocala.com/` (auto-updated via post-receive hook)
+- **macOS clone**: `/Users/jeff/source/jocala.com/`
+- **Remote**: `ssh://jeff@192.168.1.39/zstore/source/git/jocala.com.git`
+- Latest commit: `c16754d` remove unreferenced images (Jun 2026)
+
+### Production server
+- **Host**: `jeff@jocala.com` (68.67.75.218)
+- **Docroot**: `/var/www/jocala.com/public_html/`
+- **Web server**: Apache with SSL (Let's Encrypt)
+- **SSH**: From Debian → jocala.com works passwordlessly
+
+### Deployment
+- **Manual HTML deploy** (run from Debian):
+  ```sh
+  rsync -avz \
+    --include='*.html' \
+    --include='version.txt' \
+    --include='*/' \
+    --exclude='*' \
+    /zstore/source/www/jocala.com/ \
+    jeff@jocala.com:/var/www/jocala.com/public_html/
+  ```
+- **Build deploy** (when releasing new version):
+  ```sh
+  rsync -avz /zstore/source/www/jocala.com/downloads/adblink.<ver>.* \
+    jeff@jocala.com:/var/www/jocala.com/public_html/downloads/
+  ```
+- **Post-receive hook** (not yet enabled) at `/zstore/source/git/jocala.com.git/hooks/post-receive` — would auto-deploy HTML on `git push`
+
+### Site structure
+- Static HTML site (no PHP/CMS)
+- 21 root files (20 `.html` + `version.txt`), 39 help pages, 31 referenced images
+- No video files, no orphaned pages, no unused images (all cleaned Jun 2026)
+- GA4 ID: `G-B67VTTJQ1L`
+- No `.htaccess` on production (user opted out)
+
+### Release workflow
+1. Build installers → copy to `/zstore/source/www/jocala.com/downloads/adblink.<ver>.*`
+2. Rsync builds to production (see above)
+3. Edit `index.html` on macOS → update download links
+4. Update `version.txt` on macOS → new version number
+5. `git commit && git push`
+6. Run HTML rsync from Debian (or enable post-receive hook for auto-deploy)
+
 ## Current status (Jun 2026)
 
 ### Source locations
