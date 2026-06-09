@@ -211,7 +211,7 @@ Hardcoded (widgets removed, setters are no-ops): `ostype()` = `"0"`, `scoped()` 
 | Linux | `/zstore/source/adblink` | `/home/jeff/build-adblink` |
 | Windows | `X:\adblink` | `%USERPROFILE%\build-adblink` |
 
-Builds are out-of-source (Samba share → local disk). Each platform has a build script in the source root.
+Builds are out-of-source (Samba share → local disk). Each platform has a build script in the source root. **Always use the platform build script** for builds, tests, and packaging — they handle environment setup (vcvars64.bat on Windows, etc.) and ensure consistent results.
 
 ### Remote build hosts
 | Platform | Host | User | SSH key |

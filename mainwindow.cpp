@@ -781,7 +781,7 @@
     /////////////////////////////////////////////////////////////////////////
     void MainWindow::on_actionAbout_triggered()
     {
-        m_aboutManager->showAbout(this, databasedir, program + " " + version + " beta");
+        m_aboutManager->showAbout(this, databasedir, program + " " + version);
     }
 
 
