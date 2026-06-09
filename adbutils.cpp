@@ -260,7 +260,7 @@ bool isScopedStorage(const QString &adbPrefix)
     return (apiLevel >= 30) || (apiLevel == 29 && restrictedAccess);
 }
 
-void removeAppleArtifacts(const QString &dirPath)
+void removeMetadataFiles(const QString &dirPath)
 {
     QDirIterator it(dirPath, QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot,
                     QDirIterator::Subdirectories);
@@ -274,8 +274,12 @@ void removeAppleArtifacts(const QString &dirPath)
             || name == QStringLiteral(".localized")
             || name == QStringLiteral("__MACOSX")
             || name == QStringLiteral(".AppleDouble")
-            || name.startsWith(QStringLiteral("._"))) {
-            logfile(QStringLiteral("removeAppleArtifacts: ") + entry);
+            || name.startsWith(QStringLiteral("._"))
+            || name.endsWith(QChar('~'))
+            || name.endsWith(QStringLiteral(".swp"))
+            || name.endsWith(QStringLiteral(".swo"))
+            || (name.startsWith(QChar('#')) && name.endsWith(QChar('#')))) {
+            logfile(QStringLiteral("removeMetadataFiles: ") + entry);
             if (fi.isDir())
                 QDir(entry).removeRecursively();
             else

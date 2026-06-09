@@ -37,8 +37,9 @@ bool isPackageInstalled(const QString &adbPrefix, const QString &package);
 // Check if scoped storage restrictions are in effect on the device
 bool isScopedStorage(const QString &adbPrefix);
 
-// Remove Apple metadata artifacts ( .DS_Store, ._*, __MACOSX, .AppleDouble, .localized )
-// from the given directory tree. Safe to call on any platform — no-ops on non-Apple files.
-void removeAppleArtifacts(const QString &dirPath);
+// Remove editor backup/swap files and Apple metadata artifacts
+// from the given directory tree. Removes *~, *.swp, *.swo, #*#, .DS_Store,
+// ._* (AppleDouble resource forks), __MACOSX/, .AppleDouble/, .localized.
+void removeMetadataFiles(const QString &dirPath);
 
 #endif // ADBUTILS_H
