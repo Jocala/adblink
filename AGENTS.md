@@ -213,6 +213,12 @@ Hardcoded (widgets removed, setters are no-ops): `ostype()` = `"0"`, `scoped()` 
 
 Builds are out-of-source (Samba share → local disk). Each platform has a build script in the source root.
 
+### Remote build hosts
+| Platform | Host | User | SSH key |
+|---|---|---|---|
+| Debian | `192.168.1.39` | `jeff` | `/Users/jeff/.ssh/id_ed25519` |
+| Windows | `192.168.1.137` | `jeff` | `/Users/jeff/.ssh/id_ed25519` |
+
 ### Packaging
 | Platform | Generator | Output |
 |---|---|---|
