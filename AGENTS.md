@@ -201,6 +201,7 @@ Hardcoded (widgets removed, setters are no-ops): `ostype()` = `"0"`, `scoped()` 
 - `adbutils.cpp` — `syncWaitForProcess()`, `isScopedStorage()`, `resolveKodiPath()`
 - `kodidatamanager.cpp` — CRUD for device records, schema creation, JSON config defaults
 - `mainwindow.cpp` (2815 lines) — all button slots, track-devices, view switching, layout
+- `deploy.sh` — jocala.com website deployment script (runs from Debian only)
 
 ## jocala.com website
 
@@ -209,7 +210,7 @@ Hardcoded (widgets removed, setters are no-ops): `ostype()` = `"0"`, `scoped()` 
 - **Debian working tree**: `/zstore/source/www/jocala.com/` (auto-updated via post-receive hook)
 - **macOS clone**: `/Users/jeff/source/jocala.com/`
 - **Remote**: `ssh://jeff@192.168.1.39/zstore/source/git/jocala.com.git`
-- Latest commit: `c16754d` remove unreferenced images (Jun 2026)
+- Latest commit: `68099dd` move deploy script to adblink repo (Jun 2026)
 
 ### Production server
 - **Host**: `jeff@jocala.com` (68.67.75.218)
@@ -217,23 +218,16 @@ Hardcoded (widgets removed, setters are no-ops): `ostype()` = `"0"`, `scoped()` 
 - **Web server**: Apache with SSL (Let's Encrypt)
 - **SSH**: From Debian → jocala.com works passwordlessly
 
-### Deployment
-- **Manual HTML deploy** (run from Debian):
+### Deployment script
+- **Script location**: `/zstore/source/adblink/deploy.sh` (in the adblink repo, not the website repo)
+- **Usage** (run from Debian):
   ```sh
-  rsync -avz \
-    --include='*.html' \
-    --include='version.txt' \
-    --include='*/' \
-    --exclude='*' \
-    /zstore/source/www/jocala.com/ \
-    jeff@jocala.com:/var/www/jocala.com/public_html/
+  cd /zstore/source/adblink
+  ./deploy.sh html                    # deploy HTML + version.txt
+  ./deploy.sh builds <files>          # deploy packages
+  ./deploy.sh all <files>             # deploy both
   ```
-- **Build deploy** (when releasing new version):
-  ```sh
-  rsync -avz /zstore/source/www/jocala.com/downloads/adblink.<ver>.* \
-    jeff@jocala.com:/var/www/jocala.com/public_html/downloads/
-  ```
-- **Post-receive hook** (not yet enabled) at `/zstore/source/git/jocala.com.git/hooks/post-receive` — would auto-deploy HTML on `git push`
+- **No post-receive auto-deploy** — user deploys manually on purpose
 
 ### Site structure
 - Static HTML site (no PHP/CMS)
@@ -243,12 +237,16 @@ Hardcoded (widgets removed, setters are no-ops): `ostype()` = `"0"`, `scoped()` 
 - No `.htaccess` on production (user opted out)
 
 ### Release workflow
-1. Build installers → copy to `/zstore/source/www/jocala.com/downloads/adblink.<ver>.*`
-2. Rsync builds to production (see above)
-3. Edit `index.html` on macOS → update download links
-4. Update `version.txt` on macOS → new version number
-5. `git commit && git push`
-6. Run HTML rsync from Debian (or enable post-receive hook for auto-deploy)
+1. Build installers on each platform → copy to `/zstore/source/www/jocala.com/downloads/`
+   - macOS: `adblink-<ver>-Darwin.dmg`
+   - Linux: `adblink-<ver>-Linux.tar.gz`
+   - Windows: `adblink-<ver>-win64.exe`
+2. Rsync builds to production: `./deploy.sh builds <files>`
+3. Edit `index.html` on macOS → update download links to CPack filenames
+4. Update `changelog.txt` on macOS → add release notes
+5. Update `version.txt` on macOS → new version number
+6. `git commit && git push`
+7. Run HTML deploy from Debian: `./deploy.sh html`
 
 ## Current status (Jun 2026)
 
