@@ -1,36 +1,63 @@
-*~
-*.old
-*.pro.user.*
-*.pro.user
-*.bak
-oldui
-.DS_Store
-*.autosave
-mksrc
-mainwindow.ui.bkup
-# Ignore clangd cache files and related
-.qtc_clangd/
-*.idx
-*.idx.tmp
-*.idx.tmp.*
-compile_commands.json
-qt build/
-.aider*
-# Qt generated UI headers
-ui_*.h
-
-# Other common build artifacts
-*.moc
-moc_*.cpp
+# ==================== Build & Generated Files ====================
+build/
+build-*/
+build-mac/
+build-linux/
+build-win/
+*.app
+*.dmg
+*.so
 *.o
 *.obj
-build/
+*.moc
+moc_*.cpp
+ui_*.h
+*.qrc
 Makefile*
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+*.cmake
+compile_commands.json
+
+# ==================== Qt Creator / IDE Files ====================
+.qtcreator/
+.qtc_clangd/
+*.pro.user*
 *.pro.user
 .qmake.stash
-build-mac
-build-linux
-build-win
-.qtcreator
+CMakeLists.txt.user
+
+# ==================== macOS ====================
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# ==================== Windows ====================
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ==================== Temporary & Backup Files ====================
+*~
+*.old
+*.bak
+*.autosave
+*.tmp
+*.swp
+*.swo
+*.idx
+*.idx.tmp*
+
+# ==================== Project Specific ====================
+oldui
+mksrc
+mainwindow.ui.bkup
 reset
 checklist.txt
+.aider*
+
+# ==================== Logs & Debug ====================
+*.log
+*.log.*
+debug/
