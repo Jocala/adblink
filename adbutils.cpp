@@ -1,6 +1,7 @@
 #include "adbutils.h"
 #include <QCoreApplication>
 #include <QDir>
+#include <QDirIterator>
 #include <QElapsedTimer>
 #include <QFileInfo>
 #include <QMessageBox>
@@ -257,4 +258,28 @@ bool isScopedStorage(const QString &adbPrefix)
     }
 
     return (apiLevel >= 30) || (apiLevel == 29 && restrictedAccess);
+}
+
+void removeAppleArtifacts(const QString &dirPath)
+{
+    QDirIterator it(dirPath, QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot,
+                    QDirIterator::Subdirectories);
+    QStringList entries;
+    while (it.hasNext())
+        entries.prepend(it.next());
+    for (const QString &entry : entries) {
+        QFileInfo fi(entry);
+        QString name = fi.fileName();
+        if (name == QStringLiteral(".DS_Store")
+            || name == QStringLiteral(".localized")
+            || name == QStringLiteral("__MACOSX")
+            || name == QStringLiteral(".AppleDouble")
+            || name.startsWith(QStringLiteral("._"))) {
+            logfile(QStringLiteral("removeAppleArtifacts: ") + entry);
+            if (fi.isDir())
+                QDir(entry).removeRecursively();
+            else
+                QFile::remove(entry);
+        }
+    }
 }

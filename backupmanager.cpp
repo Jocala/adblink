@@ -184,6 +184,8 @@ bool BackupManager::backupDevice(QWidget *parent, const DeviceRecord &device,
     cstring = adbPrefix + "pull " + mcpath + "files/.kodi/. " + '"' + dir + '"';
     QString command = runLongProcess(cstring, "backup running for " + device.daddr);
 
+    removeAppleArtifacts(dir);
+
     if (QDir(dir + "userdata").exists()) {
         if (dataManager && !jsonstring.isEmpty())
             dataManager->writeBackupPath(jsonstring, dir);
@@ -381,6 +383,8 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
             return false;
         }
     }
+
+    removeAppleArtifacts(dir);
 
     dir = dir + "/.";
 

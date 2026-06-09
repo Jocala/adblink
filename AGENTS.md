@@ -125,6 +125,17 @@ Three paths, checked in order:
 
 `BackupManager::kodiDataRoot()` and `kodiBaseRoot()` use same scoped vs. unscoped logic.
 
+## Apple artifact cleanup
+
+`removeAppleArtifacts()` in `adbutils.cpp` is a shared utility that removes macOS metadata files from a directory tree. Called automatically:
+
+- **After backup pull** (`backupmanager.cpp`): cleans the local backup directory so Apple files never persist
+- **Before restore push** (`backupmanager.cpp`): cleans the selected backup directory before sending to device, handling existing dirty backups
+
+Files removed: `.DS_Store`, `._*` (AppleDouble resource forks), `__MACOSX/`, `.AppleDouble/`, `.localized`
+
+The function uses `QDirIterator::Subdirectories` with `prepend` (reverse order) to process children before parents. Directories are removed via `QDir::removeRecursively()`, files via `QFile::remove()`. It logs each removed entry.
+
 ## Database schema & patterns
 
 ### `device` table (20 columns)
