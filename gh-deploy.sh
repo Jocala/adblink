@@ -17,15 +17,18 @@ TGZ="adblink-${VERSION}-Linux.tar.gz"
 EXE="adblink-${VERSION}-win64.exe"
 TAG="v${VERSION}"
 
-if ! command -v gh &>/dev/null; then
+BREW="/opt/homebrew/bin/brew"
+GH="/opt/homebrew/bin/gh"
+
+if ! test -x "$GH"; then
   echo "Installing gh CLI via Homebrew..."
-  brew install gh
+  $BREW install gh
 fi
 
 echo "Checking gh auth status..."
-if ! gh auth status &>/dev/null; then
+if ! "$GH" auth status &>/dev/null; then
   echo "gh is not authenticated. Run:"
-  echo "  gh auth login --hostname github.com --git-protocol ssh"
+  echo "  $GH auth login --hostname github.com --git-protocol ssh"
   exit 1
 fi
 
@@ -49,7 +52,7 @@ scp "$DEBIAN:$DOWNLOADS/$TGZ" "$TMPDIR/$TGZ"
 scp "$DEBIAN:$DOWNLOADS/$EXE" "$TMPDIR/$EXE"
 
 echo "Creating release..."
-gh release create "$TAG" \
+"$GH" release create "$TAG" \
   "$BUILD_DIR/$DMG" \
   "$TMPDIR/$TGZ" \
   "$TMPDIR/$EXE" \
