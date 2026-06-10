@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # Stage a release: build all platforms, stage packages, stage website edits.
 # Run from macOS. Does NOT deploy to production (jocala.com).
-# Usage: ./stage.sh <version>
+# Usage: ./stage.sh
 
 set -euo pipefail
 
-VERSION="${1:?Usage: stage.sh <version>}"
+SCRIPT_DIR="$(dirname "$0")"
+VERSION=$(grep 'const QString version' "$SCRIPT_DIR/version.h" | sed 's/.*"\(.*\)".*/\1/')
 
 DEBIAN="jeff@192.168.1.39"
 WINDOWS="jeff@192.168.1.137"
