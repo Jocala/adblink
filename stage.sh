@@ -54,17 +54,36 @@ echo ""
 echo "--- Verifying staged packages ---"
 ssh "$DEBIAN" "ls -lh $DOWNLOADS/$DMG $DOWNLOADS/$TGZ $DOWNLOADS/$EXE"
 
-# -- Remind about website edits -------------------------------------------
+# -- Update website files --------------------------------------------------
+
+echo ""
+echo "--- Updating version.txt and index.html ---"
+
+OLDVER=$(ssh "$DEBIAN" "cat $WEBSITE/version.txt")
+echo "Current version: $OLDVER, new version: $VERSION"
+
+ssh "$DEBIAN" "echo '$VERSION' > $WEBSITE/version.txt"
+
+# Replace download filenames in index.html (exact literal matches)
+OLD_DMG="adblink-${OLDVER}-Darwin.dmg"
+OLD_TGZ="adblink-${OLDVER}-Linux.tar.gz"
+OLD_EXE="adblink-${OLDVER}-win64.exe"
+
+ssh "$DEBIAN" "sed -i 's/$OLD_DMG/$DMG/g; s/$OLD_TGZ/$TGZ/g; s/$OLD_EXE/$EXE/g' $WEBSITE/index.html"
+
+# Replace version labels in link text (e.g., "v8.0 for Windows" → "v8.1 for Windows")
+ssh "$DEBIAN" "sed -i '/for \(Windows\|macOS\|Linux\)/s/v${OLDVER}/v${VERSION}/g' $WEBSITE/index.html"
+
+# -- Remind about remaining manual steps -----------------------------------
 
 echo ""
 echo "=== Staging complete ==="
 echo "Packages staged at $DEBIAN:$DOWNLOADS"
+echo "version.txt and index.html updated."
 echo ""
-echo "Next steps (on Debian):"
-echo "  1. Edit $WEBSITE/index.html          -> update download links"
-echo "  2. Edit $WEBSITE/changelog.txt        -> add release notes"
-echo "  3. Edit $WEBSITE/version.txt          -> set version to $VERSION"
-echo "  4. cd $WEBSITE && git add -A && git commit -m \"v${VERSION} release\""
+echo "Remaining steps (on Debian):"
+echo "  1. Edit $WEBSITE/changelog.txt        -> add release notes"
+echo "  2. cd $WEBSITE && git add -A && git commit -m \"v${VERSION} release\""
 echo ""
 echo "When ready to go live (from Debian):"
 echo "  cd $ADBLINK_REPO"
