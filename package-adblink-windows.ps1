@@ -1,6 +1,5 @@
 param()
 
-$SourceDir = "C:\source\adblink"
 $BuildDir = "C:\Users\jeff\build-adblink"
 
 # Load Visual Studio environment so Ninja uses MSVC
@@ -11,6 +10,5 @@ cmd /c "`"$vcvars`" > nul 2>&1 && set" | ForEach-Object {
     }
 }
 
-cmake -S $SourceDir -B $BuildDir -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="C:\Qt\Qt.6.11.1-static"
-cmake --build $BuildDir
-ctest --test-dir $BuildDir --output-on-failure
+cmake --build $BuildDir --target package-win
+Get-ChildItem "$BuildDir\packages\"
