@@ -218,6 +218,7 @@ Hardcoded (widgets removed, setters are no-ops): `ostype()` = `"0"`, `scoped()` 
 - `kodidatamanager.cpp` — CRUD for device records, schema creation, JSON config defaults
 - `mainwindow.cpp` (2815 lines) — all button slots, track-devices, view switching, layout
 - `deploy.sh` — jocala.com website deployment script (runs from Debian only)
+- `gh-deploy.sh` — GitHub release script (runs from macOS, creates release with 3 installer assets)
 
 ## jocala.com website
 
@@ -232,9 +233,10 @@ Hardcoded (widgets removed, setters are no-ops): `ostype()` = `"0"`, `scoped()` 
 - **Web server**: Apache with SSL (Let's Encrypt)
 - **SSH**: From Debian → jocala.com works passwordlessly
 
-### Deployment & staging scripts
+### Deployment, staging & release scripts
 - **`deploy.sh`** (Debian only): pushes builds + HTML to production jocala.com
 - **`stage.sh`** (run from macOS): builds all platforms, stages packages + website edits locally on Debian
+- **`gh-deploy.sh`** (run from macOS, after staging): pushes source to GitHub + creates GitHub release with all 3 installer assets
 - **Usage** (run from Debian):
   ```sh
   cd /zstore/source/adblink
@@ -257,6 +259,7 @@ Hardcoded (widgets removed, setters are no-ops): `ostype()` = `"0"`, `scoped()` 
 3. On Debian: `cd /zstore/source/www/jocala.com && git add -A && git commit -m "v<ver> release"`
 4. On Debian: `cd /zstore/source/adblink && ./deploy.sh all <packages>` — deploys builds + HTML to production
 5. On Debian: `cd /zstore/source/www/jocala.com && git push`
+6. On macOS: `./gh-deploy.sh` — creates GitHub release with all 3 installer assets
 
 ## Current status (Jun 2026)
 
@@ -281,6 +284,7 @@ Builds are out-of-source (Samba share → local disk). Each platform has a build
 | macOS | DragNDrop | `.dmg` with Applications symlink |
 | Linux | TGZ | `.tar.gz` |
 | Windows | Inno Setup | `.exe` installer, no license page |
+| GitHub | `gh-deploy.sh` | Release with all 3 installer assets |
 
 ### CMakeLists.txt key details
 - `CPACK_BINARY_TZ OFF` — prevents `.tar.Z` on all platforms
