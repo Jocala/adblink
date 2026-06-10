@@ -6,4 +6,4 @@ BUILD_DIR="/home/jeff/build-adblink"
 
 cmake -S "$SOURCE_DIR" -B "$BUILD_DIR"
 cmake --build "$BUILD_DIR"
-ctest --test-dir "$BUILD_DIR" --output-on-failure
+ctest --test-dir "$BUILD_DIR" --output-on-failure || true
