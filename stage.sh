@@ -60,20 +60,18 @@ ssh "$DEBIAN" "ls -lh $DOWNLOADS/$DMG $DOWNLOADS/$TGZ $DOWNLOADS/$EXE"
 echo ""
 echo "--- Updating version.txt and index.html ---"
 
-OLDVER=$(ssh "$DEBIAN" "cat $WEBSITE/version.txt")
+OLDVER=$(ssh "$DEBIAN" "cat $WEBSITE/version.txt" | xargs)
 echo "Current version: $OLDVER, new version: $VERSION"
 
 ssh "$DEBIAN" "echo '$VERSION' > $WEBSITE/version.txt"
 
-# Replace download filenames in index.html (exact literal matches)
-OLD_DMG="adblink-${OLDVER}-Darwin.dmg"
-OLD_TGZ="adblink-${OLDVER}-Linux.tar.gz"
-OLD_EXE="adblink-${OLDVER}-win64.exe"
+# Replace download filenames in index.html (any old version → new)
+ssh "$DEBIAN" "sed -i 's|downloads/adblink-[0-9.]*-Darwin.dmg|downloads/$DMG|g' $WEBSITE/index.html"
+ssh "$DEBIAN" "sed -i 's|downloads/adblink-[0-9.]*-Linux.tar.gz|downloads/$TGZ|g' $WEBSITE/index.html"
+ssh "$DEBIAN" "sed -i 's|downloads/adblink-[0-9.]*-win64.exe|downloads/$EXE|g' $WEBSITE/index.html"
 
-ssh "$DEBIAN" "sed -i 's/$OLD_DMG/$DMG/g; s/$OLD_TGZ/$TGZ/g; s/$OLD_EXE/$EXE/g' $WEBSITE/index.html"
-
-# Replace version labels in link text (e.g., "v8.0 for Windows" → "v8.1 for Windows")
-ssh "$DEBIAN" "sed -i '/for \(Windows\|macOS\|Linux\)/s/v${OLDVER}/v${VERSION}/g' $WEBSITE/index.html"
+# Replace version labels in link text (any old version → new)
+ssh "$DEBIAN" "sed -i '/for \(Windows\|macOS\|Linux\)/s/v[0-9.]*/v${VERSION}/g' $WEBSITE/index.html"
 
 # -- Remind about remaining manual steps -----------------------------------
 
