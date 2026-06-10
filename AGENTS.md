@@ -14,7 +14,8 @@ cmake --build /Users/jeff/build-adblink
 ctest --test-dir /Users/jeff/build-adblink --output-on-failure
 cpack --config /Users/jeff/build-adblink/CPackConfig.cmake
 ```
-Or use: `/Users/jeff/source/adblink/build-adblink-macos.sh` (build + test + package)
+Or use: `/Users/jeff/source/adblink/build-adblink-macos.sh` (build + test)
+Package only (after build): `/Users/jeff/source/adblink/package-adblink-macos.sh`
 
 ### Linux
 ```sh
@@ -23,7 +24,8 @@ cmake --build /home/jeff/build-adblink
 ctest --test-dir /home/jeff/build-adblink --output-on-failure
 cpack --config /home/jeff/build-adblink/CPackConfig.cmake
 ```
-Or use: `/zstore/source/adblink/build-adblink-linux.sh` (build + test + package)
+Or use: `/zstore/source/adblink/build-adblink-linux.sh` (build + test)
+Package only (after build): `/zstore/source/adblink/package-adblink-linux.sh`
 
 ### Windows
 ```sh
