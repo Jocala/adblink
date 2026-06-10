@@ -224,8 +224,6 @@ Hardcoded (widgets removed, setters are no-ops): `ostype()` = `"0"`, `scoped()` 
 ### Git repo
 - **Bare repo (server)**: `jeff@192.168.1.39:/zstore/source/git/jocala.com.git`
 - **Debian working tree**: `/zstore/source/www/jocala.com/` (auto-updated via post-receive hook)
-- **macOS clone**: `/Users/jeff/source/jocala.com/`
-- **Remote**: `ssh://jeff@192.168.1.39/zstore/source/git/jocala.com.git`
 - Latest commit: `68099dd` move deploy script to adblink repo (Jun 2026)
 
 ### Production server
@@ -258,10 +256,10 @@ Hardcoded (widgets removed, setters are no-ops): `ostype()` = `"0"`, `scoped()` 
    - Linux: `adblink-<ver>-Linux.tar.gz`
    - Windows: `adblink-<ver>-win64.exe`
 2. Rsync builds to production: `./deploy.sh builds <files>`
-3. Edit `index.html` on macOS → update download links to CPack filenames
-4. Update `changelog.txt` on macOS → add release notes
-5. Update `version.txt` on macOS → new version number
-6. `git commit && git push`
+3. Edit `index.html` on Debian → update download links to CPack filenames
+4. Update `changelog.txt` on Debian → add release notes
+5. Update `version.txt` on Debian → new version number
+6. `git commit && git push` (from Debian working tree)
 7. Run HTML deploy from Debian: `./deploy.sh html`
 
 ## Current status (Jun 2026)
