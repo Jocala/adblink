@@ -227,6 +227,7 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
                                    KodiDataManager *dataManager,
                                    std::function<QString(const QString&, const QString&)> runLongProcess)
 {
+    ++m_activeRestores;
     logfile("Starting restore for " + device.daddr);
 
     QString cstring;
@@ -263,6 +264,7 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
             getadbOutput(cstring);
         } else {
             logfile(device.daddr + ": Error: " + device.xbmcpackage + " running. Restore failed");
+            --m_activeRestores;
             return false;
         }
     }
@@ -296,6 +298,7 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
             if (dialog.exec() == QDialog::Accepted) {
                 n_data_root = dialog.restore_data_root();
             } else {
+                --m_activeRestores;
                 return false;
             }
         }
@@ -323,6 +326,7 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
                 msgBox.setWindowModality(Qt::WindowModal);
                 msgBox.exec();
                 logfile(device.daddr + ": Error creating kodi_data: " + command);
+                --m_activeRestores;
                 return false;
             }
         } else {
@@ -338,8 +342,10 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
     QString dir = QFileDialog::getExistingDirectory(parent, "Choose Backup Folder for " + device.daddr,
                                                      backupDir.absolutePath(),
                                                      QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-    if (dir.isEmpty())
+    if (dir.isEmpty()) {
+        --m_activeRestores;
         return false;
+    }
 
     if (!QDir(dir + "/userdata").exists()) {
         QMessageBox msgBox(parent);
@@ -350,6 +356,7 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
         msgBox.setWindowModality(Qt::WindowModal);
         msgBox.exec();
         logfile(device.daddr + ": Error: Invalid backup. No userdata folder.");
+        --m_activeRestores;
         return false;
     }
     if (!QDir(dir + "/addons").exists()) {
@@ -361,6 +368,7 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
         msgBox.setWindowModality(Qt::WindowModal);
         msgBox.exec();
         logfile(device.daddr + ": Error: Invalid backup. addons folder not found.");
+        --m_activeRestores;
         return false;
     }
 
@@ -370,8 +378,10 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
     msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
     msgBox.setWindowModality(Qt::WindowModal);
     QMessageBox::StandardButton reply = static_cast<QMessageBox::StandardButton>(msgBox.exec());
-    if (reply == QMessageBox::No)
+    if (reply == QMessageBox::No) {
+        --m_activeRestores;
         return false;
+    }
 
     cstring = adbPrefix + "shell rm -r " + mcpath;
     runLongProcess(cstring, "preparing target for " + device.daddr);
@@ -396,6 +406,7 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
             msgBox.setWindowModality(Qt::WindowModal);
             msgBox.exec();
             logfile(device.daddr + ": Error creating restore point: " + errorOutput);
+            --m_activeRestores;
             return false;
         }
     }
@@ -423,6 +434,7 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
                 msgBox.setWindowModality(Qt::WindowModal);
                 msgBox.exec();
                 logfile(device.daddr + ": Error creating xbmc_env.properties: " + command);
+                --m_activeRestores;
                 return false;
             }
         } else if (n_data_root != "/sdcard/") {
@@ -433,6 +445,15 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
         if (dataManager && !jsonstring.isEmpty())
             dataManager->writeBackupPath(jsonstring, dir);
         logfile("Restore completed successfully for " + device.daddr);
+        if (--m_activeRestores == 0) {
+            QMessageBox msgBox(parent);
+            msgBox.setIcon(QMessageBox::Information);
+            msgBox.setWindowTitle(QString());
+            msgBox.setText(QStringLiteral("Restore complete. See log."));
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setWindowModality(Qt::WindowModal);
+            msgBox.exec();
+        }
         return true;
     } else {
         QMessageBox msgBox(parent);
@@ -443,6 +464,7 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
         msgBox.setWindowModality(Qt::WindowModal);
         msgBox.exec();
         logfile(device.daddr + ": Error: Restore failed: " + command);
+        --m_activeRestores;
         return false;
     }
 }

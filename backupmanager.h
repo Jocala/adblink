@@ -50,6 +50,7 @@ signals:
 private:
     KodiDataManager *m_dataManager = nullptr;
     int m_activeBackups = 0;
+    int m_activeRestores = 0;
 };
 
 #endif // BACKUPMANAGER_H
