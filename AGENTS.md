@@ -232,8 +232,9 @@ Hardcoded (widgets removed, setters are no-ops): `ostype()` = `"0"`, `scoped()` 
 - **Web server**: Apache with SSL (Let's Encrypt)
 - **SSH**: From Debian → jocala.com works passwordlessly
 
-### Deployment script
-- **Script location**: `/zstore/source/adblink/deploy.sh` (in the adblink repo, not the website repo)
+### Deployment & staging scripts
+- **`deploy.sh`** (Debian only): pushes builds + HTML to production jocala.com
+- **`stage.sh`** (run from macOS): builds all platforms, stages packages + website edits locally on Debian
 - **Usage** (run from Debian):
   ```sh
   cd /zstore/source/adblink
@@ -251,16 +252,11 @@ Hardcoded (widgets removed, setters are no-ops): `ostype()` = `"0"`, `scoped()` 
 - No `.htaccess` on production (user opted out)
 
 ### Release workflow
-1. Build installers on each platform → copy to `/zstore/source/www/jocala.com/downloads/`
-   - macOS: `adblink-<ver>-Darwin.dmg`
-   - Linux: `adblink-<ver>-Linux.tar.gz`
-   - Windows: `adblink-<ver>-win64.exe`
-2. Rsync builds to production: `./deploy.sh builds <files>`
-3. Edit `index.html` on Debian → update download links to CPack filenames
-4. Update `changelog.txt` on Debian → add release notes
-5. Update `version.txt` on Debian → new version number
-6. `git commit && git push` (from Debian working tree)
-7. Run HTML deploy from Debian: `./deploy.sh html`
+1. Run `./stage.sh <version>` from macOS — builds all platforms, copies packages to Debian downloads dir
+2. On Debian: edit `index.html`, `changelog.txt`, `version.txt` in the website working tree
+3. On Debian: `cd /zstore/source/www/jocala.com && git add -A && git commit -m "v<ver> release"`
+4. On Debian: `cd /zstore/source/adblink && ./deploy.sh all <packages>` — deploys builds + HTML to production
+5. On Debian: `cd /zstore/source/www/jocala.com && git push`
 
 ## Current status (Jun 2026)
 
