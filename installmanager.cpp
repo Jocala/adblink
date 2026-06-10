@@ -13,6 +13,7 @@ bool InstallManager::installApk(QWidget *parentWidget, const QString &adbPrefix,
                                  const QString &filename,
                                  RunLongProcessCallback runLongProcess)
 {
+    ++m_activeInstalls;
     logfile("Installing " + filename);
 
     QString cstring = adbPrefix + " install -r " + '"' + filename + '"';
@@ -28,7 +29,17 @@ bool InstallManager::installApk(QWidget *parentWidget, const QString &adbPrefix,
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setWindowModality(Qt::WindowModal);
         msgBox.exec();
+        --m_activeInstalls;
         return false;
+    }
+    if (--m_activeInstalls == 0) {
+        QMessageBox msgBox(parentWidget);
+        msgBox.setIcon(QMessageBox::Information);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("Install complete. See log."));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
     }
     return true;
 }

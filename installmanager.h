@@ -16,6 +16,9 @@ public:
 
     bool installApk(QWidget *parentWidget, const QString &adbPrefix,
                     const QString &filename, RunLongProcessCallback runLongProcess);
+
+private:
+    int m_activeInstalls = 0;
 };
 
 #endif // INSTALLMANAGER_H

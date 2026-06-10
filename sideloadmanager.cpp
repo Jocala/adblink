@@ -38,16 +38,6 @@ void SideloadManager::sideloadApks(QWidget *parentWidget,
 
             if (installer) {
                 writeInstall(filenames[0].left(filenames[0].lastIndexOf('/')));
-                QMessageBox msgBox(parentWidget);
-                msgBox.setIcon(QMessageBox::Information);
-                msgBox.setWindowTitle(QString());
-                msgBox.setText(QStringLiteral("APK(s) installed.\nSee log for details."));
-                msgBox.setStandardButtons(QMessageBox::Ok);
-                msgBox.setWindowModality(Qt::WindowModal);
-                msgBox.exec();
-
-                install = filenames[0].left(filenames[0].lastIndexOf('/'));
-                writeInstall(install);
             }
         }
     }
