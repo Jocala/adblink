@@ -4,7 +4,7 @@
 
 set -e
 
-RSYNC_OPTS="-avz --no-group"
+RSYNC_OPTS="-avz --no-group --omit-dir-times"
 PROD="jeff@jocala.com:/var/www/jocala.com/public_html"
 WWW="/zstore/source/www/jocala.com"
 
