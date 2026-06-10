@@ -2800,7 +2800,10 @@ void MainWindow::setupMenuConnections()
     connect(actionCreate_kodi_data,     &QAction::triggered, this, &MainWindow::on_actionCreate_kodi_data_triggered);
     connect(actionSwitch_View,          &QAction::triggered, this, &MainWindow::on_actionSwitch_View_triggered);
     connect(actionReiinstall_Busybox, &QAction::triggered, this, [this](bool) {
-        ensureBusyboxInstalled(this, getadb(), "Install Busybox?");
+        QString adb = getadb();
+        if (adb == "error")
+            return;
+        ensureBusyboxInstalled(this, adb, "Install Busybox?");
     });
     connect(infoArchitecture2,           &QAction::triggered, this, &MainWindow::on_infoArchitecture_triggered);
     connect(Erase_adbLink_database,     &QAction::triggered, this, &MainWindow::on_Erase_adbLink_database_triggered);
