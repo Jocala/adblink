@@ -14,6 +14,7 @@ case "${1:-html}" in
     rsync $RSYNC_OPTS \
       --include='*.html' \
       --include='version.txt' \
+      --include='changelog.txt' \
       --include='*/' \
       --exclude='*' \
       "$WWW/" "$PROD/"
@@ -33,6 +34,7 @@ case "${1:-html}" in
     rsync $RSYNC_OPTS \
       --include='*.html' \
       --include='version.txt' \
+      --include='changelog.txt' \
       --include='*/' \
       --exclude='*' \
       "$WWW/" "$PROD/"
