@@ -96,6 +96,7 @@ bool BackupManager::backupDevice(QWidget *parent, const DeviceRecord &device,
                                   KodiDataManager *dataManager,
                                   std::function<QString(const QString&, const QString&)> runLongProcess)
 {
+    ++m_activeBackups;
     logfile("Starting backup for " + device.daddr);
 
     QString cstring = getadbpath() + " -s " + device.daddr + " shell /data/local/tmp/adblink/busybox find /storage -type d -maxdepth 1";
@@ -127,6 +128,7 @@ bool BackupManager::backupDevice(QWidget *parent, const DeviceRecord &device,
         if (dialog.exec() == QDialog::Accepted) {
             n_data_root = dialog.restore_data_root();
         } else {
+            --m_activeBackups;
             return false;
         }
     }
@@ -153,6 +155,7 @@ bool BackupManager::backupDevice(QWidget *parent, const DeviceRecord &device,
         msgBox.setWindowModality(Qt::WindowModal);
         msgBox.exec();
         logfile(device.daddr + ": Error: Kodi's files not found at " + mcpath);
+        --m_activeBackups;
         return false;
     }
 
@@ -165,6 +168,7 @@ bool BackupManager::backupDevice(QWidget *parent, const DeviceRecord &device,
                                                      QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
     if (dir.isEmpty()) {
         logfile(device.daddr + ": Error: No backup destination selected");
+        --m_activeBackups;
         return false;
     }
 
@@ -173,8 +177,10 @@ bool BackupManager::backupDevice(QWidget *parent, const DeviceRecord &device,
     msgBox.setText(QStringLiteral("Backup to %1 for %2?").arg(dir, device.daddr));
     msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
     msgBox.setWindowModality(Qt::WindowModal);
-    if (msgBox.exec() != QMessageBox::Yes)
+    if (msgBox.exec() != QMessageBox::Yes) {
+        --m_activeBackups;
         return false;
+    }
 
     mcpath = mcpath + "/";
     dir = dir + "/";
@@ -191,6 +197,15 @@ bool BackupManager::backupDevice(QWidget *parent, const DeviceRecord &device,
             dataManager->writeBackupPath(jsonstring, dir);
         logfile("backup completed successfully for " + device.daddr);
         logfile("backup location: " + dir);
+        if (--m_activeBackups == 0) {
+            QMessageBox msgBox(parent);
+            msgBox.setIcon(QMessageBox::Information);
+            msgBox.setWindowTitle(QString());
+            msgBox.setText(QStringLiteral("Backup complete. See log."));
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setWindowModality(Qt::WindowModal);
+            msgBox.exec();
+        }
         return true;
     } else {
         QMessageBox msgBox(parent);
@@ -201,6 +216,7 @@ bool BackupManager::backupDevice(QWidget *parent, const DeviceRecord &device,
         msgBox.setWindowModality(Qt::WindowModal);
         msgBox.exec();
         logfile(device.daddr + ": Error: Backup failed: " + command);
+        --m_activeBackups;
         return false;
     }
 }
