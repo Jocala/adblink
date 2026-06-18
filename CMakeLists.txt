@@ -36,7 +36,6 @@ if(APPLE)
     set(OPENSSL_ROOT_DIR "/Users/jeff/openssl/openssl-universal" CACHE PATH "")
     set(OPENSSL_USE_STATIC_LIBS ON CACHE BOOL "")
     set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "")
-    set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "")
 endif()
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Sql Network Concurrent)
@@ -325,9 +324,6 @@ elseif(APPLE)
             "${CMAKE_CURRENT_SOURCE_DIR}/adblink.icns"
             "$<TARGET_FILE_DIR:adblink>/../Resources/adblink.icns"
     )
-    add_custom_command(TARGET adblink POST_BUILD
-        COMMAND codesign --force --deep --sign - "$<TARGET_FILE_DIR:adblink>/../.."
-    )
 elseif(UNIX AND NOT APPLE)
     add_custom_command(TARGET adblink POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -414,7 +410,6 @@ else()
     if(APPLE)
         set(CPACK_GENERATOR "DragNDrop")
         set(CPACK_BINARY_TZ OFF)
-        set(CPACK_PRE_BUILD_SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/packaging/codesign-macos.cmake")
     elseif(UNIX)
         set(CPACK_GENERATOR "TGZ")
         set(CPACK_BINARY_TZ OFF)
