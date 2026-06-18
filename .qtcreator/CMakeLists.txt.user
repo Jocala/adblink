@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 19.0.2, 2026-06-09T14:21:57. -->
+<!-- Written by QtCreator 19.0.2, 2026-06-18T10:47:58. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -71,7 +71,20 @@
     <value type="bool" key="AutoTest.Framework.QtTest">true</value>
    </valuemap>
    <value type="bool" key="AutoTest.ApplyFilter">false</value>
-   <valuemap type="QVariantMap" key="AutoTest.CheckStates"/>
+   <valuemap type="QVariantMap" key="AutoTest.CheckStates">
+    <value type="Qt::CheckState" key="1@/Users/jeff/source/adblink/tests/tst_database.cpp:cleanupTestCase">Unchecked</value>
+    <value type="Qt::CheckState" key="1@/Users/jeff/source/adblink/tests/tst_database.cpp:initTestCase">Unchecked</value>
+    <value type="Qt::CheckState" key="1@/Users/jeff/source/adblink/tests/tst_devicerecorddialog.cpp:cleanup">Unchecked</value>
+    <value type="Qt::CheckState" key="1@/Users/jeff/source/adblink/tests/tst_devicerecorddialog.cpp:init">Unchecked</value>
+    <value type="Qt::CheckState" key="1@/Users/jeff/source/adblink/tests/tst_getadbpath.cpp:initTestCase">Unchecked</value>
+    <value type="Qt::CheckState" key="1@/Users/jeff/source/adblink/tests/tst_jsonconfig.cpp:cleanupTestCase">Unchecked</value>
+    <value type="Qt::CheckState" key="1@/Users/jeff/source/adblink/tests/tst_jsonconfig.cpp:initTestCase">Unchecked</value>
+    <value type="Qt::CheckState" key="1@/Users/jeff/source/adblink/tests/tst_logfile.cpp:initTestCase">Unchecked</value>
+    <value type="Qt::CheckState" key="1@/Users/jeff/source/adblink/tests/tst_logviewerdialog.cpp:cleanup">Unchecked</value>
+    <value type="Qt::CheckState" key="1@/Users/jeff/source/adblink/tests/tst_logviewerdialog.cpp:init">Unchecked</value>
+    <value type="Qt::CheckState" key="1@/Users/jeff/source/adblink/tests/tst_logviewerdialog.cpp:initTestCase">Unchecked</value>
+    <value type="Qt::CheckState" key="1@/Users/jeff/source/adblink/tests/tst_stringutils.cpp:validateIP_data">Unchecked</value>
+   </valuemap>
    <valuelist type="QVariantList" key="AutoTest.PathFilters"/>
    <value type="int" key="AutoTest.RunAfterBuild">0</value>
    <value type="bool" key="AutoTest.UseGlobal">true</value>
