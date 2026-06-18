@@ -36,6 +36,7 @@ if(APPLE)
     set(OPENSSL_ROOT_DIR "/Users/jeff/openssl/openssl-universal" CACHE PATH "")
     set(OPENSSL_USE_STATIC_LIBS ON CACHE BOOL "")
     set(CMAKE_OSX_ARCHITECTURES "x86_64;arm64" CACHE STRING "")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "14.0" CACHE STRING "")
 endif()
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Sql Network Concurrent)
@@ -283,6 +284,7 @@ elseif(APPLE)
         MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}"
         MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
         MACOSX_BUNDLE_ICON_FILE "adblink.icns"
+        MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/packaging/Info.plist.in"
     )
 
     qt_import_plugins(adblink

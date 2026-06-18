@@ -18,6 +18,7 @@ CMakeCache.txt
 CMakeFiles/
 CMakeScripts/
 *.cmake
+!packaging/sign-after-install.cmake
 compile_commands.json
 
 # ==================== Qt Creator / IDE Files ====================
