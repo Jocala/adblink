@@ -78,6 +78,10 @@ void adbprefDialog::setupUiManual()
     startViewCheckBox->setObjectName("startview");
     mainLayout->addWidget(startViewCheckBox);
 
+    bypassDisconnectCheckBox = new QCheckBox("Bypass disconnect prompts", this);
+    bypassDisconnectCheckBox->setObjectName("bypassdisconnect");
+    mainLayout->addWidget(bypassDisconnectCheckBox);
+
     defaultWindowCombo = new QComboBox(this); // Changed to QComboBox
     defaultWindowCombo->setObjectName("defaultwindow");
     defaultWindowCombo->addItems({"Small", "Medium", "Large"});
@@ -350,6 +354,7 @@ QString adbprefDialog::localadb() const { return localAdbEdit->text(); }
 bool adbprefDialog::versioncheck() const { return versionCheckBox->isChecked(); }
 bool adbprefDialog::scrcpyargs() const { return scrcpyArgsCheckBox->isChecked(); }
 bool adbprefDialog::startview() const { return startViewCheckBox->isChecked(); }
+bool adbprefDialog::bypassdisconnect() const { return bypassDisconnectCheckBox->isChecked(); }
 int adbprefDialog::defaultwindow() const { return defaultWindowCombo->currentIndex(); }
 int adbprefDialog::linterm() const { return linTermCombo->currentIndex(); }
 int adbprefDialog::macterm() const { return macTermCombo->currentIndex(); }
@@ -369,6 +374,7 @@ void adbprefDialog::setlocaladb(const QString &path) { localAdbEdit->setText(pat
 void adbprefDialog::setversioncheck(bool val) { versionCheckBox->setChecked(val); }
 void adbprefDialog::setscrcpyargs(bool val) { scrcpyArgsCheckBox->setChecked(val); }
 void adbprefDialog::setstartview(bool val) { startViewCheckBox->setChecked(val); }
+void adbprefDialog::setbypassdisconnect(bool val) { bypassDisconnectCheckBox->setChecked(val); }
 void adbprefDialog::setdefaultwindow(int index) { defaultWindowCombo->setCurrentIndex(index); }
 void adbprefDialog::setlinterm(int index) { linTermCombo->setCurrentIndex(index); }
 void adbprefDialog::setmacterm(int index) { macTermCombo->setCurrentIndex(index); }

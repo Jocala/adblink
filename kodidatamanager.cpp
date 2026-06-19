@@ -187,6 +187,7 @@ void KodiDataManager::createJsonConfig(const QString &configPath)
         {"checkversion", true},
         {"scrcpy", true},
         {"startview", true},
+        {"bypassdisconnect", false},
         {"defaultwindow", true},
         {"dropdown", QStringLiteral("0")},
         {"fmfont", 0},

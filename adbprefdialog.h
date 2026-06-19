@@ -26,6 +26,7 @@ public:
     bool versioncheck() const;
     bool scrcpyargs() const;
     bool startview() const;
+    bool bypassdisconnect() const;
     int defaultwindow() const; // Changed from bool to int
     int linterm() const;
     int macterm() const;
@@ -43,6 +44,7 @@ public:
     void setversioncheck(bool val);
     void setscrcpyargs(bool val);
     void setstartview(bool val);
+    void setbypassdisconnect(bool val);
     void setdefaultwindow(int index);
 
    void setfmfont(int index);
@@ -70,6 +72,7 @@ private:
     QCheckBox *versionCheckBox;
     QCheckBox *scrcpyArgsCheckBox;
     QCheckBox *startViewCheckBox;
+    QCheckBox *bypassDisconnectCheckBox;
     QComboBox *defaultWindowCombo;
     QComboBox *lgfontCombo;
     QComboBox *mdfontCombo;

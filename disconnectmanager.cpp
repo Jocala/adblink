@@ -12,7 +12,7 @@ DisconnectManager::DisconnectManager(QObject *parent)
 {
 }
 
-void DisconnectManager::disconnectDevice(QWidget *parentWidget, QTableWidget *deviceTable)
+void DisconnectManager::disconnectDevice(QWidget *parentWidget, QTableWidget *deviceTable, bool bypassPrompt)
 {
     int selectedRow = deviceTable->currentRow();
 
@@ -50,13 +50,15 @@ void DisconnectManager::disconnectDevice(QWidget *parentWidget, QTableWidget *de
 
     QString daddr = deviceTable->item(selectedRow, 1)->text();
 
-    QMessageBox msgBox(parentWidget);
-    msgBox.setWindowTitle("Disconnect");
-    msgBox.setText("Disconnect device?");
-    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    msgBox.setWindowModality(Qt::WindowModal);
-    if (msgBox.exec() == QMessageBox::No)
-        return;
+    if (!bypassPrompt) {
+        QMessageBox msgBox(parentWidget);
+        msgBox.setWindowTitle("Disconnect");
+        msgBox.setText("Disconnect device?");
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setWindowModality(Qt::WindowModal);
+        if (msgBox.exec() == QMessageBox::No)
+            return;
+    }
 
     QString cstring = getadbpath() + " disconnect " + daddr;
     QString command = getadbOutput(cstring);

@@ -13,7 +13,7 @@ class DisconnectManager : public QObject
 public:
     explicit DisconnectManager(QObject *parent = nullptr);
 
-    void disconnectDevice(QWidget *parentWidget, QTableWidget *deviceTable);
+    void disconnectDevice(QWidget *parentWidget, QTableWidget *deviceTable, bool bypassPrompt = false);
 };
 
 #endif // DISCONNECTMANAGER_H
