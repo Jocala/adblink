@@ -34,7 +34,7 @@ ssh "$DEBIAN" "cd $ADBLINK_REPO && git stash && git pull && chmod +x *.sh && ./b
 
 echo ""
 echo "--- Building Windows ---"
-ssh "$WINDOWS" "cd C:\\source\\adblink && git pull && git config core.filemode false"
+ssh "$WINDOWS" "cd C:\\source\\adblink; git pull; git config core.filemode false"
 ssh "$WINDOWS" "powershell -ExecutionPolicy Bypass -File C:\\source\\adblink\\build-adblink-windows.ps1"
 ssh "$WINDOWS" "powershell -ExecutionPolicy Bypass -File C:\\source\\adblink\\package-adblink-windows.ps1"
 
