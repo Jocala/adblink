@@ -37,7 +37,7 @@ echo "=== Creating GitHub release ${TAG} ==="
 
 echo "Pushing source to GitHub..."
 git push github main
-git push github --tags
+git push github --force --tags
 
 echo "Gathering installer assets..."
 mkdir -p "$TMPDIR"
@@ -50,6 +50,9 @@ fi
 echo "Copying Linux and Windows packages from Debian..."
 scp "$DEBIAN:$DOWNLOADS/$TGZ" "$TMPDIR/$TGZ"
 scp "$DEBIAN:$DOWNLOADS/$EXE" "$TMPDIR/$EXE"
+
+echo "Deleting existing release (if any)..."
+"$GH" release delete "$TAG" --yes 2>/dev/null || true
 
 echo "Creating release..."
 "$GH" release create "$TAG" \
