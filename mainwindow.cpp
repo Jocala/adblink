@@ -424,10 +424,22 @@
           m_trackDevicesProcess->waitForFinished(1000);
       }
 
-      QString cstring = getadbpath() + " kill-server";
-     QString command=getadbOutput(cstring);
- //    logfile(command);
-  //   logfile("server stopped");
+      {
+          QProcess killServer;
+          killServer.startCommand(getadbpath() + QStringLiteral(" kill-server"));
+          if (!killServer.waitForFinished(3000)) {
+              killServer.kill();
+              killServer.waitForFinished(1000);
+          }
+      }
+
+#if defined(Q_OS_WIN)
+      QProcess::execute(QStringLiteral("taskkill"),
+                        {QStringLiteral("/f"), QStringLiteral("/im"), QStringLiteral("adb.exe")});
+#else
+      QProcess::execute(QStringLiteral("pkill"),
+                        {QStringLiteral("-9"), QStringLiteral("adb")});
+#endif
 
 
        QDir dir(scriptdir);
