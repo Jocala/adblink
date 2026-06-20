@@ -32,7 +32,7 @@ bool PreferencesManager::exec(QWidget *parent)
     bool checkversion = doc.object()["checkversion"].toBool();
     bool scrcpy = doc.object()["scrcpy"].toBool();
     bool startview = doc.object()["startview"].toBool();
-    bool bypassdisconnect = doc.object()["bypassdisconnect"].toBool();
+    bool bypassdisconnect = obj.contains("bypassdisconnect") ? obj["bypassdisconnect"].toBool() : false;
     int defaultwindow = doc.object()["defaultwindow"].toInt();
 
     int fmfont = doc.object()["fmfont"].toInt();

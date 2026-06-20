@@ -774,7 +774,8 @@
         QFile file(databasedir + "adblink.json");
         (void)file.open(QIODevice::ReadOnly);
         QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
-        bool bypassPrompt = doc.object()["bypassdisconnect"].toBool();
+        QJsonObject root = doc.object();
+        bool bypassPrompt = root.contains("bypassdisconnect") ? root["bypassdisconnect"].toBool() : false;
         file.close();
 
         m_disconnectManager->disconnectDevice(this, deviceTable, bypassPrompt);

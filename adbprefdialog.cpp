@@ -80,6 +80,7 @@ void adbprefDialog::setupUiManual()
 
     bypassDisconnectCheckBox = new QCheckBox("Bypass disconnect prompts", this);
     bypassDisconnectCheckBox->setObjectName("bypassdisconnect");
+    bypassDisconnectCheckBox->setChecked(false);
     mainLayout->addWidget(bypassDisconnectCheckBox);
 
     defaultWindowCombo = new QComboBox(this); // Changed to QComboBox
