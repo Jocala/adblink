@@ -291,14 +291,21 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
                 mcpath.chop(6);
             else
                 valid = false;
-            if (valid && mcpath.startsWith("/sdcard/")) {
-                QString expectedBase = QStringLiteral("/sdcard/")
-                    + (scoped ? QStringLiteral("kodi_data/") : QStringLiteral("Android/data/"))
-                    + device.xbmcpackage;
-                if (mcpath != expectedBase)
+            if (valid) {
+                QString suffix = QStringLiteral("/") + device.xbmcpackage;
+                if (mcpath.endsWith(suffix)) {
+                    QString structure = mcpath.left(mcpath.length() - suffix.length());
+                    bool isScopedStruc = structure.endsWith(QStringLiteral("/kodi_data"));
+                    bool isLegacyStruc = structure.endsWith(QStringLiteral("/Android/data"));
+                    if (mcpath.startsWith("/sdcard/")) {
+                        if ((scoped && !isScopedStruc) || (!scoped && !isLegacyStruc))
+                            valid = false;
+                    } else if (!isLegacyStruc) {
+                        valid = false;
+                    }
+                } else {
                     valid = false;
-            } else if (valid && !mcpath.contains(device.xbmcpackage)) {
-                valid = false;
+                }
             }
             if (!valid)
                 mcpath.clear();
