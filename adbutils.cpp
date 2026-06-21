@@ -117,7 +117,17 @@ QString resolveKodiPath(const QString &adbPrefix, const QString &dataRoot,
         cstring = adbPrefix + " shell cat /sdcard/xbmc_env.properties";
         result = ::getadbOutput(cstring);
         result.replace(QRegularExpression("[\r\n]"), "");
-        return result.mid(result.indexOf("xbmc.data=") + 10) + "/.kodi";
+
+        const QString prefix("xbmc.data=");
+        int idx = result.indexOf(prefix);
+        if (idx >= 0) {
+            QString path = result.mid(idx + prefix.length()).trimmed();
+            if (!path.isEmpty()) {
+                if (path.endsWith("/.kodi"))
+                    return path;
+                return path + "/.kodi";
+            }
+        }
     }
 
     if (scoped)
