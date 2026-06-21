@@ -27,6 +27,7 @@ public:
     bool scrcpyargs() const;
     bool startview() const;
     bool bypassdisconnect() const;
+    bool diagnostic() const;
     int defaultwindow() const; // Changed from bool to int
     int linterm() const;
     int macterm() const;
@@ -45,6 +46,7 @@ public:
     void setscrcpyargs(bool val);
     void setstartview(bool val);
     void setbypassdisconnect(bool val);
+    void setdiagnostic(bool val);
     void setdefaultwindow(int index);
 
    void setfmfont(int index);
@@ -73,6 +75,7 @@ private:
     QCheckBox *scrcpyArgsCheckBox;
     QCheckBox *startViewCheckBox;
     QCheckBox *bypassDisconnectCheckBox;
+    QCheckBox *diagnosticCheckBox;
     QComboBox *defaultWindowCombo;
     QComboBox *lgfontCombo;
     QComboBox *mdfontCombo;

@@ -1278,6 +1278,17 @@
     logfile(scoped);
     logfile("------------------------");
 
+    {
+        QFile diagFile(jsonstring);
+        if (diagFile.open(QIODevice::ReadOnly)) {
+            QJsonDocument diagDoc = QJsonDocument::fromJson(diagFile.readAll());
+            diagFile.close();
+            if (diagDoc.object().value("diagnostic").toBool())
+                ::logDeviceDiagnostics(getadb(), device.daddr,
+                                       device.xbmcpackage, device.data_root);
+        }
+    }
+
     QStringList list;
     list << archi << android << adevice << bdevice << manufact << battinf << scoped;
 

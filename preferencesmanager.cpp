@@ -33,6 +33,7 @@ bool PreferencesManager::exec(QWidget *parent)
     bool scrcpy = doc.object()["scrcpy"].toBool();
     bool startview = doc.object()["startview"].toBool();
     bool bypassdisconnect = obj.contains("bypassdisconnect") ? obj["bypassdisconnect"].toBool() : false;
+    bool diagnostic = obj.contains("diagnostic") ? obj["diagnostic"].toBool() : false;
     int defaultwindow = doc.object()["defaultwindow"].toInt();
 
     int fmfont = doc.object()["fmfont"].toInt();
@@ -46,6 +47,7 @@ bool PreferencesManager::exec(QWidget *parent)
     dialog.setscrcpyargs(scrcpy);
     dialog.setstartview(startview);
     dialog.setbypassdisconnect(bypassdisconnect);
+    dialog.setdiagnostic(diagnostic);
     dialog.setdefaultwindow(defaultwindow);
     dialog.setlinterm(mcheck);
     dialog.setmacterm(mcheck);
@@ -72,6 +74,7 @@ bool PreferencesManager::exec(QWidget *parent)
     obj["scrcpy"] = dialog.scrcpyargs();
     obj["startview"] = dialog.startview();
     obj["bypassdisconnect"] = dialog.bypassdisconnect();
+    obj["diagnostic"] = dialog.diagnostic();
     obj["defaultwindow"] = dialog.defaultwindow();
     obj["download"] = dialog.downloaddir();
     obj["install"] = dialog.installdir();

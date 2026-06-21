@@ -260,6 +260,108 @@ bool isScopedStorage(const QString &adbPrefix)
     return (apiLevel >= 30) || (apiLevel == 29 && restrictedAccess);
 }
 
+void logDeviceDiagnostics(const QString &adbPrefix, const QString &daddr,
+                          const QString &xbmcpackage, const QString &dataRoot)
+{
+    logfile("--- Device diagnostics for " + daddr + " ---");
+
+    QString packageCheck = adbPrefix + " shell pm list packages";
+    QString pkgResult = ::getadbOutput(packageCheck);
+    logfile("Kodi package (" + xbmcpackage + "): "
+            + (pkgResult.contains(xbmcpackage) ? "installed" : "not installed"));
+
+    QString envCheck = adbPrefix + " shell ls /sdcard/xbmc_env.properties";
+    QString envResult = ::getadbOutput(envCheck);
+    if (!envResult.contains("No such file")) {
+        logfile("xbmc_env.properties: found");
+        QString envCat = adbPrefix + " shell cat /sdcard/xbmc_env.properties";
+        QString envContent = ::getadbOutput(envCat);
+        envContent.replace(QRegularExpression("[\r\n]"), "");
+        logfile("xbmc_env.properties content: " + envContent);
+
+        const QString prefix("xbmc.data=");
+        int idx = envContent.indexOf(prefix);
+        if (idx >= 0) {
+            QString envPath = envContent.mid(idx + prefix.length()).trimmed();
+            logfile("xbmc_env.properties parsed path: " + envPath);
+            int startIndex = envContent.indexOf("=") + 1;
+            int endIndex = envContent.indexOf(".kodi") + 5;
+            QString oldMcpath = envContent.mid(startIndex, endIndex - startIndex);
+            logfile("xbmc_env.properties old-style mcpath: \"" + oldMcpath + "\"");
+        }
+    } else {
+        logfile("xbmc_env.properties: not found");
+    }
+
+    QString apiOutput = scopedAdbOutput(adbPrefix, "shell getprop ro.build.version.sdk");
+    bool ok;
+    int apiLevel = apiOutput.toInt(&ok);
+    if (!ok || apiOutput.isEmpty())
+        logfile("Scoped: failed to read API level");
+    else
+        logfile("Scoped: API level = " + QString::number(apiLevel));
+
+    bool restrictedAccess = false;
+    QString touch1 = scopedAdbOutput(adbPrefix, "shell touch /sdcard/Android/data/" + xbmcpackage + "/files/test.txt");
+    if (touch1.isEmpty()) {
+        logfile("Scoped: touch /sdcard/Android/data/" + xbmcpackage + "/files/test.txt -> allowed");
+        scopedAdbOutput(adbPrefix, "shell rm /sdcard/Android/data/" + xbmcpackage + "/files/test.txt");
+    } else {
+        restrictedAccess = touch1.contains("Permission denied", Qt::CaseInsensitive);
+        logfile("Scoped: touch /sdcard/Android/data/... -> "
+                + QString(restrictedAccess ? "denied" : "error: " + touch1.trimmed()));
+    }
+
+    if (!restrictedAccess) {
+        QString touch2 = scopedAdbOutput(adbPrefix, "shell touch /sdcard/DCIM/test.txt");
+        if (touch2.isEmpty()) {
+            logfile("Scoped: touch /sdcard/DCIM/test.txt -> allowed");
+            scopedAdbOutput(adbPrefix, "shell rm /sdcard/DCIM/test.txt");
+        } else {
+            restrictedAccess = touch2.contains("Permission denied", Qt::CaseInsensitive);
+            logfile("Scoped: touch /sdcard/DCIM/test.txt -> "
+                    + QString(restrictedAccess ? "denied" : "error: " + touch2.trimmed()));
+        }
+    }
+
+    QString lsOutput = scopedAdbOutput(adbPrefix, "shell ls -ld /sdcard/");
+    if (lsOutput.isEmpty()) {
+        logfile("Scoped: /sdcard/ permissions: unknown");
+    } else {
+        bool permissiveFs = lsOutput.contains("rwxrwxrwx");
+        logfile("Scoped: /sdcard/ permissions: " + lsOutput.trimmed()
+                + (permissiveFs ? " (permissive)" : ""));
+        if (permissiveFs)
+            restrictedAccess = false;
+    }
+
+    bool scopedVerdict = (apiLevel >= 30) || (apiLevel == 29 && restrictedAccess);
+    logfile("Scoped: verdict = " + QString(scopedVerdict ? "true" : "false")
+            + " (api=" + QString::number(apiLevel)
+            + ", restricted=" + (restrictedAccess ? "yes" : "no") + ")");
+
+    QString runningCheck = adbPrefix + " shell ps | grep " + xbmcpackage;
+    QString runningResult = ::getadbOutput(runningCheck);
+    logfile("Kodi running: " + QString(runningResult.contains(xbmcpackage) ? "yes" : "no"));
+
+    QString scopedPath = dataRoot + "kodi_data/" + xbmcpackage + "/files/.kodi";
+    QString legacyPath = dataRoot + "Android/data/" + xbmcpackage + "/files/.kodi";
+    logfile("Scoped path exists: " + scopedPath);
+    {
+        QString checkScoped = adbPrefix + " shell ls " + scopedPath;
+        QString note = ::getadbOutput(checkScoped).contains("No such file") ? "not found" : "found";
+        logfile(QStringLiteral("  -> ") + note);
+    }
+    logfile("Legacy path exists: " + legacyPath);
+    {
+        QString checkLegacy = adbPrefix + " shell ls " + legacyPath;
+        QString note = ::getadbOutput(checkLegacy).contains("No such file") ? "not found" : "found";
+        logfile(QStringLiteral("  -> ") + note);
+    }
+
+    logfile("--- End device diagnostics ---");
+}
+
 void removeMetadataFiles(const QString &dirPath)
 {
     QDirIterator it(dirPath, QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot,

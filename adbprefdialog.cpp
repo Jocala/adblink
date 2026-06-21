@@ -83,6 +83,11 @@ void adbprefDialog::setupUiManual()
     bypassDisconnectCheckBox->setChecked(false);
     mainLayout->addWidget(bypassDisconnectCheckBox);
 
+    diagnosticCheckBox = new QCheckBox("Enable diagnostic logging (restart required)", this);
+    diagnosticCheckBox->setObjectName("diagnostic");
+    diagnosticCheckBox->setChecked(false);
+    mainLayout->addWidget(diagnosticCheckBox);
+
     defaultWindowCombo = new QComboBox(this); // Changed to QComboBox
     defaultWindowCombo->setObjectName("defaultwindow");
     defaultWindowCombo->addItems({"Small", "Medium", "Large"});
@@ -356,6 +361,7 @@ bool adbprefDialog::versioncheck() const { return versionCheckBox->isChecked(); 
 bool adbprefDialog::scrcpyargs() const { return scrcpyArgsCheckBox->isChecked(); }
 bool adbprefDialog::startview() const { return startViewCheckBox->isChecked(); }
 bool adbprefDialog::bypassdisconnect() const { return bypassDisconnectCheckBox->isChecked(); }
+bool adbprefDialog::diagnostic() const { return diagnosticCheckBox->isChecked(); }
 int adbprefDialog::defaultwindow() const { return defaultWindowCombo->currentIndex(); }
 int adbprefDialog::linterm() const { return linTermCombo->currentIndex(); }
 int adbprefDialog::macterm() const { return macTermCombo->currentIndex(); }
@@ -376,6 +382,7 @@ void adbprefDialog::setversioncheck(bool val) { versionCheckBox->setChecked(val)
 void adbprefDialog::setscrcpyargs(bool val) { scrcpyArgsCheckBox->setChecked(val); }
 void adbprefDialog::setstartview(bool val) { startViewCheckBox->setChecked(val); }
 void adbprefDialog::setbypassdisconnect(bool val) { bypassDisconnectCheckBox->setChecked(val); }
+void adbprefDialog::setdiagnostic(bool val) { diagnosticCheckBox->setChecked(val); }
 void adbprefDialog::setdefaultwindow(int index) { defaultWindowCombo->setCurrentIndex(index); }
 void adbprefDialog::setlinterm(int index) { linTermCombo->setCurrentIndex(index); }
 void adbprefDialog::setmacterm(int index) { macTermCombo->setCurrentIndex(index); }

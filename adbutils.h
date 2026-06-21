@@ -37,6 +37,10 @@ bool isPackageInstalled(const QString &adbPrefix, const QString &package);
 // Check if scoped storage restrictions are in effect on the device
 bool isScopedStorage(const QString &adbPrefix);
 
+// Log extended device diagnostics for troubleshooting
+void logDeviceDiagnostics(const QString &adbPrefix, const QString &daddr,
+                          const QString &xbmcpackage, const QString &dataRoot);
+
 // Remove editor backup/swap files and Apple metadata artifacts
 // from the given directory tree. Removes *~, *.swp, *.swo, #*#, .DS_Store,
 // ._* (AppleDouble resource forks), __MACOSX/, .AppleDouble/, .localized.
