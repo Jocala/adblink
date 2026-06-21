@@ -6,6 +6,7 @@
 #include "logfile.h"
 
 #include <QMessageBox>
+#include <QRegularExpression>
 #include <QWidget>
 
 KodiSetupManager::KodiSetupManager(QObject *parent)
@@ -18,11 +19,10 @@ void KodiSetupManager::createKodiData(QWidget *parentWidget,
                                        const QString &adbPrefix,
                                        RunLongProcessCallback runLongProcess)
 {
+    Q_UNUSED(runLongProcess);
+
     QString cstring;
     QString command;
-    QString mcpath;
-
-    mcpath = "/sdcard/kodi_data/" + device.xbmcpackage;
 
     cstring = adbPrefix + " shell ps | grep " + device.xbmcpackage;
     command = getadbOutput(cstring);
@@ -44,21 +44,37 @@ void KodiSetupManager::createKodiData(QWidget *parentWidget,
         }
     }
 
-    cstring = adbPrefix + " shell ls " + mcpath;
-    command = getadbOutput(cstring);
+    QString mcpath = QStringLiteral("/sdcard/kodi_data/") + device.xbmcpackage;
+    QString expectedEnv = QStringLiteral("xbmc.data=") + mcpath + QStringLiteral("/files");
+    QString kodiDir = mcpath + QStringLiteral("/files/.kodi");
 
-    if (!command.contains("No such file or directory")) {
+    // Read current state
+    cstring = adbPrefix + " shell ls " + kodiDir;
+    QString dirResult = getadbOutput(cstring);
+    bool dirExists = !dirResult.contains("No such file or directory");
+
+    cstring = adbPrefix + " shell cat /sdcard/xbmc_env.properties";
+    QString envContent = getadbOutput(cstring);
+    envContent.replace(QRegularExpression("[\r\n]"), "");
+    bool envCorrect = !envContent.isEmpty() && envContent == expectedEnv;
+
+    // Determine what needs fixing
+    bool needDir = !dirExists;
+    bool needEnv = !envCorrect;
+
+    if (!needDir && !needEnv) {
         QMessageBox msgBox(parentWidget);
-        msgBox.setWindowTitle(QStringLiteral("Create Kodi Data"));
-        msgBox.setText(QStringLiteral("This will overwrite /sdcard/kodi_data/\nProceed?"));
-        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setIcon(QMessageBox::Information);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("Kodi data area is already set up correctly on %1").arg(device.daddr));
+        msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setWindowModality(Qt::WindowModal);
-        QMessageBox::StandardButton reply = static_cast<QMessageBox::StandardButton>(msgBox.exec());
-        if (reply == QMessageBox::No)
-            return;
+        msgBox.exec();
+        logfile(device.daddr + ": Kodi data area already OK");
+        return;
     }
 
-    {
+    if (needDir) {
         cstring = adbPrefix + " shell getprop ro.build.version.release";
         QString android = getadbOutput(cstring);
         if (android.toInt() >= 11) {
@@ -75,23 +91,13 @@ void KodiSetupManager::createKodiData(QWidget *parentWidget,
                 }
             }
         }
-    }
 
-    cstring = adbPrefix + " shell rm -r " + mcpath;
-    command = runLongProcess(cstring, "Preparing target");
-    logfile(command);
-
-    cstring = adbPrefix + " shell ls " + mcpath;
-    command = getadbOutput(cstring);
-
-    if (command.contains("No such file or directory")) {
-        cstring = adbPrefix + " shell mkdir -p " + mcpath + "/files/.kodi";
+        cstring = adbPrefix + " shell mkdir -p " + kodiDir;
         command = getadbOutput(cstring);
         logfile(command);
-        QString errorp = command;
-        cstring = adbPrefix + " shell ls " + mcpath + "/files/.kodi";
-        command = getadbOutput(cstring);
 
+        cstring = adbPrefix + " shell ls " + kodiDir;
+        command = getadbOutput(cstring);
         if (command.contains("No such file or directory")) {
             QMessageBox msgBox(parentWidget);
             msgBox.setIcon(QMessageBox::Critical);
@@ -100,20 +106,27 @@ void KodiSetupManager::createKodiData(QWidget *parentWidget,
             msgBox.setStandardButtons(QMessageBox::Ok);
             msgBox.setWindowModality(Qt::WindowModal);
             msgBox.exec();
-            logfile("Restore error:" + errorp);
+            logfile("Kodi data folder creation failed");
             return;
         }
     }
 
-    cstring = adbPrefix + " shell echo xbmc.data=" + mcpath + "/files > /sdcard/xbmc_env.properties";
-    command = getadbOutput(cstring);
-    logfile("create /sdcard/xbmc_env.properties");
-    logfile(command);
+    if (needEnv) {
+        cstring = adbPrefix + " shell echo " + expectedEnv + " > /sdcard/xbmc_env.properties";
+        command = getadbOutput(cstring);
+        logfile("Updated /sdcard/xbmc_env.properties");
+        logfile(command);
+    }
+
+    QStringList parts;
+    if (needDir) parts << QStringLiteral("directory created");
+    if (needEnv) parts << QStringLiteral("env file written");
+    QString detail = parts.join(QStringLiteral(", "));
 
     QMessageBox msgBox(parentWidget);
     msgBox.setIcon(QMessageBox::Information);
     msgBox.setWindowTitle(QString());
-    msgBox.setText(QStringLiteral("Kodi data area created"));
+    msgBox.setText(QStringLiteral("Kodi data area created: %1").arg(detail));
     msgBox.setStandardButtons(QMessageBox::Ok);
     msgBox.setWindowModality(Qt::WindowModal);
     msgBox.exec();

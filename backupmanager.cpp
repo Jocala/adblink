@@ -8,7 +8,10 @@
 #include "logfile.h"
 
 #include <QDir>
+#include <QFile>
 #include <QFileDialog>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QMessageBox>
 #include <QProcess>
 #include <QRegularExpression>
@@ -50,10 +53,13 @@ QString BackupManager::resolveKodiPath(AdbDevice *device, bool scoped, const QSt
         QString catCmd = QStringLiteral("cat /sdcard/xbmc_env.properties");
         QString envContent = device->runShell(catCmd);
         envContent.replace(QRegularExpression(QStringLiteral("[\r\n]")), QString());
-        int startIndex = envContent.indexOf(QChar('=')) + 1;
-        int endIndex = envContent.indexOf(QStringLiteral(".kodi")) + 5;
-        if (startIndex > 0 && endIndex > startIndex)
-            return envContent.mid(startIndex, endIndex - startIndex);
+        const QString envPrefix("xbmc.data=");
+        int idx = envContent.indexOf(envPrefix);
+        if (idx >= 0) {
+            QString envPath = envContent.mid(idx + envPrefix.length()).trimmed();
+            if (envPath.startsWith("/"))
+                return envPath + QStringLiteral("/.kodi");
+        }
     }
 
     return kodiDataRoot(dataRoot, scoped, package) + QStringLiteral("/files/.kodi");
@@ -98,6 +104,18 @@ bool BackupManager::backupDevice(QWidget *parent, const DeviceRecord &device,
 {
     ++m_activeBackups;
     logfile("Starting backup for " + device.daddr);
+
+    bool diag = false;
+    {
+        QFile f(jsonstring);
+        if (f.open(QIODevice::ReadOnly)) {
+            diag = QJsonDocument::fromJson(f.readAll()).object().value("diagnostic").toBool();
+            f.close();
+        }
+    }
+    if (diag)
+        ::logDeviceDiagnostics(getadbpath() + " -s " + device.daddr, device.daddr,
+                               device.xbmcpackage, device.data_root);
 
     QString cstring = getadbpath() + " -s " + device.daddr + " shell /data/local/tmp/adblink/busybox find /storage -type d -maxdepth 1";
     QString s = getadbOutput(cstring);
@@ -145,6 +163,12 @@ bool BackupManager::backupDevice(QWidget *parent, const DeviceRecord &device,
         mcpath = n_data_root + "Android/data/" + device.xbmcpackage;
     }
 
+    if (diag) {
+        logfile(device.daddr + ": backup n_data_root=" + n_data_root
+                + " scoped=" + (scoped ? "true" : "false")
+                + " mcpath=" + mcpath);
+    }
+
     cstring = adbPrefix + "shell ls " + mcpath + "/files/.kodi";
     if (!getreturncode(cstring)) {
         QMessageBox msgBox(parent);
@@ -188,6 +212,8 @@ bool BackupManager::backupDevice(QWidget *parent, const DeviceRecord &device,
         dir.replace("/", "\\");
 
     cstring = adbPrefix + "pull " + mcpath + "files/.kodi/. " + '"' + dir + '"';
+    if (diag)
+        logfile(device.daddr + ": backup command: " + cstring);
     QString command = runLongProcess(cstring, "backup running for " + device.daddr);
 
     removeMetadataFiles(dir);
@@ -230,6 +256,18 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
     ++m_activeRestores;
     logfile("Starting restore for " + device.daddr);
 
+    bool diag = false;
+    {
+        QFile f(jsonstring);
+        if (f.open(QIODevice::ReadOnly)) {
+            diag = QJsonDocument::fromJson(f.readAll()).object().value("diagnostic").toBool();
+            f.close();
+        }
+    }
+    if (diag)
+        ::logDeviceDiagnostics(getadbpath() + " -s " + device.daddr, device.daddr,
+                               device.xbmcpackage, device.data_root);
+
     QString cstring;
     QString command;
     QString n_data_root;
@@ -243,10 +281,34 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
         cstring = getadbpath() + " -s " + device.daddr + " shell cat /sdcard/xbmc_env.properties";
         command = getadbOutput(cstring);
         command.replace(QRegularExpression("[\r\n]"), "");
-        int startIndex = command.indexOf("=") + 1;
-        int endIndex = command.indexOf(".kodi") + 5;
-        mcpath = command.mid(startIndex, endIndex - startIndex);
-        xbmc_env = true;
+        mcpath.clear();
+        const QString envPrefix("xbmc.data=");
+        int idx = command.indexOf(envPrefix);
+        if (idx >= 0) {
+            mcpath = command.mid(idx + envPrefix.length()).trimmed();
+            bool valid = mcpath.startsWith("/");
+            if (valid && mcpath.endsWith("/files"))
+                mcpath.chop(6);
+            else
+                valid = false;
+            if (valid && mcpath.startsWith("/sdcard/")) {
+                QString expectedBase = QStringLiteral("/sdcard/")
+                    + (scoped ? QStringLiteral("kodi_data/") : QStringLiteral("Android/data/"))
+                    + device.xbmcpackage;
+                if (mcpath != expectedBase)
+                    valid = false;
+            } else if (valid && !mcpath.contains(device.xbmcpackage)) {
+                valid = false;
+            }
+            if (!valid)
+                mcpath.clear();
+        }
+        if (!mcpath.isEmpty())
+            xbmc_env = true;
+        if (diag) {
+            logfile(device.daddr + ": xbmc_env.properties content: " + command);
+            logfile(device.daddr + ": env parsed mcpath: \"" + mcpath + "\"");
+        }
     }
 
     cstring = getadbpath() + " -s " + device.daddr + " shell ps | grep " + device.xbmcpackage;
@@ -311,6 +373,11 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
         if (!n_data_root.endsWith("/"))
             n_data_root.append("/");
 
+        if (diag) {
+            logfile(device.daddr + ": restore n_data_root=" + n_data_root
+                    + " scoped=" + (scoped ? "true" : "false"));
+        }
+
         if (scoped) {
             kbase = n_data_root + "kodi_data/";
             mcpath = kbase + device.xbmcpackage;
@@ -333,6 +400,8 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
             mcpath = n_data_root + "Android/data/" + device.xbmcpackage;
             kbase = n_data_root + "Android/data/";
         }
+        if (diag)
+            logfile(device.daddr + ": restore mcpath=" + mcpath);
     }
 
     QString backup;
@@ -416,6 +485,8 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
     dir = dir + "/.";
 
     cstring = adbPrefix + "push \"" + dir + "\" " + mcpath + "/files/.kodi/";
+    if (diag)
+        logfile(device.daddr + ": restore command: " + cstring);
     command = runLongProcess(cstring, "restore running for " + device.daddr);
 
     if (command.contains("bytes")) {

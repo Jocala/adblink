@@ -117,7 +117,13 @@ QString resolveKodiPath(const QString &adbPrefix, const QString &dataRoot,
         cstring = adbPrefix + " shell cat /sdcard/xbmc_env.properties";
         result = ::getadbOutput(cstring);
         result.replace(QRegularExpression("[\r\n]"), "");
-        return result.mid(result.indexOf("xbmc.data=") + 10) + "/.kodi";
+        const QString envPrefix("xbmc.data=");
+        int idx = result.indexOf(envPrefix);
+        if (idx >= 0) {
+            QString envPath = result.mid(idx + envPrefix.length()).trimmed();
+            if (envPath.startsWith("/"))
+                return envPath + "/.kodi";
+        }
     }
 
     if (scoped)
@@ -284,10 +290,36 @@ void logDeviceDiagnostics(const QString &adbPrefix, const QString &daddr,
         if (idx >= 0) {
             QString envPath = envContent.mid(idx + prefix.length()).trimmed();
             logfile("xbmc_env.properties parsed path: " + envPath);
-            int startIndex = envContent.indexOf("=") + 1;
-            int endIndex = envContent.indexOf(".kodi") + 5;
-            QString oldMcpath = envContent.mid(startIndex, endIndex - startIndex);
-            logfile("xbmc_env.properties old-style mcpath: \"" + oldMcpath + "\"");
+            int eqIdx = envContent.indexOf("=");
+            int kodiIdx = envContent.indexOf(".kodi");
+            if (eqIdx >= 0 && kodiIdx > eqIdx) {
+                QString oldMcpath = envContent.mid(eqIdx + 1, kodiIdx - eqIdx + 4);
+                logfile("xbmc_env.properties old-style mcpath: \"" + oldMcpath + "\"");
+
+                if (envPath.length() > oldMcpath.length()) {
+                    logfile("  ANALYSIS: old-style mcpath is TRUNCATED — indexOf(\".kodi\")"
+                            " found \".kodi\" inside package name \"" + xbmcpackage
+                            + "\", not the directory. Result is "
+                            + QString::number(envPath.length() - oldMcpath.length())
+                            + " chars shorter than full path.");
+                }
+            }
+
+            int pkgIdx = envPath.indexOf(xbmcpackage);
+            QString base = (pkgIdx >= 0) ? envPath.left(pkgIdx) : envPath;
+            bool standardBase = base.startsWith("/sdcard/Android/data/")
+                                || base.startsWith("/sdcard/kodi_data/")
+                                || base == "/sdcard/";
+            if (!standardBase)
+                logfile("  ANALYSIS: path base \"" + base
+                        + "\" is non-standard (expected \"/sdcard/Android/data/\""
+                        " or \"/sdcard/kodi_data/\")");
+
+            QString envKodiPath = envPath + "/.kodi";
+            QString envCheckPath = adbPrefix + " shell ls " + envKodiPath;
+            QString envExists = ::getadbOutput(envCheckPath);
+            QString envExistsNote = envExists.contains("No such file") ? "not found" : "found";
+            logfile("xbmc_env.properties .kodi dir exists: " + envExistsNote);
         }
     } else {
         logfile("xbmc_env.properties: not found");
@@ -359,6 +391,53 @@ void logDeviceDiagnostics(const QString &adbPrefix, const QString &daddr,
         logfile(QStringLiteral("  -> ") + note);
     }
 
+    logfile("--- Diagnostic analysis ---");
+    {
+        QStringList warnings;
+        QString scopedPath = dataRoot + "kodi_data/" + xbmcpackage + "/files/.kodi";
+        QString legacyPath = dataRoot + "Android/data/" + xbmcpackage + "/files/.kodi";
+
+        QString envCheck = adbPrefix + " shell ls /sdcard/xbmc_env.properties";
+        QString envResult = ::getadbOutput(envCheck);
+        if (!envResult.contains("No such file")) {
+            QString envCat = adbPrefix + " shell cat /sdcard/xbmc_env.properties";
+            QString envContent = ::getadbOutput(envCat);
+            envContent.replace(QRegularExpression("[\r\n]"), "");
+            const QString prefix("xbmc.data=");
+            int idx = envContent.indexOf(prefix);
+            if (idx >= 0) {
+                QString envPath = envContent.mid(idx + prefix.length()).trimmed();
+                int pkgIdx = envPath.indexOf(xbmcpackage);
+                QString base = (pkgIdx >= 0) ? envPath.left(pkgIdx) : envPath;
+                if (!base.startsWith("/sdcard/Android/data/")
+                    && !base.startsWith("/sdcard/kodi_data/")
+                    && base != "/sdcard/")
+                    warnings.append(QStringLiteral("xbmc_env.properties path base \"")
+                                    + base + QStringLiteral("\" is non-standard"));
+
+                QString envKodiPath = envPath + "/.kodi";
+                QString envCheckPath = adbPrefix + " shell ls " + envKodiPath;
+                if (::getadbOutput(envCheckPath).contains("No such file"))
+                    warnings.append(QStringLiteral("xbmc_env.properties points to \"")
+                                    + envKodiPath + QStringLiteral("\" which does not exist"));
+            }
+        } else {
+            QString scopedCheck = adbPrefix + " shell ls " + scopedPath;
+            QString legacyCheck = adbPrefix + " shell ls " + legacyPath;
+            bool scopedExists = !::getadbOutput(scopedCheck).contains("No such file");
+            bool legacyExists = !::getadbOutput(legacyCheck).contains("No such file");
+            if (!scopedExists && !legacyExists)
+                warnings.append(QStringLiteral("Neither scoped nor legacy Kodi path exists on device"));
+        }
+
+        if (warnings.isEmpty()) {
+            logfile("No issues detected.");
+        } else {
+            logfile("Warnings:");
+            for (const QString &w : warnings)
+                logfile("  " + w);
+        }
+    }
     logfile("--- End device diagnostics ---");
 }
 
