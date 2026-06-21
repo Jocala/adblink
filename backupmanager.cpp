@@ -50,14 +50,10 @@ QString BackupManager::resolveKodiPath(AdbDevice *device, bool scoped, const QSt
         QString catCmd = QStringLiteral("cat /sdcard/xbmc_env.properties");
         QString envContent = device->runShell(catCmd);
         envContent.replace(QRegularExpression(QStringLiteral("[\r\n]")), QString());
-
-        const QString prefix(QStringLiteral("xbmc.data="));
-        int idx = envContent.indexOf(prefix);
-        if (idx >= 0) {
-            QString path = envContent.mid(idx + prefix.length()).trimmed();
-            if (!path.isEmpty())
-                return path + QStringLiteral("/.kodi");
-        }
+        int startIndex = envContent.indexOf(QChar('=')) + 1;
+        int endIndex = envContent.indexOf(QStringLiteral(".kodi")) + 5;
+        if (startIndex > 0 && endIndex > startIndex)
+            return envContent.mid(startIndex, endIndex - startIndex);
     }
 
     return kodiDataRoot(dataRoot, scoped, package) + QStringLiteral("/files/.kodi");
@@ -247,17 +243,10 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
         cstring = getadbpath() + " -s " + device.daddr + " shell cat /sdcard/xbmc_env.properties";
         command = getadbOutput(cstring);
         command.replace(QRegularExpression("[\r\n]"), "");
-        logfile(device.daddr + ": xbmc_env.properties: " + command);
-
-        const QString prefix(QStringLiteral("xbmc.data="));
-        int idx = command.indexOf(prefix);
-        if (idx >= 0) {
-            mcpath = command.mid(idx + prefix.length()).trimmed();
-            if (mcpath.endsWith(QStringLiteral("/files")))
-                mcpath.chop(6);
-            if (!mcpath.isEmpty() && mcpath.startsWith(QChar('/')))
-                xbmc_env = true;
-        }
+        int startIndex = command.indexOf("=") + 1;
+        int endIndex = command.indexOf(".kodi") + 5;
+        mcpath = command.mid(startIndex, endIndex - startIndex);
+        xbmc_env = true;
     }
 
     cstring = getadbpath() + " -s " + device.daddr + " shell ps | grep " + device.xbmcpackage;
