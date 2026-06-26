@@ -204,7 +204,7 @@ kbd { background: #eef2f6; border: 1px solid #cbd5e1; border-radius: 3px; paddin
 <tr><td><code>KodiDownloadCoordinator</code></td><td><code>kodidownloadcoordinator.cpp/.h</code></td><td>Coordinates Kodi download process (download + push + install).</td></tr>
 <tr><td><code>KodiDownloader</code></td><td><code>kodidownloader.cpp/.h</code></td><td>Downloads Kodi APK from jocala.com. Version check + download progress. Fixed for suffixed version parsing.</td></tr>
 <tr><td><code>KodiLogManager</code></td><td><code>kodilogmanager.cpp/.h</code></td><td>View Kodi log from device (<code>cat /sdcard/Android/.../kodi.log</code>).</td></tr>
-<tr><td><code>KodiSetupManager</code></td><td><code>kodisetupmanager.cpp/.h</code></td><td>Create kodi_data directory. Surgical repair: reads current state, only creates/writes what's missing.</td></tr>
+<tr><td><code>KodiSetupManager</code></td><td><code>kodisetupmanager.cpp/.h</code></td><td>Create kodi_data directory. Guards with <code>isScopedStorage()</code> — refuses on non-scoped devices. Surgical repair: reads current state, only creates/writes what's missing.</td></tr>
 <tr><td><code>KillServerManager</code></td><td><code>killservermanager.cpp/.h</code></td><td>Reset ADB server (<code>adb kill-server</code> + restart).</td></tr>
 <tr><td><code>KeypadManager</code></td><td><code>keypadmanager.cpp/.h</code></td><td>Virtual keypad dialog — sends keyevents to device.</td></tr>
 <tr><td><code>RemotePushManager</code></td><td><code>remotepushmanager.cpp/.h</code></td><td>Push remote files to Kodi (custom keymaps, etc.).</td></tr>
@@ -295,7 +295,7 @@ kbd { background: #eef2f6; border: 1px solid #cbd5e1; border-radius: 3px; paddin
 <tr><td>Download Kodi</td><td><code>actionDownload_Kodi</code></td><td><code>on_actionDownload_Kodi_triggered</code></td><td><code>kodidownloader.cpp/.h</code>, <code>kodidownloadcoordinator.cpp/.h</code></td><td>Download Kodi APK from jocala.com and install to device. mainwindow.cpp:1219</td></tr>
 <tr><td>Kodi data size</td><td><code>actionKodi_data_usage</code></td><td><code>on_actionKodi_data_usage_triggered</code></td><td><code>datausagemanager.cpp/.h</code></td><td>Show size of Kodi data directory via <code>du</code>. mainwindow.cpp:1075</td></tr>
 <tr><td>Check Kodi version</td><td><code>actionKodi_version</code></td><td><code>on_actionKodi_version</code></td><td><code>mainwindow.cpp</code></td><td>Query installed Kodi version via <code>dumpsys package</code>. mainwindow.cpp:1095</td></tr>
-<tr><td>Create kodi_data</td><td><code>actionCreate_kodi_data</code></td><td><code>on_actionCreate_kodi_data_triggered</code></td><td><code>kodisetupmanager.cpp/.h</code></td><td>Surgical repair of Kodi data directory. Checks env file content + directory state, only creates/writes what's missing. No <code>rm -r</code>. mainwindow.cpp:1414</td></tr>
+<tr><td>Create kodi_data</td><td><code>actionCreate_kodi_data</code></td><td><code>on_actionCreate_kodi_data_triggered</code></td><td><code>kodisetupmanager.cpp/.h</code></td><td>Surgical repair of Kodi data directory. Guards with <code>isScopedStorage()</code> — refuses on non-scoped devices. Checks env file content + directory state, only creates/writes what's missing. No <code>rm -r</code>. mainwindow.cpp:1414</td></tr>
 </table>
 
 <h3 id="menu-util">3.3 &mdash; Utility Menu</h3>
@@ -756,7 +756,7 @@ QMessageBox::StandardButton reply = static_cast&lt;QMessageBox::StandardButton&g
 
 <table>
 <tr><th>Operation</th><th>File Written</th><th>Content</th></tr>
-<tr><td>Create kodi_data</td><td>kodisetupmanager.cpp:108</td><td><code>xbmc.data=/sdcard/kodi_data/&lt;pkg&gt;/files</code></td></tr>
+<tr><td>Create kodi_data</td><td>kodisetupmanager.cpp:108</td><td><code>xbmc.data=/sdcard/kodi_data/&lt;pkg&gt;/files</code> (guarded: only writes if <code>isScopedStorage()</code> returns true)</td></tr>
 <tr><td>Restore (scoped)</td><td>backupmanager.cpp:474</td><td><code>xbmc.data=&lt;mcpath&gt;/files</code></td></tr>
 <tr><td>Restore (non-scoped, external)</td><td>backupmanager.cpp:489</td><td><code>xbmc.data=&lt;mcpath&gt;/files</code></td></tr>
 <tr><td>Data move</td><td>datamovemanager.cpp</td><td><code>xbmc.data=&lt;new_path&gt;/files</code></td></tr>

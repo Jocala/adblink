@@ -44,6 +44,20 @@ void KodiSetupManager::createKodiData(QWidget *parentWidget,
         }
     }
 
+    if (!::isScopedStorage(adbPrefix)) {
+        QMessageBox msgBox(parentWidget);
+        msgBox.setIcon(QMessageBox::Information);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("This device does not use scoped storage.\n"
+                                      "Kodi data is accessible at the standard location.\n"
+                                      "Use Utility \u2192 Move Kodi to relocate data."));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
+        logfile(device.daddr + ": kodi_data not needed \u2014 device is not scoped");
+        return;
+    }
+
     QString mcpath = QStringLiteral("/sdcard/kodi_data/") + device.xbmcpackage;
     QString expectedEnv = QStringLiteral("xbmc.data=") + mcpath + QStringLiteral("/files");
     QString kodiDir = mcpath + QStringLiteral("/files/.kodi");
