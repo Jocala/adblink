@@ -78,6 +78,17 @@ kbd { background: #eef2f6; border: 1px solid #cbd5e1; border-radius: 3px; paddin
 <a href="#help-log"   class="sub">9.3 logfile.cpp</a>
 <a href="#help-adb"   class="sub">9.4 ADB Helpers</a>
 <a href="#patterns"   class="sec">10</a><a href="#patterns">Key Code Patterns</a>
+<a href="#adb-cmds"   class="sec">11</a><a href="#adb-cmds">ADB Commands Reference</a>
+<a href="#adb-cmds-timer"  class="sub">11.1 Timer / Sleep</a>
+<a href="#adb-cmds-backup" class="sub">11.2 Backup / Restore</a>
+<a href="#adb-cmds-fm"     class="sub">11.3 File Manager</a>
+<a href="#adb-cmds-install" class="sub">11.4 APK Install / Uninstall</a>
+<a href="#adb-cmds-misc"   class="sub">11.5 App / Keypad / Text / Display</a>
+<a href="#adb-cmds-info"   class="sub">11.6 System Info &amp; Diagnostics</a>
+<a href="#adb-cmds-connect" class="sub">11.7 ADB Server &amp; Connection</a>
+<a href="#adb-cmds-kodi"   class="sub">11.8 Kodi Data &amp; Cache</a>
+<a href="#adb-cmds-scoped" class="sub">11.9 Scoped Storage &amp; Setup</a>
+<a href="#quirks"     class="sec">12</a><a href="#quirks">Platform Quirks</a>
 </nav>
 
 <main id="content">
@@ -174,7 +185,6 @@ kbd { background: #eef2f6; border: 1px solid #cbd5e1; border-radius: 3px; paddin
 <tr><td><code>keyboarddialog.cpp/.h</code></td><td>Keyboard/virtual keypad dialog.</td></tr>
 <tr><td><code>searchdialog.cpp/.h</code></td><td>Search dialog.</td></tr>
 <tr><td><code>usbfiledialog.cpp/.h</code></td><td>File manager dialog (~1200 lines). Tree-based file browsing, pull/push, delete on device.</td></tr>
-<tr><td><code>oculusdialog.cpp/.h</code></td><td>Oculus VR setup dialog. Dead code (not connected to menu).</td></tr>
 <tr><td><code>kodiarchdialog.cpp/.h</code></td><td>Kodi architecture info dialog.</td></tr>
 <tr><td><code>forcequitdialog.cpp/.h</code></td><td>Force-quit confirmation dialog.</td></tr>
 <tr><td><code>uninstalldialog.cpp/.h</code></td><td>APK uninstall confirmation dialog.</td></tr>
@@ -234,7 +244,6 @@ kbd { background: #eef2f6; border: 1px solid #cbd5e1; border-radius: 3px; paddin
 <tr><td><code>about.cpp/.h</code></td><td>About box content (version string, credits).</td></tr>
 <tr><td><code>datadialog.cpp/.h</code></td><td>Generic data display widget.</td></tr>
 <tr><td><code>deviceeditor.cpp/.h</code></td><td>Device editor helper.</td></tr>
-<tr><td><code>oculusmanager.cpp/.h</code></td><td>Oculus Quest ADB setup. Compilable but not connected to any menu action (dead code).</td></tr>
 </table>
 
 <h3>Tests</h3>
@@ -775,6 +784,240 @@ QMessageBox::StandardButton reply = static_cast&lt;QMessageBox::StandardButton&g
 <tr><td>Grid button size</td><td>180×66</td><td>130×46</td><td>110×36</td></tr>
 <tr><td>Action button size</td><td>160×32</td><td>110×32</td><td>100×32</td></tr>
 <tr><td>Font size (config index)</td><td>14/16/18/20</td><td>12/14/16/18</td><td>10/12/14/16</td></tr>
+</table>
+
+
+<!-- ─── Section 11: ADB Commands Reference ──────────────── -->
+<h2 id="adb-cmds">11 &mdash; ADB Commands Reference</h2>
+
+<p>Exact shell commands sent to devices, organized by feature. <code>&lt;adbPrefix&gt;</code> = <code>"&lt;adb_path&gt;" -s &lt;serial_or_ip:port&gt;</code>. Variables shown in angle brackets are interpolated at runtime.</p>
+
+<h3 id="adb-cmds-timer">11.1 &mdash; Timer / Sleep (<code>timermanager.cpp</code>)</h3>
+
+<p>Android version is read first to select the correct settings namespace:</p>
+
+<table>
+<tr><th>Purpose</th><th>Command (after <code>adbPrefix + " shell "</code>)</th><th>Android</th></tr>
+<tr><td>Get Android version</td><td><code>getprop ro.build.version.release</code></td><td>all</td></tr>
+<tr><td>Read sleep timeout</td><td><code>settings get secure sleep_timeout</code></td><td>&lt; 11</td></tr>
+<tr><td>Read sleep timeout</td><td><code>settings get global stay_on_while_plugged_in</code></td><td>&ge; 11</td></tr>
+<tr><td>Read screensaver</td><td><code>settings get system screen_off_timeout</code></td><td>all</td></tr>
+<tr><td>Write sleep timeout</td><td><code>settings put secure sleep_timeout &lt;value&gt;</code></td><td>&lt; 11</td></tr>
+<tr><td>Write sleep timeout</td><td><code>settings put global stay_on_while_plugged_in &lt;value&gt;</code></td><td>&ge; 11</td></tr>
+<tr><td>Write screensaver</td><td><code>settings put system screen_off_timeout &lt;value&gt;</code></td><td>all</td></tr>
+</table>
+
+<p>Values written: <code>0</code> (off) or <code>1200000</code> (default) for sleep; <code>2147460000</code> (off, ~25 days) or <code>30000</code> (default) for screensaver. All numeric — no string values are ever written.</p>
+
+<h3 id="adb-cmds-backup">11.2 &mdash; Backup / Restore (<code>backupmanager.cpp</code>)</h3>
+
+<table>
+<tr><th>Purpose</th><th>ADB Command</th></tr>
+<tr><td>Discover storage mounts</td><td><code>&lt;adbPrefix&gt; shell /data/local/tmp/adblink/busybox find /storage -type d -maxdepth 1</code></td></tr>
+<tr><td>Check env file exists</td><td><code>&lt;adbPrefix&gt; shell ls /sdcard/xbmc_env.properties</code></td></tr>
+<tr><td>Read env file</td><td><code>&lt;adbPrefix&gt; shell cat /sdcard/xbmc_env.properties</code></td></tr>
+<tr><td>Check Kodi .kodi dir</td><td><code>&lt;adbPrefix&gt; shell ls &lt;mcpath&gt;/files/.kodi</code></td></tr>
+<tr><td>Pull backup</td><td><code>&lt;adbPrefix&gt; pull &lt;mcpath&gt;files/.kodi/. "&lt;destDir&gt;"</code></td></tr>
+<tr><td>Force-stop Kodi</td><td><code>&lt;getadbpath()&gt; -s &lt;daddr&gt; shell am force-stop &lt;xbmcpackage&gt;</code></td></tr>
+<tr><td>Push restore</td><td><code>&lt;adbPrefix&gt; push "&lt;srcDir&gt;" &lt;mcpath&gt;/files/.kodi/</code></td></tr>
+<tr><td>Remove existing target</td><td><code>&lt;adbPrefix&gt; shell rm -r &lt;mcpath&gt;</code></td></tr>
+<tr><td>Create target dir</td><td><code>&lt;getadbpath()&gt; -s &lt;daddr&gt; shell mkdir -p &lt;mcpath&gt;/files/.kodi</code></td></tr>
+<tr><td>Write env file</td><td><code>&lt;getadbpath()&gt; -s &lt;daddr&gt; shell echo xbmc.data=&lt;mcpath&gt;/files &gt; /sdcard/xbmc_env.properties</code></td></tr>
+<tr><td>Remove old env file</td><td><code>&lt;getadbpath()&gt; -s &lt;daddr&gt; shell rm /sdcard/xbmc_env.properties</code></td></tr>
+</table>
+
+<h3 id="adb-cmds-fm">11.3 &mdash; File Manager (<code>usbfiledialog.cpp</code>)</h3>
+
+<p>Uses <code>&lt;adb21&gt;</code> = <code>"&lt;adb_path&gt;" -s &lt;daddr&gt;</code>, <code>&lt;adbShell&gt;</code> = <code>" shell "</code>.</p>
+
+<table>
+<tr><th>Purpose</th><th>ADB Command</th></tr>
+<tr><td>Test if directory</td><td><code>&lt;adb21&gt;&lt;adbShell&gt; test -d &lt;file&gt; &amp;&amp; echo true || echo false</code></td></tr>
+<tr><td>List directories</td><td><code>&lt;adb21&gt;&lt;adbShell&gt; /data/local/tmp/adblink/busybox find "&lt;path&gt;" -type d -maxdepth 1</code></td></tr>
+<tr><td>List files</td><td><code>&lt;adb21&gt;&lt;adbShell&gt; /data/local/tmp/adblink/busybox find "&lt;path&gt;" -type f -maxdepth 1</code></td></tr>
+<tr><td>List symlinks</td><td><code>&lt;adb21&gt;&lt;adbShell&gt; /data/local/tmp/adblink/busybox find "&lt;path&gt;" -type l -maxdepth 1</code></td></tr>
+<tr><td>Pull file/dir</td><td><code>&lt;adb21&gt; pull "&lt;file&gt;" "&lt;pulldir&gt;/&lt;name&gt;"</code></td></tr>
+<tr><td>Push file</td><td><code>&lt;adb21&gt; push "&lt;src&gt;" "&lt;dst&gt;"</code></td></tr>
+<tr><td>Delete file</td><td><code>&lt;adb21&gt;&lt;adbShell&gt; rm -r "'&lt;file&gt;'"</code></td></tr>
+<tr><td>Create directory</td><td><code>&lt;adb21&gt;&lt;adbShell&gt; mkdir -p "'&lt;dir&gt;'"</code></td></tr>
+<tr><td>Rename / move</td><td><code>&lt;adb21&gt;&lt;adbShell&gt; mv "'&lt;old&gt;'" "'&lt;new&gt;'"</code></td></tr>
+<tr><td>Copy</td><td><code>&lt;adb21&gt;&lt;adbShell&gt; cp -R "'&lt;src&gt;'" "'&lt;dst&gt;'"</code></td></tr>
+<tr><td>chmod (fallback after pull)</td><td><code>&lt;adb21&gt;&lt;adbShell&gt; chmod -R 755 &lt;path&gt;</code></td></tr>
+</table>
+
+<h3 id="adb-cmds-install">11.4 &mdash; APK Install / Uninstall</h3>
+
+<table>
+<tr><th>Purpose</th><th>Source</th><th>ADB Command</th></tr>
+<tr><td>Install APK</td><td><code>installmanager.cpp:18</code></td><td><code>&lt;adbPrefix&gt; install -r "&lt;filename&gt;"</code></td></tr>
+<tr><td>Uninstall (keep data)</td><td><code>uninstallmanager.cpp:68</code></td><td><code>&lt;adbPrefix&gt; shell pm uninstall -k &lt;package&gt;</code></td></tr>
+<tr><td>Uninstall (full)</td><td><code>uninstallmanager.cpp:66</code></td><td><code>&lt;adbPrefix&gt; shell pm uninstall &lt;package&gt;</code></td></tr>
+<tr><td>List all packages</td><td><code>uninstalldialog.cpp:113</code></td><td><code>&lt;getadbpath()&gt; -s &lt;daddr&gt; shell pm list packages</code></td></tr>
+<tr><td>List packages (filtered)</td><td><code>uninstalldialog.cpp:99</code></td><td><code>&lt;getadbpath()&gt; -s &lt;daddr&gt; shell pm list packages | grep &lt;filter&gt;</code></td></tr>
+</table>
+
+<h3 id="adb-cmds-misc">11.5 &mdash; App / Keypad / Text / Display</h3>
+
+<table>
+<tr><th>Purpose</th><th>Source</th><th>ADB Command</th></tr>
+<tr><td>Start app</td><td><code>appmanager.cpp:146</code></td><td><code>&lt;adbPrefix&gt; shell am start -n &lt;package&gt;</code></td></tr>
+<tr><td>Force-stop app</td><td><code>appmanager.cpp:67</code></td><td><code>&lt;adbPrefix&gt; shell am force-stop &lt;package&gt;</code></td></tr>
+<tr><td>Send text</td><td><code>sendtextmanager.cpp:24</code></td><td><code>&lt;adbPrefix&gt; shell input text &lt;text&gt;</code> (spaces replaced with <code>%s</code>)</td></tr>
+<tr><td>Keyevent</td><td><code>keyboarddialog.cpp:168</code></td><td><code>&lt;getadbpath()&gt; -s &lt;daddr&gt; shell input keyevent &lt;code&gt;</code></td></tr>
+<tr><td>Display off</td><td><code>adbutils.cpp:100</code></td><td><code>&lt;adbPrefix&gt; shell input keyevent 26</code></td></tr>
+</table>
+
+<h3 id="adb-cmds-info">11.6 &mdash; System Info &amp; Diagnostics</h3>
+
+<table>
+<tr><th>Purpose</th><th>Source</th><th>ADB Command</th></tr>
+<tr><td>Android version</td><td><code>mainwindow.cpp:484</code></td><td><code>&lt;getadb()&gt; shell getprop ro.build.version.release</code></td></tr>
+<tr><td>SDK version</td><td><code>adbutils.cpp:230</code></td><td><code>&lt;adbPrefix&gt; shell getprop ro.build.version.sdk</code></td></tr>
+<tr><td>Manufacturer</td><td><code>adbutils.cpp:128</code></td><td><code>getprop ro.product.manufacturer</code> (via AdbDevice)</td></tr>
+<tr><td>Device model</td><td><code>adbutils.cpp:134</code></td><td><code>getprop ro.product.model</code> (via AdbDevice)</td></tr>
+<tr><td>CPU ABI</td><td><code>mainwindow.cpp:1249</code></td><td><code>&lt;getadb()&gt; shell getprop ro.product.cpu.abi</code></td></tr>
+<tr><td>Build ID</td><td><code>mainwindow.cpp:526</code></td><td><code>&lt;getadb()&gt; shell getprop ro.build.display.id</code></td></tr>
+<tr><td>Battery</td><td><code>adbutils.cpp:53</code></td><td><code>&lt;adbPrefix&gt; shell dumpsys battery</code></td></tr>
+<tr><td>Kodi version</td><td><code>kodidownloader.cpp:57</code></td><td><code>&lt;adbPrefix&gt; -s &lt;addr&gt; shell dumpsys package org.xbmc.kodi | grep versionName</code></td></tr>
+<tr><td>Kodi data size</td><td><code>datausagemanager.cpp:41</code></td><td><code>&lt;adbPrefix&gt; shell du -sh &lt;xbmcpath&gt;</code></td></tr>
+<tr><td>Package installed</td><td><code>adbutils.cpp:191</code></td><td><code>&lt;adbPrefix&gt; shell pm list packages</code></td></tr>
+</table>
+
+<h3 id="adb-cmds-connect">11.7 &mdash; ADB Server &amp; Connection</h3>
+
+<table>
+<tr><th>Purpose</th><th>Source</th><th>ADB Command</th></tr>
+<tr><td>Connect</td><td><code>connectmanager.cpp:82</code></td><td><code>&lt;adbPath&gt; connect &lt;daddr&gt;:&lt;port&gt;</code></td></tr>
+<tr><td>Disconnect</td><td><code>disconnectmanager.cpp:63</code></td><td><code>&lt;getadbpath()&gt; disconnect &lt;daddr&gt;</code></td></tr>
+<tr><td>Kill server</td><td><code>killservermanager.cpp:24</code></td><td><code>&lt;getadbpath()&gt; kill-server</code></td></tr>
+<tr><td>Reboot</td><td><code>rebootmanager.cpp:30</code></td><td><code>&lt;adbPrefix&gt; reboot</code></td></tr>
+</table>
+
+<h3 id="adb-cmds-kodi">11.8 &mdash; Kodi Data &amp; Cache</h3>
+
+<table>
+<tr><th>Purpose</th><th>Source</th><th>ADB Command</th></tr>
+<tr><td>Read env file</td><td><code>adbutils.cpp:117</code></td><td><code>&lt;adbPrefix&gt; shell cat /sdcard/xbmc_env.properties</code></td></tr>
+<tr><td>Check env file exists</td><td><code>adbutils.cpp:113</code></td><td><code>&lt;adbPrefix&gt; shell ls /sdcard/xbmc_env.properties</code></td></tr>
+<tr><td>Write env file</td><td><code>kodisetupmanager.cpp:129</code></td><td><code>&lt;adbPrefix&gt; shell echo xbmc.data=&lt;path&gt;/files &gt; /sdcard/xbmc_env.properties</code></td></tr>
+<tr><td>Delete thumbnails</td><td><code>thumbnailmanager.cpp:48</code></td><td><code>&lt;adbPrefix&gt; shell rm -r &lt;thumb&gt;</code></td></tr>
+<tr><td>Delete textures db</td><td><code>thumbnailmanager.cpp:52</code></td><td><code>&lt;adbPrefix&gt; shell rm -r &lt;textures&gt;</code></td></tr>
+<tr><td>Push cache config</td><td><code>cachemanager.cpp:150</code></td><td><code>&lt;adbPrefix&gt; push &lt;file&gt; &lt;xpath&gt;advancedsettings.xml</code></td></tr>
+<tr><td>Copy Kodi data</td><td><code>datamovemanager.cpp:168</code></td><td><code>&lt;adbPrefix&gt; shell cp -r &lt;src&gt;/files/.kodi &lt;dst&gt;/files</code></td></tr>
+<tr><td>Find kodi.log</td><td><code>kodilogmanager.cpp:28</code></td><td><code>&lt;adbPrefix&gt; shell &lt;busyPath&gt;busybox find &lt;xpath&gt; -maxdepth 1 -name kodi.log</code></td></tr>
+<tr><td>View kodi.log</td><td><code>logviewerdialog.cpp:101</code></td><td><code>&lt;adbPath&gt; shell cat &lt;filepath&gt;kodi.log</code></td></tr>
+<tr><td>List XML files</td><td><code>xmleditormanager.cpp:27</code></td><td><code>&lt;adbPrefix&gt; shell &lt;busyPath&gt;busybox find &lt;xpath&gt; -maxdepth 1 -name *.xml</code></td></tr>
+<tr><td>Push remote/keymap</td><td><code>remotepushmanager.cpp:74</code></td><td><code>&lt;adbPrefix&gt; push "&lt;file&gt;" &lt;mcpath&gt;/keyboard.xml</code></td></tr>
+</table>
+
+<h3 id="adb-cmds-scoped">11.9 &mdash; Scoped Storage &amp; Setup</h3>
+
+<table>
+<tr><th>Purpose</th><th>Source</th><th>ADB Command</th></tr>
+<tr><td>Grant storage permission</td><td><code>kodisetupmanager.cpp:96</code></td><td><code>&lt;adbPrefix&gt; shell appops set --uid &lt;pkg&gt; MANAGE_EXTERNAL_STORAGE allow</code></td></tr>
+<tr><td>Create kodi_data dir</td><td><code>kodisetupmanager.cpp:109</code></td><td><code>&lt;adbPrefix&gt; shell mkdir -p &lt;kodiDir&gt;</code></td></tr>
+<tr><td>Touch test (sdcard)</td><td><code>adbutils.cpp:239</code></td><td><code>&lt;adbPrefix&gt; shell touch /sdcard/Android/data/org.xbmc.kodi/files/test.txt</code></td></tr>
+<tr><td>Touch test (DCIM)</td><td><code>adbutils.cpp:247</code></td><td><code>&lt;adbPrefix&gt; shell touch /sdcard/DCIM/test.txt</code></td></tr>
+<tr><td>Check sdcard perms</td><td><code>adbutils.cpp:255</code></td><td><code>&lt;adbPrefix&gt; shell ls -ld /sdcard/</code></td></tr>
+<tr><td>Push busybox</td><td><code>adbutils.cpp:155</code></td><td><code>&lt;adbPrefix&gt; push "&lt;busyboxPath&gt;" /data/local/tmp/adblink/</code></td></tr>
+<tr><td>Install busybox</td><td><code>adbutils.cpp:175</code></td><td><code>&lt;adbPrefix&gt; shell /data/local/tmp/adblink/busybox --install -s /data/local/tmp/adblink</code></td></tr>
+<tr><td>Screencap</td><td><code>screencapmanager.cpp:36</code></td><td><code>&lt;adbPrefix&gt; shell screencap -p /data/local/tmp/&lt;ts&gt;.png</code></td></tr>
+<tr><td>Pull screencap</td><td><code>screencapmanager.cpp:56</code></td><td><code>&lt;adbPrefix&gt; pull /data/local/tmp/&lt;ts&gt;.png &lt;pulldir&gt;</code></td></tr>
+</table>
+
+
+<!-- ─── Section 12: Platform Quirks ─────────────────────── -->
+<h2 id="quirks">12 &mdash; Platform Quirks</h2>
+
+<p>Device-type-specific behavior differences that affect development and debugging.</p>
+
+<table>
+<tr><th>Category</th><th>Device Type</th><th>Behavior / Quirk</th><th>Impact</th></tr>
+
+<tr>
+  <td>Sleep timer</td>
+  <td>Fire TV (all)<br>Android &lt; 11</td>
+  <td>Uses <code>settings put secure sleep_timeout</code>. Value <code>0</code> disables sleep.</td>
+  <td>No special handling needed — standard Android path.</td>
+</tr>
+
+<tr>
+  <td>Sleep timer</td>
+  <td>Android &ge; 11<br>(phones/tablets)</td>
+  <td>Sleep is controlled by <code>settings put global stay_on_while_plugged_in</code>. Value <code>1</code> = stay awake while plugged in (any source).</td>
+  <td>TimerManager branches on <code>ro.build.version.release</code> at runtime to select correct settings namespace.</td>
+</tr>
+
+
+<tr>
+  <td>Scoped storage</td>
+  <td>Android &ge; 11<br>(API 30+)</td>
+  <td>Kodi data lives at <code>&lt;data_root&gt;kodi_data/&lt;pkg&gt;/files/.kodi</code> instead of legacy <code>Android/data/</code> path. xbmc_env.properties is required.</td>
+  <td><code>isScopedStorage()</code> is checked at device creation and stored in the <code>scoped</code> flag (flag1). All Kodi path resolution branches on this flag.</td>
+</tr>
+
+<tr>
+  <td>Scoped storage</td>
+  <td>Android 10<br>(API 29)</td>
+  <td>Ambiguous — some devices enforce scoped, some don't. adblink performs a runtime write test (<code>touch /sdcard/Android/data/&lt;pkg&gt;/files/test.txt</code>). If denied, device is treated as scoped.</td>
+  <td>API 29 devices may have <code>kodi_data/</code> <strong>and</strong> legacy <code>Android/data/</code> paths both present with different data. The <code>isScopedStorage()</code> test determines which is used.</td>
+</tr>
+
+<tr>
+  <td>Scoped storage</td>
+  <td>Vendor bypass<br>(some Fire TV, Chinese tablets)</td>
+  <td><code>/sdcard/</code> is world-writable (<code>drwxrwxrwx</code>). adblink's <code>isScopedStorage()</code> checks <code>ls -ld /sdcard/</code> permissions. If world-writable, not scoped regardless of API level.</td>
+  <td>These devices use legacy <code>Android/data/</code> paths even on API 30+. <code>createKodiData()</code> refuses to run when <code>isScopedStorage()</code> returns false.</td>
+</tr>
+
+<tr>
+  <td>xbmc_env.properties</td>
+  <td>All devices</td>
+  <td>Kodi never writes this file. Only adblink does. It is adblink's persistent record of Kodi's data location.</td>
+  <td>If the file is deleted manually (or by a factory reset), Backup/Restore and Data Move will still work — they re-create it. <code>createKodiData()</code> surgically repairs it.</td>
+</tr>
+
+<tr>
+  <td>ADB track-devices</td>
+  <td>Fire TV</td>
+  <td>Serial numbers from <code>track-devices</code> may have a leading digit prefix stripped by <code>onTrackOutput()</code>.</td>
+  <td>This is handled automatically by the strip logic in <code>mainwindow.cpp::onTrackOutput()</code>.</td>
+</tr>
+
+<tr>
+  <td>ADB kill-server</td>
+  <td>Windows</td>
+  <td>A running <code>adb.exe</code> cannot be overwritten during rebuild. Must be terminated first. <code>taskkill /f /im adb.exe</code> is used in <code>onApplicationQuit()</code>.</td>
+  <td>When rebuilding on Windows, ensure all adb processes are killed first (build script does this).</td>
+</tr>
+
+<tr>
+  <td>ADB kill-server</td>
+  <td>macOS / Linux</td>
+  <td><code>pkill -9 adb</code> used as force-kill fallback after 3-second timeout in <code>onApplicationQuit()</code>.</td>
+  <td>Graceful <code>adb kill-server</code> is attempted first; force-kill only on timeout.</td>
+</tr>
+
+<tr>
+  <td>Busybox</td>
+  <td>All devices</td>
+  <td>adblink bundles its own busybox binary per architecture. Pushed to <code>/data/local/tmp/adblink/</code> on first use. Used for <code>find</code>, <code>du</code>, <code>--install</code> symlinks.</td>
+  <td>If busybox cannot be pushed or installed, File Manager listing, data size, and storage mount discovery will fail.</td>
+</tr>
+
+<tr>
+  <td>OS detection</td>
+  <td>Cross-platform</td>
+  <td><code>m_os</code> is set at startup: 0 = Linux, 1 = Windows, 2 = macOS. Determines ADB binary name (<code>adb</code> vs <code>adb.exe</code>), font paths, data directory locations, and terminal emulator selection.</td>
+  <td>All OS-specific branching uses this integer. Add new OS values here if porting.</td>
+</tr>
+
+<tr>
+  <td>File Manager</td>
+  <td>All devices</td>
+  <td>Files listed via <code>busybox find</code> (type-based: dirs/files/links separately). Pull uses <code>adb pull</code> directly. If pull fails (permissions), file is <code>cp -R</code> to <code>/data/local/tmp/</code>, <code>chmod -R 755</code>, then pulled from there.</td>
+  <td>The temp-copy fallback on pull failure handles permission-restricted files on unrooted devices.</td>
+</tr>
 </table>
 
 <hr>
