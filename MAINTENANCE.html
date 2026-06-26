@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>adblink Maintenance Reference</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 14px; line-height: 1.55; color: #222; background: #fafafa;
+  display: flex; min-height: 100vh;
+}
+nav#toc {
+  position: fixed; top: 0; left: 0; bottom: 0; width: 280px;
+  overflow-y: auto; background: #1e293b; color: #cbd5e1;
+  padding: 20px 0; z-index: 100;
+}
+nav#toc h1 { font-size: 16px; color: #f1f5f9; padding: 0 16px 12px; border-bottom: 1px solid #334155; margin-bottom: 8px; }
+nav#toc a { display: block; padding: 3px 16px 3px 20px; color: #94a3b8; text-decoration: none; font-size: 13px; }
+nav#toc a:hover { color: #f1f5f9; background: #334155; }
+nav#toc .sec  { font-weight: 600; color: #e2e8f0; padding: 6px 16px 3px 12px; margin-top: 4px; font-size: 13px; }
+nav#toc .sub  { padding-left: 28px; font-size: 12px; }
+main#content { margin-left: 280px; flex: 1; padding: 32px 48px 80px; max-width: 1100px; }
+main#content h2 { font-size: 22px; color: #1e293b; margin: 40px 0 12px; border-bottom: 2px solid #e2e8f0; padding-bottom: 4px; }
+main#content h2:first-of-type { margin-top: 0; }
+main#content h3 { font-size: 17px; color: #334155; margin: 28px 0 10px; }
+main#content h4 { font-size: 15px; color: #475569; margin: 20px 0 8px; }
+main#content p  { margin: 8px 0; }
+main#content ul { margin: 6px 0 6px 20px; }
+main#content li { margin: 2px 0; }
+table { border-collapse: collapse; width: 100%; margin: 10px 0 18px; font-size: 13px; }
+th { background: #f1f5f9; color: #1e293b; font-weight: 600; text-align: left; padding: 6px 8px; border: 1px solid #d1d5db; }
+td { padding: 4px 8px; border: 1px solid #d1d5db; vertical-align: top; }
+tr:nth-child(even) td { background: #f9fafb; }
+code, tt { font-family: "SF Mono", "Cascadia Code", "Consolas", "Liberation Mono", monospace; font-size: 12.5px; background: #eef2f6; padding: 1px 4px; border-radius: 3px; }
+pre { background: #1e293b; color: #e2e8f0; padding: 14px; border-radius: 6px; overflow-x: auto; font-size: 13px; line-height: 1.4; margin: 10px 0; }
+pre code { background: none; padding: 0; color: inherit; }
+kbd { background: #eef2f6; border: 1px solid #cbd5e1; border-radius: 3px; padding: 1px 5px; font-family: inherit; font-size: 12px; }
+.file  { font-family: "SF Mono", monospace; font-size: 12.5px; color: #475569; }
+.slot  { font-family: "SF Mono", monospace; font-size: 12.5px; color: #0369a1; }
+.top   { float: right; font-size: 12px; color: #94a3b8; text-decoration: none; }
+.top:hover { color: #1e293b; }
+.box   { background: #f8fafc; border: 1px solid #d1d5db; border-radius: 6px; padding: 14px; margin: 10px 0; }
+.tag   { display: inline-block; background: #dbeafe; color: #1e40af; font-size: 11px; padding: 1px 6px; border-radius: 3px; margin-right: 4px; }
+.tag-green { background: #d1fae5; color: #065f46; }
+.tag-amber { background: #fef3c7; color: #92400e; }
+</style>
+</head>
+<body>
+
+<nav id="toc">
+<h1>adblink Maintenance</h1>
+<a href="#topo"       class="sec">1</a><a href="#topo">Architecture Overview</a>
+<a href="#files"      class="sec">2</a><a href="#files">Source File Index</a>
+<a href="#menu"       class="sec">3</a><a href="#menu">Menu Reference</a>
+<a href="#menu-file"  class="sub">3.1 File Menu</a>
+<a href="#menu-kodi"  class="sub">3.2 Kodi Menu</a>
+<a href="#menu-util"  class="sub">3.3 Utility Menu</a>
+<a href="#menu-about" class="sub">3.4 About / Help</a>
+<a href="#buttons"    class="sec">4</a><a href="#buttons">Button Grid Reference</a>
+<a href="#btn-upper"  class="sub">4.1 Upper Action Grid</a>
+<a href="#btn-kodi"   class="sub">4.2 Kodi View Grid</a>
+<a href="#btn-android" class="sub">4.3 Android View Grid</a>
+<a href="#shortcuts"  class="sec">5</a><a href="#shortcuts">Keyboard Shortcuts</a>
+<a href="#adb"        class="sec">6</a><a href="#adb">ADB Communication Layer</a>
+<a href="#adb-patterns" class="sub">6.1 Execution Patterns</a>
+<a href="#adb-path"   class="sub">6.2 ADB Path Construction</a>
+<a href="#adb-usb"    class="sub">6.3 USB Auto-Discovery</a>
+<a href="#data"       class="sec">7</a><a href="#data">Key Data Structures</a>
+<a href="#db"         class="sec">8</a><a href="#db">Database &amp; Config</a>
+<a href="#db-schema"  class="sub">8.1 SQLite Schema</a>
+<a href="#db-json"    class="sub">8.2 JSON Config Keys</a>
+<a href="#db-log"     class="sub">8.3 Log System</a>
+<a href="#helpers"    class="sec">9</a><a href="#helpers">Helper Functions</a>
+<a href="#help-adbutils" class="sub">9.1 adbutils.cpp</a>
+<a href="#help-stringutils" class="sub">9.2 stringutils.cpp</a>
+<a href="#help-log"   class="sub">9.3 logfile.cpp</a>
+<a href="#help-adb"   class="sub">9.4 ADB Helpers</a>
+<a href="#patterns"   class="sec">10</a><a href="#patterns">Key Code Patterns</a>
+</nav>
+
+<main id="content">
+
+<h2 id="topo">1 &mdash; Architecture Overview</h2>
+
+<div class="box">
+<pre><code>MainWindow (mainwindow.cpp/.h &mdash; ~2850 lines, class MainWindow : QMainWindow)
+│
+├── File / Kodi / Utility / About / Help   (5 QMenu bars, 22 QAction items)
+│
+├── upperLayout (QHBoxLayout, margins 28, spacing 18)
+│   ├── NoHScrollTableWidget (device table, 3 cols: Device | IP | Status)
+│   └── rightColumn (QVBoxLayout)
+│       ├── 3x2 action button grid (Connect/Disconnect/New/Edit/Delete/Clear)
+│       └── QLineEdit (adhoc_ip, Ad hoc IP field)
+│
+├── QStackedWidget
+│   ├── [0] Kodi View: 4x4 grid (grid1Buttons[16])
+│   └── [1] Android View: 4x3 grid (grid2Buttons[12])
+│
+├── statusBar (QStatusBar + QProgressBar + QLabel)
+│
+├── 37 manager objects (allocated in constructor member init list)
+│   → AdbConnection, AboutManager, AdhocManager, AppManager, ApkUidManager,
+│     KodiDataManager, ConsoleManager, BackupManager, CacheManager,
+│     ConnectManager, DisconnectManager, DeviceEditorManager,
+│     DeviceTableLoader, FileManager, InstallManager, DataMoveManager,
+│     DataUsageManager, DatabaseResetManager, DeleteRecordManager,
+│     SideloadManager, ScreenCapManager, SendTextManager, RebootManager,
+│     SplashScreenManager, ThumbnailManager, TimerManager, UninstallManager,
+│     VersionCheckManager, WirelessAdbManager, XmlEditorManager,
+│     KodiDownloader, KodiDownloadCoordinator, KodiLogManager,
+│     KodiSetupManager, KillServerManager, KeypadManager, RemotePushManager
+│
+└── ADB Layer (4 patterns &mdash; see Section 6)
+    ├── getadbOutput()         [getadbdata.cpp]  &mdash; one-shot, ignore exit code
+    ├── getreturncode()        [getreturncode.cpp] &mdash; need exit code only
+    ├── connectadb()           [connectadb.cpp]  &mdash; network connect, 5s timeout
+    └── AdbConnection::runCommand()  [adbconnection.cpp] &mdash; OOP wrapper
+</code></pre>
+
+<p><strong>Entry point:</strong> <code>main.cpp</code> &mdash; sets Fusion style, loads <code>:/style.qss</code>, sets DejaVuSans 12px font, constructs <code>MainWindow</code>.</p>
+<p><strong>Constructor sequence:</strong> OS detection → path derivation → keyboard shortcuts → status bar → log rotation → DB init → table creation → JSON config → menu setup → window sizing → track-devices start → version check.</p>
+</div>
+
+<h2 id="files">2 &mdash; Source File Index</h2>
+
+<p>All source files (.cpp/.h) listed in CMakeLists.txt, with a brief purpose statement. Line count approximations as of v8.0.</p>
+
+<h3>Core / Entry</h3>
+<table>
+<tr><th>File(s)</th><th>Purpose</th></tr>
+<tr><td><code>main.cpp</code></td><td>Application entry. Sets Fusion style, loads QSS, font. Constructs MainWindow.</td></tr>
+<tr><td><code>mainwindow.cpp/.h</code></td><td>Central window (~2850 lines). Owns all managers, menus, button grids, device table, track-devices, layout. Delegates all feature work to manager objects.</td></tr>
+</table>
+
+<h3>ADB Communication</h3>
+<table>
+<tr><th>File(s)</th><th>Purpose</th></tr>
+<tr><td><code>adbconnection.cpp/.h</code></td><td>OOP wrapper for ADB. <code>startServer()</code>, <code>killServer()</code>, <code>listDeviceSerialNumbers()</code>, <code>runCommand(args)</code>, <code>adbPrefixForDevice()</code>.</td></tr>
+<tr><td><code>adbdevice.cpp/.h</code></td><td>OOP wrapper per device. <code>runShell(cmd)</code>, <code>runAdb(args)</code>, <code>adbPrefix()</code>, <code>isPackageInstalled()</code>, <code>fileExists()</code>.</td></tr>
+<tr><td><code>adboutput.cpp/.h</code></td><td><code>getadbOutput2(adbPath, args)</code> — alternative ADB runner with explicit path+args (no shell splitting).</td></tr>
+<tr><td><code>adbutils.cpp/.h</code></td><td>Free utility functions: <code>getadbpath()</code>, <code>syncWaitForProcess()</code>, <code>resolveKodiPath()</code>, <code>isScopedStorage()</code>, <code>ensureBusyboxInstalled()</code>, <code>logDeviceDiagnostics()</code>, <code>removeMetadataFiles()</code>, <code>readBatteryLevel()</code>, <code>displayOff()</code>, <code>isPackageInstalled()</code>.</td></tr>
+<tr><td><code>getadbdata.cpp/.h</code></td><td><code>getadbOutput(cstring)</code> — one-shot ADB via <code>startCommand()</code> (shell splitting).</td></tr>
+<tr><td><code>getreturncode.cpp/.h</code></td><td><code>getreturncode(cstring)</code> — ADB via <code>splitCommand()</code> + <code>start(prog,args)</code>, returns exit code.</td></tr>
+<tr><td><code>connectadb.cpp/.h</code></td><td><code>connectadb(adbPath, args)</code> — network connect with 5-second timeout + SIGKILL/TerminateProcess fallback.</td></tr>
+</table>
+
+<h3>Database, Config &amp; Logging</h3>
+<table>
+<tr><th>File(s)</th><th>Purpose</th></tr>
+<tr><td><code>kodidatamanager.cpp/.h</code></td><td>SQLite CRUD for the <code>device</code> table. JSON config creation/merge. DB path, table creation, device record queries.</td></tr>
+<tr><td><code>preferencesmanager.cpp/.h</code></td><td>Load/save individual preference values from <code>adblink.json</code>.</td></tr>
+<tr><td><code>logfile.cpp/.h</code></td><td>Thread-safe logging singleton. <code>logfile(line)</code>, <code>rotateLogFile(dir)</code>. Writes to <code>~/.jocala/adblink.log</code>.</td></tr>
+</table>
+
+<h3>UI Dialogs</h3>
+<table>
+<tr><th>File(s)</th><th>Purpose</th></tr>
+<tr><td><code>adbprefdialog.cpp/.h</code></td><td>Preferences dialog (300x500 fixed). 3 checkboxes, 5 combos, 4 directory pickers, terminal type, 3 buttons.</td></tr>
+<tr><td><code>devicerecorddialog.cpp/.h</code></td><td>Add/Edit device dialog. Visible fields: Description, IP, Port, USB, Package, Data Root, File Path, Pull Dir, Scrcpy Args.</td></tr>
+<tr><td><code>sleepdialog.cpp/.h</code></td><td>Sleep &amp; screensaver timer dialog for Kodi devices. Radio buttons + value entry fields.</td></tr>
+<tr><td><code>logviewerdialog.cpp/.h</code></td><td>View adblink log in a scrollable dialog.</td></tr>
+<tr><td><code>helpdialog.cpp/.h</code></td><td>Help system using QTextBrowser. Loads HTML from qrc:/assets/. Supports hyperlinks.</td></tr>
+<tr><td><code>backupdialog.cpp/.h</code></td><td>Backup progress/settings dialog.</td></tr>
+<tr><td><code>restdialog.cpp/.h</code></td><td>Restore partition chooser dialog (when multiple storage mounts exist).</td></tr>
+<tr><td><code>cachedialog.cpp/.h</code></td><td>Cache management dialog.</td></tr>
+<tr><td><code>datadialog.cpp/.h</code></td><td>Generic data display dialog.</td></tr>
+<tr><td><code>tcpipdialog.cpp/.h</code></td><td>TCP/IP connection dialog (Wireless ADBD).</td></tr>
+<tr><td><code>scpdialog.cpp/.h</code></td><td>Screen capture dialog.</td></tr>
+<tr><td><code>listfiledialog.cpp/.h</code></td><td>File listing dialog.</td></tr>
+<tr><td><code>editordialog.cpp/.h</code></td><td>XML editor dialog.</td></tr>
+<tr><td><code>keyboarddialog.cpp/.h</code></td><td>Keyboard/virtual keypad dialog.</td></tr>
+<tr><td><code>searchdialog.cpp/.h</code></td><td>Search dialog.</td></tr>
+<tr><td><code>usbfiledialog.cpp/.h</code></td><td>File manager dialog (~1200 lines). Tree-based file browsing, pull/push, delete on device.</td></tr>
+<tr><td><code>oculusdialog.cpp/.h</code></td><td>Oculus VR setup dialog. Dead code (not connected to menu).</td></tr>
+<tr><td><code>kodiarchdialog.cpp/.h</code></td><td>Kodi architecture info dialog.</td></tr>
+<tr><td><code>forcequitdialog.cpp/.h</code></td><td>Force-quit confirmation dialog.</td></tr>
+<tr><td><code>uninstalldialog.cpp/.h</code></td><td>APK uninstall confirmation dialog.</td></tr>
+<tr><td><code>customlistwidget.cpp/.h</code></td><td>Custom QListWidget subclass (styling).</td></tr>
+</table>
+
+<h3>Manager Classes (37)</h3>
+<table>
+<tr><th>Class</th><th>Files</th><th>Purpose</th></tr>
+<tr><td><code>AboutManager</code></td><td><code>aboutmanager.cpp/.h</code></td><td>Builds the About box: version, credits, links.</td></tr>
+<tr><td><code>AdhocManager</code></td><td><code>adhocmanager.cpp/.h</code></td><td>Ad-hoc IP device connection (add device by IP).</td></tr>
+<tr><td><code>AppManager</code></td><td><code>appmanager.cpp/.h</code></td><td>Start/stop apps via <code>am start</code>/<code>am force-stop</code>.</td></tr>
+<tr><td><code>ApkUidManager</code></td><td><code>apkuidmanager.cpp/.h</code></td><td>Get package UID/name from an APK file (aapt dump).</td></tr>
+<tr><td><code>BackupManager</code></td><td><code>backupmanager.cpp/.h</code></td><td>Backup &amp; restore Kodi data. Pulls <code>files/.kodi/</code> from device, pushes backups back. Calls <code>removeMetadataFiles()</code>, <code>logDeviceDiagnostics()</code>.</td></tr>
+<tr><td><code>CacheManager</code></td><td><code>cachemanager.cpp/.h</code></td><td>Manage Kodi cache directories (textures, thumbnails, etc.).</td></tr>
+<tr><td><code>ConnectManager</code></td><td><code>connectmanager.cpp/.h</code></td><td>Connect to device via ADB TCP/IP. Calls <code>connectadb()</code>.</td></tr>
+<tr><td><code>ConsoleManager</code></td><td><code>consolemanager.cpp/.h</code></td><td>ADB shell console (interactive-like).</td></tr>
+<tr><td><code>DataMoveManager</code></td><td><code>datamovemanager.cpp/.h</code></td><td>Move Kodi data between storage locations (internal ↔ external).</td></tr>
+<tr><td><code>DataUsageManager</code></td><td><code>datausagemanager.cpp/.h</code></td><td>Show Kodi data directory size via <code>du</code>.</td></tr>
+<tr><td><code>DatabaseResetManager</code></td><td><code>databaseresetmanager.cpp/.h</code></td><td>Erase/reinitialize adblink SQLite database (Initialize adblink).</td></tr>
+<tr><td><code>DeleteRecordManager</code></td><td><code>deleterecordmanager.cpp/.h</code></td><td>Delete device record from SQLite (blocked if connected).</td></tr>
+<tr><td><code>DeviceEditorManager</code></td><td><code>deviceeditormanager.cpp/.h</code></td><td>Coordinates add/edit device workflow via DeviceRecordDialog.</td></tr>
+<tr><td><code>DeviceTableLoader</code></td><td><code>devicetableloader.cpp/.h</code></td><td>Queries all devices from SQLite and populates the table widget. Preserves selection/scroll state. Uses IpTableWidgetItem for IP-aware sorting.</td></tr>
+<tr><td><code>DisconnectManager</code></td><td><code>disconnectmanager.cpp/.h</code></td><td>Disconnect device via ADB. Optional bypass-prompt via <code>bypassdisconnect</code> JSON key.</td></tr>
+<tr><td><code>FileManager</code></td><td><code>filemanager.cpp/.h</code></td><td>Opens the device file browser (usbfiledialog). Resolves Kodi path via <code>resolveKodiPath()</code>.</td></tr>
+<tr><td><code>InstallManager</code></td><td><code>installmanager.cpp/.h</code></td><td>APK installation via <code>adb install</code>. Reads saved install path from JSON.</td></tr>
+<tr><td><code>KodiDownloadCoordinator</code></td><td><code>kodidownloadcoordinator.cpp/.h</code></td><td>Coordinates Kodi download process (download + push + install).</td></tr>
+<tr><td><code>KodiDownloader</code></td><td><code>kodidownloader.cpp/.h</code></td><td>Downloads Kodi APK from jocala.com. Version check + download progress. Fixed for suffixed version parsing.</td></tr>
+<tr><td><code>KodiLogManager</code></td><td><code>kodilogmanager.cpp/.h</code></td><td>View Kodi log from device (<code>cat /sdcard/Android/.../kodi.log</code>).</td></tr>
+<tr><td><code>KodiSetupManager</code></td><td><code>kodisetupmanager.cpp/.h</code></td><td>Create kodi_data directory. Surgical repair: reads current state, only creates/writes what's missing.</td></tr>
+<tr><td><code>KillServerManager</code></td><td><code>killservermanager.cpp/.h</code></td><td>Reset ADB server (<code>adb kill-server</code> + restart).</td></tr>
+<tr><td><code>KeypadManager</code></td><td><code>keypadmanager.cpp/.h</code></td><td>Virtual keypad dialog — sends keyevents to device.</td></tr>
+<tr><td><code>RemotePushManager</code></td><td><code>remotepushmanager.cpp/.h</code></td><td>Push remote files to Kodi (custom keymaps, etc.).</td></tr>
+<tr><td><code>RebootManager</code></td><td><code>rebootmanager.cpp/.h</code></td><td>Reboot device via <code>adb reboot</code>.</td></tr>
+<tr><td><code>ScreenCapManager</code></td><td><code>screencapmanager.cpp/.h</code></td><td>Capture device screen via <code>screencap</code> + pull to local.</td></tr>
+<tr><td><code>SendTextManager</code></td><td><code>sendtextmanager.cpp/.h</code></td><td>Send text input to device via <code>adb shell input text</code>.</td></tr>
+<tr><td><code>SideloadManager</code></td><td><code>sideloadmanager.cpp/.h</code></td><td>APK install (sideload) dialog + progress.</td></tr>
+<tr><td><code>SplashScreenManager</code></td><td><code>splashscreenmanager.cpp/.h</code></td><td>Replace Kodi splash screen image.</td></tr>
+<tr><td><code>ThumbnailManager</code></td><td><code>thumbnailmanager.cpp/.h</code></td><td>Delete Kodi thumbnail cache (<code>delete thumbnails</code>).</td></tr>
+<tr><td><code>TimerManager</code></td><td><code>timermanager.cpp/.h</code></td><td>Set sleep &amp; screensaver timers via <code>settings put</code> commands.</td></tr>
+<tr><td><code>UninstallManager</code></td><td><code>uninstallmanager.cpp/.h</code></td><td>Uninstall APK via <code>adb uninstall</code>.</td></tr>
+<tr><td><code>VersionCheckManager</code></td><td><code>versioncheckmanager.cpp/.h</code></td><td>Check for newer adblink version on jocala.com.</td></tr>
+<tr><td><code>WirelessAdbManager</code></td><td><code>wirelessadbmanager.cpp/.h</code></td><td>Enable/disable wireless ADB on device via TCP/IP port.</td></tr>
+<tr><td><code>XmlEditorManager</code></td><td><code>xmleditormanager.cpp/.h</code></td><td>Edit Kodi XML config files on device (pull, local edit, push).</td></tr>
+</table>
+
+<h3>Utility / Misc</h3>
+<table>
+<tr><th>File(s)</th><th>Purpose</th></tr>
+<tr><td><code>adbstring.cpp/.h</code></td><td><code>adbString(input)</code> — escape single quotes, wrap in double quotes.</td></tr>
+<tr><td><code>stringutils.cpp/.h</code></td><td><code>stripString()</code>, <code>checkslash()</code>, <code>validateIPAddress()</code>, <code>usbStatus()</code>.</td></tr>
+<tr><td><code>devicerecord.h</code></td><td>POD struct with 20 fields (id, daddr, pulldir, xbmcpackage, data_root, buffermode, buffersize, bufferfactor, description, filepath, port, isusb, disableroot, scoped, wsa, ostype, scrcpyarg).</td></tr>
+<tr><td><code>iptablewidgetitem.h</code></td><td><code>IpTableWidgetItem</code> — QTableWidgetItem subclass with IP-aware sorting (N/A sentinel, octet comparison).</td></tr>
+<tr><td><code>program.h</code></td><td><code>QString program = "adblink"</code></td></tr>
+<tr><td><code>version.h</code></td><td><code>const QString version = "8.0"</code></td></tr>
+<tr><td><code>getlocaladb.cpp/.h</code></td><td>Read user-specified ADB path from <code>adblink.json</code> key <code>"localadb"</code>. Returns empty string if not set.</td></tr>
+<tr><td><code>about.cpp/.h</code></td><td>About box content (version string, credits).</td></tr>
+<tr><td><code>datadialog.cpp/.h</code></td><td>Generic data display widget.</td></tr>
+<tr><td><code>deviceeditor.cpp/.h</code></td><td>Device editor helper.</td></tr>
+<tr><td><code>oculusmanager.cpp/.h</code></td><td>Oculus Quest ADB setup. Compilable but not connected to any menu action (dead code).</td></tr>
+</table>
+
+<h3>Tests</h3>
+<table>
+<tr><th>File(s)</th><th>Purpose</th></tr>
+<tr><td><code>tst_adbstring.cpp</code></td><td>Tests <code>adbString()</code> escaping.</td></tr>
+<tr><td><code>tst_database.cpp</code></td><td>Tests SQLite CRUD via KodiDataManager.</td></tr>
+<tr><td><code>tst_jsonconfig.cpp</code></td><td>Tests JSON config creation/merge.</td></tr>
+<tr><td><code>tst_logfile.cpp</code></td><td>Tests logfile append and rotation.</td></tr>
+<tr><td><code>tst_getadbpath.cpp</code></td><td>Tests ADB path resolution.</td></tr>
+<tr><td><code>tst_devicerecord.cpp</code></td><td>Tests DeviceRecord struct.</td></tr>
+<tr><td><code>tst_iptablesort.cpp</code></td><td>Tests IP sorting via IpTableWidgetItem.</td></tr>
+<tr><td><code>tst_stringutils.cpp</code></td><td>Tests string utility functions.</td></tr>
+<tr><td><code>tst_getreturncode.cpp</code></td><td>Tests getreturncode (exit code).</td></tr>
+<tr><td><code>tst_devicerecorddialog.cpp</code></td><td>GUI test — DeviceRecordDialog.</td></tr>
+<tr><td><code>tst_logviewerdialog.cpp</code></td><td>GUI test — LogViewerDialog.</td></tr>
+</table>
+
+
+<!-- ─── Section 3: Menu Reference ──────────────────────────── -->
+<h2 id="menu">3 &mdash; Menu Reference</h2>
+<p>All menu actions are created in <code>MainWindow::setupMenus()</code> (mainwindow.cpp ~2721) and connected in <code>setupMenuConnections()</code> (mainwindow.cpp ~2817).</p>
+
+<h3 id="menu-file">3.1 &mdash; File Menu</h3>
+<table>
+<tr><th>Label</th><th>Action Variable</th><th>Slot</th><th>Source File(s)</th><th>Synopsis</th></tr>
+<tr>
+  <td>Preferences</td>
+  <td><code>actionPreferences</code></td>
+  <td><code>on_actionPreferences_triggered</code></td>
+  <td><code>adbprefdialog.cpp/.h</code>, <code>preferencesmanager.cpp/.h</code></td>
+  <td>Opens the preferences dialog (300x500). 3 checkboxes, 5 combos, 4 directory pickers, terminal type. mainwindow.cpp:1174</td>
+</tr>
+<tr>
+  <td>View adblink Log</td>
+  <td><code>actionView_adbLink_Log</code></td>
+  <td><code>on_actionView_adbLink_Log_triggered</code></td>
+  <td><code>logviewerdialog.cpp/.h</code>, <code>logfile.cpp/.h</code></td>
+  <td>Opens the log viewer showing <code>~/.jocala/adblink.log</code>. mainwindow.cpp:908</td>
+</tr>
+<tr>
+  <td>Quit</td>
+  <td><code>actionQuit</code></td>
+  <td><code>on_actionQuit_triggered</code> → <code>onApplicationQuit()</code></td>
+  <td><code>mainwindow.cpp/.h</code></td>
+  <td>Cleanup: stop track-devices, kill ADB server with timeout + force-kill fallback. mainwindow.cpp:696</td>
+</tr>
+</table>
+
+<h3 id="menu-kodi">3.2 &mdash; Kodi Menu</h3>
+<table>
+<tr><th>Label</th><th>Action Variable</th><th>Slot</th><th>Source File(s)</th><th>Synopsis</th></tr>
+<tr><td>View Kodi Log</td><td><code>actionView_Kodi_Log</code></td><td><code>on_actionView_Kodi_Log_triggered</code></td><td><code>kodilogmanager.cpp/.h</code></td><td>Reads and displays Kodi log from device. mainwindow.cpp:895</td></tr>
+<tr><td>Edit XML</td><td><code>actionEdit_XML</code></td><td><code>on_actionEdit_XML_triggered</code></td><td><code>xmleditormanager.cpp/.h</code></td><td>Pull XML from device, edit locally, push back. mainwindow.cpp:1693</td></tr>
+<tr><td>Splash Screen</td><td><code>actionSplash_Screen</code></td><td><code>on_actionSplash_Screen_triggered</code></td><td><code>splashscreenmanager.cpp/.h</code></td><td>Replace Kodi splash screen image. mainwindow.cpp:1631</td></tr>
+<tr><td>Delete thumbnails</td><td><code>actiondelthumb</code></td><td><code>on_actiondelthumb_triggered</code></td><td><code>thumbnailmanager.cpp/.h</code></td><td>Deletes Kodi thumbnail cache directories on device. mainwindow.cpp:1394</td></tr>
+<tr><td>Push remote</td><td><code>actionPush_remote</code></td><td><code>on_actionPush_remote_triggered</code></td><td><code>remotepushmanager.cpp/.h</code></td><td>Push custom remote/keymap files to Kodi. mainwindow.cpp:818</td></tr>
+<tr><td>Download Kodi</td><td><code>actionDownload_Kodi</code></td><td><code>on_actionDownload_Kodi_triggered</code></td><td><code>kodidownloader.cpp/.h</code>, <code>kodidownloadcoordinator.cpp/.h</code></td><td>Download Kodi APK from jocala.com and install to device. mainwindow.cpp:1219</td></tr>
+<tr><td>Kodi data size</td><td><code>actionKodi_data_usage</code></td><td><code>on_actionKodi_data_usage_triggered</code></td><td><code>datausagemanager.cpp/.h</code></td><td>Show size of Kodi data directory via <code>du</code>. mainwindow.cpp:1075</td></tr>
+<tr><td>Check Kodi version</td><td><code>actionKodi_version</code></td><td><code>on_actionKodi_version</code></td><td><code>mainwindow.cpp</code></td><td>Query installed Kodi version via <code>dumpsys package</code>. mainwindow.cpp:1095</td></tr>
+<tr><td>Create kodi_data</td><td><code>actionCreate_kodi_data</code></td><td><code>on_actionCreate_kodi_data_triggered</code></td><td><code>kodisetupmanager.cpp/.h</code></td><td>Surgical repair of Kodi data directory. Checks env file content + directory state, only creates/writes what's missing. No <code>rm -r</code>. mainwindow.cpp:1414</td></tr>
+</table>
+
+<h3 id="menu-util">3.3 &mdash; Utility Menu</h3>
+<table>
+<tr><th>Label</th><th>Action Variable</th><th>Slot</th><th>Source File(s)</th><th>Synopsis</th></tr>
+<tr><td>Switch View</td><td><code>actionSwitch_View</code></td><td><code>on_actionSwitch_View_triggered</code></td><td><code>mainwindow.cpp</code></td><td>Toggles stacked widget between Kodi (0) and Android (1) view. Persisted to JSON <code>"startview"</code>. mainwindow.cpp:2037</td></tr>
+<tr><td>Reinstall Busybox</td><td><code>actionReiinstall_Busybox</code></td><td>lambda → <code>ensureBusyboxInstalled()</code></td><td><code>adbutils.cpp/.h</code></td><td>Pushes busybox binary to device at <code>/data/local/tmp/adblink/</code>. mainwindow.cpp:2832</td></tr>
+<tr><td>System information</td><td><code>infoArchitecture2</code></td><td><code>on_infoArchitecture_triggered</code></td><td><code>mainwindow.cpp</code></td><td>Display device architecture, Android version, name, manufacturer, battery, scoped status. mainwindow.cpp:2037 area</td></tr>
+<tr><td>Initialize adblink</td><td><code>Erase_adbLink_database</code></td><td><code>on_Erase_adbLink_database_triggered</code></td><td><code>databaseresetmanager.cpp/.h</code></td><td>Drop all tables, recreate schema, reset JSON config to defaults. mainwindow.cpp:1873</td></tr>
+<tr><td>Send text to device</td><td><code>actionSend_text</code></td><td><code>on_actionSend_text_triggered</code></td><td><code>sendtextmanager.cpp/.h</code></td><td>Send text via <code>input text</code>. Also accessible via Ctrl+T from Android view. mainwindow.cpp:1665</td></tr>
+<tr><td>Get package name</td><td><code>actionGet_UID_from_APK_file</code></td><td><code>on_actionGet_UID_from_APK_file_triggered</code></td><td><code>apkuidmanager.cpp/.h</code></td><td>Read package name/UID from an APK file via aapt. mainwindow.cpp:1658</td></tr>
+<tr><td>Reload devices</td><td><code>actionReload_devices</code></td><td><code>on_actionReload_devices_triggered</code></td><td><code>mainwindow.cpp</code>, <code>devicetableloader.cpp</code></td><td>Re-populates the device table from SQLite. mainwindow.cpp:2019</td></tr>
+<tr><td>View changelog</td><td><code>View_Changelog</code></td><td><code>on_View_Changelog_triggered</code></td><td><code>about.cpp/.h</code>, <code>changelog.txt</code></td><td>Opens changelog from the app's data directory. mainwindow.cpp:1646</td></tr>
+<tr><td>Wireless ADBD</td><td><code>actionWireless_ADBD</code></td><td><code>on_actionWireless_ADBD_triggered</code></td><td><code>wirelessadbmanager.cpp/.h</code></td><td>Enable/disable ADB over TCP/IP on device. mainwindow.cpp:1057</td></tr>
+<tr><td>Reboot device</td><td><code>actionReboot</code></td><td><code>on_actionReboot_triggered</code></td><td><code>rebootmanager.cpp/.h</code></td><td>Reboot device via <code>adb reboot</code>. mainwindow.cpp:836</td></tr>
+</table>
+
+<h3 id="menu-about">3.4 &mdash; About &amp; Help Menus</h3>
+<table>
+<tr><th>Menu</th><th>Label</th><th>Action Variable</th><th>Slot</th><th>Source</th><th>Synopsis</th></tr>
+<tr><td>About</td><td>About</td><td><code>actionAbout</code></td><td><code>on_actionAbout_triggered</code></td><td><code>aboutmanager.cpp/.h</code></td><td>Show version, credits, website links. mainwindow.cpp:801</td></tr>
+<tr><td>Help</td><td>Help</td><td><code>actionHelp</code></td><td><code>on_actionHelp_triggered</code></td><td><code>helpdialog.cpp/.h</code>, <code>assets/*.html</code></td><td>Opens QTextBrowser with <code>menu.html</code> from qrc:/assets/. mainwindow.cpp:808</td></tr>
+</table>
+
+
+<!-- ─── Section 4: Button Grid Reference ──────────────────── -->
+<h2 id="buttons">4 &mdash; Button Grid Reference</h2>
+
+<h3 id="btn-upper">4.1 &mdash; Upper Action Grid (3x2)</h3>
+<p>In <code>rightLayout</code> above the stacked widget. Fixed button size from <code>ebuttonsize</code>. mainwindow.cpp:2208-2257</p>
+<table>
+<tr><th>#</th><th>Label</th><th>Tooltip</th><th>Shortcut</th><th>Slot</th><th>Source</th><th>Synopsis</th></tr>
+<tr><td>0</td><td>Connect</td><td>Connect selected device (Ctrl+D)</td><td>Ctrl+D</td><td><code>connButton_clicked</code></td><td><code>connectmanager.cpp</code></td><td>ADB connect to selected device (IP:port or USB).</td></tr>
+<tr><td>1</td><td>Disconnect</td><td>Disconnect selected device (Ctrl+E)</td><td>Ctrl+E</td><td><code>disButton_clicked</code></td><td><code>disconnectmanager.cpp</code></td><td>ADB disconnect. Optionally bypasses confirmation prompt via JSON <code>"bypassdisconnect"</code>.</td></tr>
+<tr><td>2</td><td>New</td><td>Add new device (Ctrl+G)</td><td>Ctrl+G</td><td>lambda → <code>dataentry(true)</code></td><td><code>deviceeditormanager.cpp</code></td><td>Open DeviceRecordDialog to add a new device to SQLite.</td></tr>
+<tr><td>3</td><td>Edit</td><td>Edit selected device (Ctrl+W)</td><td>Ctrl+W</td><td>lambda → <code>dataentry(false)</code></td><td><code>deviceeditormanager.cpp</code></td><td>Open DeviceRecordDialog to edit the selected device's record.</td></tr>
+<tr><td>4</td><td>Delete</td><td>Delete selected device (Ctrl+I)</td><td>Ctrl+I</td><td><code>delRecordButton_clicked</code></td><td><code>deleterecordmanager.cpp</code></td><td>Delete selected device from SQLite. Blocked if device status is Connected.</td></tr>
+<tr><td>5</td><td>Clear</td><td>Clear ad hoc IP field (Ctrl+J)</td><td>Ctrl+J</td><td><code>on_clearAdhocButton_clicked</code></td><td><code>mainwindow.cpp</code></td><td>Clears the Ad hoc IP address text field.</td></tr>
+</table>
+
+<h3 id="btn-kodi">4.2 &mdash; Kodi View Grid (4x4, 16 buttons)</h3>
+<p>Stacked widget index 0. Fixed button size from <code>buttonsize</code>. mainwindow.cpp:2309-2403</p>
+<table>
+<tr><th>#</th><th>Label</th><th>Tooltip</th><th>Shortcut</th><th>Slot</th><th>Source</th><th>Synopsis</th></tr>
+<tr><td>0</td><td>File Manager</td><td>Open the file manager (Ctrl+F)</td><td>Ctrl+F</td><td><code>fmButton_clicked</code></td><td><code>filemanager.cpp/.h</code></td><td>Opens the device file browser (usbfiledialog). Resolves Kodi path as root.</td></tr>
+<tr><td>1</td><td>ADB Shell</td><td>Open an ADB shell (Ctrl+A)</td><td>Ctrl+A</td><td><code>adbshellButton_clicked</code></td><td><code>consolemanager.cpp/.h</code></td><td>Opens an interactive-like ADB shell console.</td></tr>
+<tr><td>2</td><td>Backup</td><td>Backup device data (Ctrl+B)</td><td>Ctrl+B</td><td><code>backupButton_clicked</code></td><td><code>backupmanager.cpp/.h</code></td><td>Pull Kodi userdata/addons from device to local backup directory.</td></tr>
+<tr><td>3</td><td>Restore</td><td>Restore device data (Ctrl+R)</td><td>Ctrl+R</td><td><code>restoreButton_clicked</code></td><td><code>backupmanager.cpp/.h</code></td><td>Push a local backup back to device. Validates env file before using.</td></tr>
+<tr><td>4</td><td>Install</td><td>Install an APK file (Ctrl+V)</td><td>Ctrl+V</td><td><code>sideload_Button_clicked</code></td><td><code>sideloadmanager.cpp/.h</code>, <code>installmanager.cpp/.h</code></td><td>Install an APK file on the device.</td></tr>
+<tr><td>5</td><td>Uninstall</td><td>Uninstall an APK (Ctrl+U)</td><td>Ctrl+U</td><td><code>uninstall_Button_clicked</code></td><td><code>uninstallmanager.cpp/.h</code>, <code>uninstalldialog.cpp/.h</code></td><td>Uninstall a package from the device.</td></tr>
+<tr><td>6</td><td>Move Kodi</td><td>Move Kodi data to another location</td><td>&mdash;</td><td><code>mvdataButton_clicked</code></td><td><code>datamovemanager.cpp/.h</code></td><td>Move Kodi data between internal and external storage.</td></tr>
+<tr><td>7</td><td>Edit Timers</td><td>Edit device timers</td><td>&mdash;</td><td><code>pushTimers_clicked</code></td><td><code>timermanager.cpp/.h</code>, <code>sleepdialog.cpp/.h</code></td><td>Read/write sleep &amp; screensaver timer settings via <code>settings put</code>.</td></tr>
+<tr><td>8</td><td>Screencap</td><td>Capture the device screen (Ctrl+C)</td><td>Ctrl+C</td><td><code>screenCap</code></td><td><code>screencapmanager.cpp/.h</code></td><td>Capture device screen via <code>screencap</code> + pull to desktop.</td></tr>
+<tr><td>9</td><td>Reset ADB</td><td>Reset the ADB server</td><td>&mdash;</td><td><code>killServer_clicked</code></td><td><code>killservermanager.cpp/.h</code></td><td><code>adb kill-server</code> followed by <code>adb start-server</code>.</td></tr>
+<tr><td>10</td><td>Scrcpy</td><td>Mirror and control device screen (Ctrl+S)</td><td>Ctrl+S</td><td><code>scpyButton_clicked</code></td><td><code>mainwindow.cpp</code></td><td>Launch scrcpy with device-specific arguments from JSON key <code>"scrcpyarg"</code> (flag5).</td></tr>
+<tr><td>11</td><td>Edit Cache</td><td>Manage device cache</td><td>&mdash;</td><td><code>cacheButton_clicked</code></td><td><code>cachemanager.cpp/.h</code>, <code>cachedialog.cpp/.h</code></td><td>View/manage Kodi cache directories.</td></tr>
+<tr><td>12</td><td>Console</td><td>Open the console (Ctrl+N)</td><td>Ctrl+N</td><td><code>doConsole_clicked</code></td><td><code>consolemanager.cpp/.h</code></td><td>Open ADB shell console (alternative entry).</td></tr>
+<tr><td>13</td><td>Keypad</td><td>Access virtual keypad (Ctrl+K)</td><td>Ctrl+K</td><td><code>keypadButton_clicked</code></td><td><code>keypadmanager.cpp/.h</code>, <code>keyboarddialog.cpp/.h</code></td><td>Virtual keypad that sends keyevents to device.</td></tr>
+<tr><td>14</td><td>Start App</td><td>Launch an application (Ctrl+O)</td><td>Ctrl+O</td><td><code>startapp_clicked</code></td><td><code>appmanager.cpp/.h</code></td><td>Launch app via <code>am start</code>. Package from JSON key <code>"startapp"</code>.</td></tr>
+<tr><td>15</td><td>Stop App</td><td>Stop a running application (Ctrl+P)</td><td>Ctrl+P</td><td><code>stopapp_clicked</code></td><td><code>appmanager.cpp/.h</code></td><td>Force-stop app via <code>am force-stop</code>. Package from JSON key <code>"stopapp"</code>.</td></tr>
+</table>
+
+<h3 id="btn-android">4.3 &mdash; Android View Grid (4x3, 12 buttons)</h3>
+<p>Stacked widget index 1. Fixed button size from <code>buttonsize</code>. mainwindow.cpp:2407-2485</p>
+<table>
+<tr><th>#</th><th>Label</th><th>Tooltip</th><th>Shortcut</th><th>Slot</th><th>Source</th><th>Synopsis</th></tr>
+<tr><td>0</td><td>File Manager</td><td>Open the file manager (Ctrl+F)</td><td>Ctrl+F</td><td><code>fmButton_clicked</code></td><td><code>filemanager.cpp/.h</code></td><td>Same as Kodi view File Manager (no Kodi path dependency).</td></tr>
+<tr><td>1</td><td>Install APK</td><td>Install an APK file (Ctrl+V)</td><td>Ctrl+V</td><td><code>sideload_Button_clicked</code></td><td><code>installmanager.cpp/.h</code></td><td>Same as Kodi view Install.</td></tr>
+<tr><td>2</td><td>Uninstall APK</td><td>Uninstall an APK (Ctrl+U)</td><td>Ctrl+U</td><td><code>uninstall_Button_clicked</code></td><td><code>uninstallmanager.cpp/.h</code></td><td>Same as Kodi view Uninstall.</td></tr>
+<tr><td>3</td><td>System Info</td><td>Display system information</td><td>&mdash;</td><td><code>infoArchitecture</code></td><td><code>mainwindow.cpp</code></td><td>Show Android architecture, version, device name, manufacturer, battery, scoped status.</td></tr>
+<tr><td>4</td><td>Screencap</td><td>Capture the device screen (Ctrl+C)</td><td>Ctrl+C</td><td><code>screenCap</code></td><td><code>screencapmanager.cpp/.h</code></td><td>Same as Kodi view Screencap.</td></tr>
+<tr><td>5</td><td>Reset ADB</td><td>Reset the ADB server</td><td>&mdash;</td><td><code>killServer_clicked</code></td><td><code>killservermanager.cpp/.h</code></td><td>Same as Kodi view Reset ADB.</td></tr>
+<tr><td>6</td><td>Start App</td><td>Launch an application (Ctrl+O)</td><td>Ctrl+O</td><td><code>startapp_clicked</code></td><td><code>appmanager.cpp/.h</code></td><td>Same as Kodi view Start App.</td></tr>
+<tr><td>7</td><td>Stop App</td><td>Stop a running application (Ctrl+P)</td><td>Ctrl+P</td><td><code>stopapp_clicked</code></td><td><code>appmanager.cpp/.h</code></td><td>Same as Kodi view Stop App.</td></tr>
+<tr><td>8</td><td>ADB Shell</td><td>Open an ADB shell (Ctrl+A)</td><td>Ctrl+A</td><td><code>adbshellButton_clicked</code></td><td><code>consolemanager.cpp/.h</code></td><td>Same as Kodi view ADB Shell.</td></tr>
+<tr><td>9</td><td>Console</td><td>Open the console (Ctrl+N)</td><td>Ctrl+N</td><td><code>doConsole_clicked</code></td><td><code>consolemanager.cpp/.h</code></td><td>Same as Kodi view Console.</td></tr>
+<tr><td>10</td><td>Send Text</td><td>Send text to the device (Ctrl+T)</td><td>Ctrl+T</td><td><code>on_actionSend_text_triggered</code></td><td><code>sendtextmanager.cpp/.h</code></td><td>Same as Utility → Send text to device.</td></tr>
+<tr><td>11</td><td>ScrCpy</td><td>Mirror and control device screen (Ctrl+S)</td><td>Ctrl+S</td><td><code>scpyButton_clicked</code></td><td><code>mainwindow.cpp</code></td><td>Same as Kodi view Scrcpy.</td></tr>
+</table>
+
+
+<!-- ─── Section 5: Keyboard Shortcuts ────────────────────── -->
+<h2 id="shortcuts">5 &mdash; Keyboard Shortcuts</h2>
+<p>All shortcuts bound in <code>MainWindow</code> constructor. mainwindow.cpp:238-258</p>
+<table>
+<tr><th>Shortcut</th><th>Slot / Action</th><th>Source</th></tr>
+<tr><td><kbd>Ctrl+A</kbd></td><td><code>adbshellButton_clicked</code></td><td>consolemanager</td></tr>
+<tr><td><kbd>Ctrl+B</kbd></td><td><code>backupButton_clicked</code></td><td>backupmanager</td></tr>
+<tr><td><kbd>Ctrl+C</kbd></td><td><code>screenCap</code></td><td>screencapmanager</td></tr>
+<tr><td><kbd>Ctrl+D</kbd></td><td><code>connButton_clicked</code></td><td>connectmanager</td></tr>
+<tr><td><kbd>Ctrl+E</kbd></td><td><code>disButton_clicked</code></td><td>disconnectmanager</td></tr>
+<tr><td><kbd>Ctrl+F</kbd></td><td><code>fmButton_clicked</code></td><td>filemanager</td></tr>
+<tr><td><kbd>Ctrl+G</kbd></td><td><code>dataentry(true)</code> (New device)</td><td>deviceeditormanager</td></tr>
+<tr><td><kbd>Ctrl+I</kbd></td><td><code>delRecordButton_clicked</code></td><td>deleterecordmanager</td></tr>
+<tr><td><kbd>Ctrl+J</kbd></td><td><code>on_clearAdhocButton_clicked</code></td><td>mainwindow</td></tr>
+<tr><td><kbd>Ctrl+K</kbd></td><td><code>keypadButton_clicked</code></td><td>keypadmanager</td></tr>
+<tr><td><kbd>Ctrl+N</kbd></td><td><code>doConsole_clicked</code></td><td>consolemanager</td></tr>
+<tr><td><kbd>Ctrl+O</kbd></td><td><code>startapp_clicked</code></td><td>appmanager</td></tr>
+<tr><td><kbd>Ctrl+P</kbd></td><td><code>stopapp_clicked</code></td><td>appmanager</td></tr>
+<tr><td><kbd>Ctrl+R</kbd></td><td><code>restoreButton_clicked</code></td><td>backupmanager</td></tr>
+<tr><td><kbd>Ctrl+S</kbd></td><td><code>scpyButton_clicked</code></td><td>mainwindow (scrcpy)</td></tr>
+<tr><td><kbd>Ctrl+T</kbd></td><td><code>on_actionSend_text_triggered</code></td><td>sendtextmanager</td></tr>
+<tr><td><kbd>Ctrl+U</kbd></td><td><code>uninstall_Button_clicked</code></td><td>uninstallmanager</td></tr>
+<tr><td><kbd>Ctrl+V</kbd></td><td><code>sideload_Button_clicked</code></td><td>sideloadmanager</td></tr>
+<tr><td><kbd>Ctrl+W</kbd></td><td><code>dataentry(false)</code> (Edit device)</td><td>deviceeditormanager</td></tr>
+<tr><td><kbd>Ctrl+X</kbd></td><td><code>displayOff</code></td><td>adbutils (shell input keyevent 26)</td></tr>
+<tr><td><kbd>Ctrl++</kbd></td><td><code>switchSize()</code></td><td>mainwindow (cycle small/medium/large)</td></tr>
+</table>
+
+
+<!-- ─── Section 6: ADB Communication Layer ───────────────── -->
+<h2 id="adb">6 &mdash; ADB Communication Layer</h2>
+
+<h3 id="adb-patterns">6.1 &mdash; Four Execution Patterns</h3>
+<table>
+<tr><th>Pattern</th><th>Function</th><th>File</th><th>Shell</th><th>When</th></tr>
+<tr>
+  <td><code>getadbOutput(cstring)</code></td>
+  <td>One-shot ADB command, ignore exit code</td>
+  <td><code>getadbdata.cpp</code></td>
+  <td>Uses <code>startCommand()</code> (shell splitting via <code>/bin/sh -c</code> or <code>cmd.exe /c</code>)</td>
+  <td>Most common — reading output, running shell commands on device</td>
+</tr>
+<tr>
+  <td><code>getreturncode(cstring)</code></td>
+  <td>Need exit code only</td>
+  <td><code>getreturncode.cpp</code></td>
+  <td><code>splitCommand()</code> + <code>start(program, args)</code> — no shell. Empty-arg guard returns false.</td>
+  <td>When exit success/failure matters (permissions, existence checks)</td>
+</tr>
+<tr>
+  <td><code>connectadb(adbPath, args)</code></td>
+  <td>Network connect with 5s timeout</td>
+  <td><code>connectadb.cpp</code></td>
+  <td><code>start(adbPath, args)</code> — no shell</td>
+  <td><code>adb connect</code> command. QEventLoop + QTimer(5000). Kills process on timeout (SIGKILL / TerminateProcess).</td>
+</tr>
+<tr>
+  <td><code>AdbConnection::runCommand(args)</code></td>
+  <td>OOP wrapper via manager</td>
+  <td><code>adbconnection.cpp</code></td>
+  <td><code>start(m_adbPath, splitCommand(args))</code> or <code>start(m_adbPath, args)</code></td>
+  <td>Used by managers that hold an AdbConnection reference</td>
+</tr>
+</table>
+
+<h4>Core blocking wait: <code>syncWaitForProcess()</code> (adbutils.cpp)</h4>
+<pre><code>void syncWaitForProcess(QProcess &process, int timeoutMs = -1);
+</code></pre>
+<p>Polls <code>waitForFinished(100)</code> in a loop, calls <code>QCoreApplication::processEvents()</code> each iteration to keep UI alive. Optional timeout kills the process. Always uses <code>MergedChannels</code> (stdout+stderr combined).</p>
+
+<h4><code>splitCommand()</code> vs <code>startCommand()</code></h4>
+<ul>
+  <li><code>startCommand()</code> → delegates to <code>/bin/sh -c</code> / <code>cmd.exe /c</code> — shell interprets quotes and pipes.</li>
+  <li><code>splitCommand()</code> + <code>start(program, args)</code> → no shell, arguments passed literally. Preferred for safety.</li>
+</ul>
+
+<h3 id="adb-path">6.2 &mdash; ADB Path Construction</h3>
+<p><code>MainWindow::getadb()</code> (mainwindow.cpp) builds the adb prefix string: <code>"\&lt;adb_path&gt;" -s &lt;serial_or_ip:port&gt;</code>. USB and TCP devices distinguished by <code>DeviceRecord::isusb</code>.</p>
+
+<h4>ADB binary discovery priority (adbutils.cpp:17, getlocaladb.cpp)</h4>
+<ol>
+  <li>User-specified path from <code>adblink.json</code> key <code>"localadb"</code> + <code>/adb</code> (or <code>adb.exe</code> on Windows)</li>
+  <li>Bundled <code>&lt;appDir&gt;/adbfiles/adb</code> (or <code>adbfiles/adb.exe</code> on Windows)</li>
+</ol>
+
+<h3 id="adb-usb">6.3 &mdash; USB Auto-Discovery (track-devices)</h3>
+<p>Persistent <code>QProcess</code> running <code>adb track-devices</code>. Streams device state changes continuously. mainwindow.cpp:</p>
+<ul>
+  <li><code>startTrackDevices()</code> — creates QProcess, connects <code>readyReadStandardOutput</code> → <code>onTrackOutput</code>, connects <code>finished</code> → <code>onTrackFinished</code> (auto-restart after 1s).</li>
+  <li><code>onTrackOutput()</code> — reads lines (<code>SERIAL\tSTATUS</code>), strips leading digit prefixes, updates <code>m_usbStatusCache</code> (QHash), starts 150ms debounce timer.</li>
+  <li><code>applyDebouncedRefresh()</code> (debounce timeout) — iterates cache, skips network devices (contains <code>:</code>), skips non-<code>"device"</code> status, skips existing DB records, INSERTs new device with default Kodi values. Duplicate descriptions get <code>-2</code>, <code>-3</code>, etc. suffix.</li>
+</ul>
+
+
+<!-- ─── Section 7: Key Data Structures ───────────────────── -->
+<h2 id="data">7 &mdash; Key Data Structures</h2>
+
+<h3>DeviceRecord (<code>devicerecord.h</code>)</h3>
+<table>
+<tr><th>Field</th><th>Type</th><th>Default</th><th>SQLite Column</th><th>Notes</th></tr>
+<tr><td><code>id</code></td><td>int</td><td>0</td><td>Id (PK AUTOINCREMENT)</td><td></td></tr>
+<tr><td><code>daddr</code></td><td>QString</td><td></td><td>daddr</td><td>IP:port or USB serial</td></tr>
+<tr><td><code>pulldir</code></td><td>QString</td><td></td><td>pulldir</td><td>Default backup/install directory</td></tr>
+<tr><td><code>xbmcpackage</code></td><td>QString</td><td><code>"org.xbmc.kodi"</code></td><td>xbmcpackage</td><td></td></tr>
+<tr><td><code>data_root</code></td><td>QString</td><td><code>"/sdcard/"</code></td><td>data_root</td><td></td></tr>
+<tr><td><code>buffermode</code></td><td>int</td><td>1</td><td>buffermode</td><td></td></tr>
+<tr><td><code>buffersize</code></td><td>QString</td><td></td><td>buffersize</td><td></td></tr>
+<tr><td><code>bufferfactor</code></td><td>QString</td><td></td><td>bufferfactor</td><td></td></tr>
+<tr><td><code>description</code></td><td>QString</td><td></td><td>description (UNIQUE)</td><td>Displayed in device table</td></tr>
+<tr><td><code>filepath</code></td><td>QString</td><td><code>"files/.kodi"</code></td><td>filepath</td><td></td></tr>
+<tr><td><code>port</code></td><td>QString</td><td></td><td>port</td><td>ADB port (default 5555 if empty)</td></tr>
+<tr><td><code>isusb</code></td><td>bool</td><td>false</td><td>isusb</td><td></td></tr>
+<tr><td><code>disableroot</code></td><td>bool</td><td>false</td><td>disableroot</td><td></td></tr>
+<tr><td><code>scoped</code></td><td>bool</td><td>false</td><td>flag1</td><td>Scoped storage flag (set at device creation time)</td></tr>
+<tr><td><code>wsa</code></td><td>bool</td><td>false</td><td>flag2</td><td>Windows Subsystem for Android</td></tr>
+<tr><td><code>ostype</code></td><td>QString</td><td><code>"0"</code></td><td>ostype</td><td>0=Linux, 1=Windows, 2=macOS</td></tr>
+<tr><td><code>scrcpyarg</code></td><td>QString</td><td></td><td>flag5</td><td>Custom scrcpy arguments</td></tr>
+</table>
+
+<h3>NoHScrollTableWidget (<code>mainwindow.h:78-96</code>)</h3>
+<p>QTableWidget subclass. Disables horizontal scrollbar via <code>ScrollBarAlwaysOff</code>. Overrides <code>scrollTo()</code> to preserve horizontal scroll position.</p>
+
+<h3>IpTableWidgetItem (<code>iptablewidgetitem.h</code>)</h3>
+<p>QTableWidgetItem subclass. Overrides <code>operator&lt;</code> for IP-aware sorting in the device table. Handles <code>"N/A"</code> sentinel (sorts last) and parses octets for numeric comparison.</p>
+
+
+<!-- ─── Section 8: Database & Config ────────────────────── -->
+<h2 id="db">8 &mdash; Database &amp; Config</h2>
+
+<h3 id="db-schema">8.1 &mdash; SQLite Schema</h3>
+<p>Path: <code>~/.jocala/adblink.db</code> (macOS/Linux) or <code>%APPDATA%/.jocala/adblink.db</code> (Windows). Created at first run. Managed by <code>KodiDataManager</code>.</p>
+
+<pre><code>CREATE TABLE IF NOT EXISTS device (
+  Id INTEGER PRIMARY KEY AUTOINCREMENT,
+  daddr TEXT,
+  description TEXT NOT NULL UNIQUE,
+  pulldir TEXT,
+  xbmcpackage TEXT,
+  data_root TEXT,
+  buffermode INTEGER,
+  buffersize TEXT,
+  bufferfactor TEXT,
+  filepath TEXT,
+  port TEXT,
+  isusb INTEGER,
+  ostype TEXT,
+  logfilename TEXT,
+  disableroot INTEGER,
+  flag1 TEXT,   -- scoped
+  flag2 TEXT,   -- wsa (Windows Subsystem for Android)
+  flag3 TEXT,
+  flag4 TEXT,
+  flag5 TEXT    -- scrcpyarg
+);</code></pre>
+
+<h4>Key queries</h4>
+<table>
+<tr><th>Operation</th><th>Method</th><th>Description</th></tr>
+<tr><td>Select by description</td><td><code>queryDeviceRecord(desc)</code></td><td>Used when a device table row is selected</td></tr>
+<tr><td>Select by daddr</td><td><code>queryDeviceByDaddr(serial)</code></td><td>Used by USB auto-add</td></tr>
+<tr><td>Insert new device</td><td>INSERT INTO device (11 columns)</td><td>Duplicate description check first</td></tr>
+<tr><td>Update device</td><td>UPDATE device SET ... WHERE description = ?</td><td>No duplicate check</td></tr>
+<tr><td>Ad-hoc insert</td><td>INSERT OR REPLACE INTO device (7 columns)</td><td>Description hardcoded <code>"Ad hoc"</code></td></tr>
+<tr><td>Delete device</td><td>DELETE FROM device WHERE description = ?</td><td>Blocked if device status is <code>"Connected"</code></td></tr>
+</table>
+
+<h3 id="db-json">8.2 &mdash; JSON Config Keys (<code>adblink.json</code>)</h3>
+<p>Managed by <code>KodiDataManager::createJsonConfig()</code> (kodidatamanager.cpp:177). Defaults are merged with existing config; obsolete keys are removed automatically.</p>
+<table>
+<tr><th>Key</th><th>Type</th><th>Default</th><th>Description</th></tr>
+<tr><td><code>checkversion</code></td><td>bool</td><td>true</td><td>Check for new adblink version at startup</td></tr>
+<tr><td><code>scrcpy</code></td><td>bool</td><td>true</td><td>Enable scrcpy feature</td></tr>
+<tr><td><code>startview</code></td><td>bool</td><td>true</td><td>true = Kodi view (index 0), false = Android (index 1)</td></tr>
+<tr><td><code>bypassdisconnect</code></td><td>bool</td><td>false</td><td>Skip "Disconnect device?" confirmation prompt</td></tr>
+<tr><td><code>diagnostic</code></td><td>bool</td><td>false</td><td>Enable verbose device diagnostics logging (restart required)</td></tr>
+<tr><td><code>defaultwindow</code></td><td>bool</td><td>true</td><td>Window size: true = large, false = small</td></tr>
+<tr><td><code>dropdown</code></td><td>string</td><td>"0"</td><td>Terminal type (0/1/2/3/4 depending on platform)</td></tr>
+<tr><td><code>fmfont</code></td><td>int</td><td>0</td><td>File manager font size index (0-3)</td></tr>
+<tr><td><code>lgfont</code></td><td>int</td><td>0</td><td>Large window font index (0-3 → 14/16/18/20 px)</td></tr>
+<tr><td><code>mdfont</code></td><td>int</td><td>0</td><td>Medium window font index (0-3 → 12/14/16/18 px)</td></tr>
+<tr><td><code>smfont</code></td><td>int</td><td>0</td><td>Small window font index (0-3 → 10/12/14/16 px)</td></tr>
+<tr><td><code>download</code></td><td>string</td><td>home dir</td><td>Default download directory</td></tr>
+<tr><td><code>install</code></td><td>string</td><td>home dir</td><td>Default install directory</td></tr>
+<tr><td><code>backup</code></td><td>string</td><td>home dir</td><td>Default backup directory</td></tr>
+<tr><td><code>localadb</code></td><td>string</td><td>""</td><td>Custom ADB binary path (overrides bundled)</td></tr>
+<tr><td><code>stopapp</code></td><td>string</td><td>"org.xbmc.kodi"</td><td>Package for "Stop App" button</td></tr>
+<tr><td><code>startapp</code></td><td>string</td><td>"org.xbmc.kodi/org.xbmc.kodi.Splash"</td><td>Intent for "Start App" button</td></tr>
+</table>
+
+<h3 id="db-log">8.3 &mdash; Log System (<code>logfile.cpp</code>)</h3>
+<ul>
+  <li><strong>Path:</strong> <code>~/.jocala/adblink.log</code> (macOS/Linux) or <code>%APPDATA%/.jocala/adblink.log</code> (Windows)</li>
+  <li><strong>Thread safety:</strong> <code>static QMutex</code> + <code>QMutexLocker</code></li>
+  <li><strong>Rotation:</strong> <code>rotateLogFile(dir)</code> — deletes existing <code>.old.log</code>, renames <code>.log</code> → <code>.old.log</code>. Called once at startup.</li>
+  <li><strong>Format:</strong> One line per call to <code>logfile()</code>. No timestamps (added by the caller in context).</li>
+</ul>
+
+
+<!-- ─── Section 9: Helper Functions ─────────────────────── -->
+<h2 id="helpers">9 &mdash; Helper Functions</h2>
+
+<h3 id="help-adbutils">9.1 &mdash; adbutils.cpp</h3>
+<p>~470 lines. Free utility functions. <strong>All use <code>::getadbOutput()</code></strong> (the shell-splitting variant from <code>getadbdata.cpp</code>) unless noted.</p>
+
+<table>
+<tr><th>Function</th><th>Line</th><th>Signature</th><th>Description</th><th>Called By</th></tr>
+<tr>
+  <td><code>getadbpath</code></td><td>17</td>
+  <td><code>QString getadbpath()</code></td>
+  <td>Returns path to ADB binary. Priority: JSON <code>"localadb"</code> → bundled <code>adbfiles/adb</code>.</td>
+  <td>Nearly every manager</td>
+</tr>
+<tr>
+  <td><code>readBatteryLevel</code></td><td>51</td>
+  <td><code>QString readBatteryLevel(const QString &amp;adbPrefix)</code></td>
+  <td>Parse <code>dumpsys battery</code> output for level and status.</td>
+  <td>MainWindow::infoArchitecture</td>
+</tr>
+<tr>
+  <td><code>displayOff</code></td><td>98</td>
+  <td><code>void displayOff(const QString &amp;adbPrefix)</code></td>
+  <td>Send keyevent 26 (power button) to turn off display.</td>
+  <td>MainWindow (Ctrl+X)<br>Shortcut</td>
+</tr>
+<tr>
+  <td><code>busybox_permissions</code></td><td>104</td>
+  <td><code>void busybox_permissions(const QString &amp;adbPrefix)</code></td>
+  <td><code>chmod 755 /data/local/tmp/adblink/busybox</code></td>
+  <td>ensureBusyboxInstalled</td>
+</tr>
+<tr>
+  <td><code>resolveKodiPath</code></td><td>110</td>
+  <td><code>QString resolveKodiPath(adbPrefix, dataRoot, xbmcpackage, scoped)</code></td>
+  <td>Returns full path to <code>.kodi</code> dir. Priority: xbmc_env.properties → scoped → legacy. Uses xbmc.data= prefix matching with validation.</td>
+  <td>CacheManager, KodiLogManager, FileManager, XmlEditorManager</td>
+</tr>
+<tr>
+  <td><code>ensureBusyboxInstalled</code></td><td>135</td>
+  <td><code>bool ensureBusyboxInstalled(parent, adbPrefix, msg)</code></td>
+  <td>Prompts user, pushes busybox binary to device, installs symlinks.</td>
+  <td>MainWindow (Utility → Reinstall Busybox)</td>
+</tr>
+<tr>
+  <td><code>isPackageInstalled</code></td><td>189</td>
+  <td><code>bool isPackageInstalled(adbPrefix, package)</code></td>
+  <td><code>pm list packages</code> + contains check.</td>
+  <td>KodiSetupManager, KodiDownloadCoordinator</td>
+</tr>
+<tr>
+  <td><code>syncWaitForProcess</code></td><td>196</td>
+  <td><code>void syncWaitForProcess(QProcess &amp;process, int timeoutMs = -1)</code></td>
+  <td>Core blocking wait. Polls 100ms loops with processEvents(). Kills on timeout.</td>
+  <td>getadbdata, getreturncode, adbconnection, adbdevice</td>
+</tr>
+<tr>
+  <td><code>isScopedStorage</code></td><td>228</td>
+  <td><code>bool isScopedStorage(const QString &amp;adbPrefix)</code></td>
+  <td>API 30+ → scoped; API 29 → touch test; vendor permissive /sdcard/ → not scoped.</td>
+  <td>MainWindow, BackupManager, DataMoveManager</td>
+</tr>
+<tr>
+  <td><code>logDeviceDiagnostics</code></td><td>269</td>
+  <td><code>void logDeviceDiagnostics(adbPrefix, daddr, xbmcpackage, dataRoot)</code></td>
+  <td>Logs Kodi package, env content, scoped trace, path existence, analysis. Triggered when JSON <code>"diagnostic"</code> is true.</td>
+  <td>BackupManager (restore/backup), MainWindow (infolog)</td>
+</tr>
+<tr>
+  <td><code>removeMetadataFiles</code></td><td>365</td>
+  <td><code>void removeMetadataFiles(const QString &amp;dirPath)</code></td>
+  <td>Removes <code>*~</code>, <code>*.swp</code>, <code>*.swo</code>, <code>#*#</code>, <code>.DS_Store</code>, <code>._*</code>, <code>__MACOSX/</code>, <code>.AppleDouble/</code>, <code>.localized</code>. Uses QDirIterator::Subdirectories with prepend.</td>
+  <td>BackupManager (pre-restore, post-backup)</td>
+</tr>
+</table>
+
+<h3 id="help-stringutils">9.2 &mdash; stringutils.cpp</h3>
+<table>
+<tr><th>Function</th><th>Line</th><th>Signature</th><th>Description</th><th>Called By</th></tr>
+<tr><td><code>stripString</code></td><td>4</td><td><code>QString stripString(const QString &amp;str)</code></td><td><code>simplified()</code> then remove all spaces.</td><td>Various</td></tr>
+<tr><td><code>checkslash</code></td><td>11</td><td><code>QString checkslash(const QString &amp;path)</code></td><td>Ensure leading and trailing <code>/</code>.</td><td>Various</td></tr>
+<tr><td><code>validateIPAddress</code></td><td>21</td><td><code>bool validateIPAddress(const QString &amp;ip)</code></td><td>Regex matching IPv4 dotted-decimal or DNS hostname.</td><td>AdhocManager</td></tr>
+<tr><td><code>usbStatus</code></td><td>38</td><td><code>QString usbStatus(cache, daddr)</code></td><td>Maps track-devices state to display text: "device" → "Connected", missing → "Disconnected", else capitalize first letter.</td><td>DeviceTableLoader</td></tr>
+</table>
+
+<h3 id="help-log">9.3 &mdash; logfile.cpp</h3>
+<table>
+<tr><th>Function</th><th>Line</th><th>Signature</th><th>Description</th></tr>
+<tr><td><code>logfile</code></td><td>15</td><td><code>void logfile(const QString &amp;line)</code></td><td>Thread-safe append to <code>adblink.log</code>. Static QMutex + QMutexLocker.</td></tr>
+<tr><td><code>rotateLogFile</code></td><td>31</td><td><code>void rotateLogFile(const QString &amp;dir)</code></td><td>Delete existing <code>.old.log</code>, rename <code>.log</code> → <code>.old.log</code>. Called once at startup.</td></tr>
+</table>
+
+<h3 id="help-adb">9.4 &mdash; ADB Helpers</h3>
+<table>
+<tr><th>Function</th><th>File</th><th>Line</th><th>Signature</th><th>Description</th></tr>
+<tr>
+  <td><code>getadbOutput</code></td>
+  <td><code>getadbdata.cpp</code></td><td>5</td>
+  <td><code>QString getadbOutput(const QString &amp;cstring)</code></td>
+  <td>One-shot via <code>startCommand()</code> (shell splitting). MergedChannels. Returns stdout+stderr combined.</td>
+</tr>
+<tr>
+  <td><code>getreturncode</code></td>
+  <td><code>getreturncode.cpp</code></td><td>7</td>
+  <td><code>bool getreturncode(const QString &amp;cstring)</code></td>
+  <td>Via <code>splitCommand()</code> + <code>start(program, args)</code>. Returns true if exit code == 0. Empty-arg guard returns false.</td>
+</tr>
+<tr>
+  <td><code>connectadb</code></td>
+  <td><code>connectadb.cpp</code></td><td>16</td>
+  <td><code>QString connectadb(adbPath, arguments)</code></td>
+  <td>5s timeout via QEventLoop + QTimer. Kills on timeout (SIGKILL/TerminateProcess).</td>
+</tr>
+<tr>
+  <td><code>AdbConnection::runCommand</code></td>
+  <td><code>adbconnection.cpp</code></td><td>62</td>
+  <td><code>QString runCommand(args) const</code></td>
+  <td>OOP wrapper. <code>start(m_adbPath, args)</code>. Two overloads: QString and QStringList.</td>
+</tr>
+<tr>
+  <td><code>AdbDevice::runCommand</code></td>
+  <td><code>adbdevice.cpp</code></td><td>30</td>
+  <td><code>QString runCommand(binary, args) const</code></td>
+  <td>OOP wrapper. <code>start(binary, args)</code>. Also: <code>runShell()</code>, <code>runAdb()</code>.</td>
+</tr>
+<tr>
+  <td><code>getadbOutput2</code></td>
+  <td><code>adboutput.cpp</code></td><td>8</td>
+  <td><code>QString getadbOutput2(adbPath, args)</code></td>
+  <td>Alternative: <code>start(adbPath, args)</code> with error logging. No shell.</td>
+</tr>
+<tr>
+  <td><code>getlocaladb</code></td>
+  <td><code>getlocaladb.cpp</code></td><td>7</td>
+  <td><code>QString getlocaladb(const QString &amp;configDir)</code></td>
+  <td>Reads user-specified ADB path from JSON config. Two overloads (with/without configDir).</td>
+</tr>
+<tr>
+  <td><code>adbString</code></td>
+  <td><code>adbstring.cpp</code></td><td>3</td>
+  <td><code>QString adbString(const QString &amp;input)</code></td>
+  <td>Escape <code>'</code> → <code>\'</code>, wrap in <code>"</code>.</td>
+</tr>
+</table>
+
+
+<!-- ─── Section 10: Key Code Patterns ────────────────────── -->
+<h2 id="patterns">10 &mdash; Key Code Patterns</h2>
+
+<h3>10.1 &mdash; QMessageBox: Always use explicit <code>setWindowModality</code></h3>
+<p>Never use static helpers like <code>QMessageBox::information()</code>. Always construct explicitly:</p>
+<pre><code>QMessageBox msgBox(parent);
+msgBox.setWindowTitle(QStringLiteral("Title"));
+msgBox.setText(QStringLiteral("Message text"));
+msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+msgBox.setWindowModality(Qt::WindowModal);
+QMessageBox::StandardButton reply = static_cast&lt;QMessageBox::StandardButton&gt;(msgBox.exec());</code></pre>
+
+<h3>10.2 &mdash; <code>syncWaitForProcess()</code> vs raw <code>waitForFinished()</code></h3>
+<p>Always use <code>syncWaitForProcess()</code> instead of direct <code>waitForFinished()</code>. The raw version blocks the event loop and stale click events can auto-click modal dialogs. <code>syncWaitForProcess()</code> calls <code>QCoreApplication::processEvents()</code> each poll cycle.</p>
+
+<h3>10.3 &mdash; Scoped Storage Resolution</h3>
+<p>Three Kodi data paths, checked in order at runtime:</p>
+<ol>
+  <li><strong>Custom env file</strong> (<code>/sdcard/xbmc_env.properties</code>): Parse <code>xbmc.data=</code> prefix. Under <code>/sdcard/</code>, validate structure (<code>kodi_data/</code> if scoped, <code>Android/data/</code> if not). External storage: legacy (<code>Android/data/</code>) always.</li>
+  <li><strong>Scoped storage</strong> (Android 11+): <code>&lt;data_root&gt;kodi_data/&lt;package&gt;/files/.kodi</code></li>
+  <li><strong>Legacy</strong>: <code>&lt;data_root&gt;Android/data/&lt;package&gt;/files/.kodi</code></li>
+</ol>
+
+<p><code>isScopedStorage()</code> logic (adbutils.cpp:228):</p>
+<ul>
+  <li>API level 30+ → scoped</li>
+  <li>API level 29 → test write permission to <code>/sdcard/Android/data/&lt;pkg&gt;/files/test.txt</code>; if denied → scoped</li>
+  <li>World-writable <code>/sdcard/</code> permissions → vendor bypass, not scoped</li>
+</ul>
+
+<h3>10.4 &mdash; xbmc_env.properties Lifecycle</h3>
+<p>Kodi <strong>never</strong> writes <code>xbmc_env.properties</code> — only adblink does. The file is adblink's persistent record of Kodi's data location on the device.</p>
+
+<table>
+<tr><th>Operation</th><th>File Written</th><th>Content</th></tr>
+<tr><td>Create kodi_data</td><td>kodisetupmanager.cpp:108</td><td><code>xbmc.data=/sdcard/kodi_data/&lt;pkg&gt;/files</code></td></tr>
+<tr><td>Restore (scoped)</td><td>backupmanager.cpp:474</td><td><code>xbmc.data=&lt;mcpath&gt;/files</code></td></tr>
+<tr><td>Restore (non-scoped, external)</td><td>backupmanager.cpp:489</td><td><code>xbmc.data=&lt;mcpath&gt;/files</code></td></tr>
+<tr><td>Data move</td><td>datamovemanager.cpp</td><td><code>xbmc.data=&lt;new_path&gt;/files</code></td></tr>
+</table>
+
+<h3>10.5 &mdash; Constructor Sequence (mainwindow.cpp)</h3>
+<pre><code>OS detection → path derivation → keyboard shortcuts → status bar
+→ log rotation → DB init → table creation → JSON config
+→ menu setup → window sizing → track-devices start → version check</code></pre>
+
+<h3>10.6 &mdash; Window Sizing</h3>
+<p>Three levels (small/medium/large) read from JSON <code>"defaultwindow"</code> key, applied via <code>setWindowSize()</code> → <code>setupUI()</code>. Font mappings:</p>
+<table>
+<tr><th>Window</th><th>Large</th><th>Medium</th><th>Small</th></tr>
+<tr><td>Main window size</td><td>850×555</td><td>750×455</td><td>710×405</td></tr>
+<tr><td>Grid button size</td><td>180×66</td><td>130×46</td><td>110×36</td></tr>
+<tr><td>Action button size</td><td>160×32</td><td>110×32</td><td>100×32</td></tr>
+<tr><td>Font size (config index)</td><td>14/16/18/20</td><td>12/14/16/18</td><td>10/12/14/16</td></tr>
+</table>
+
+<hr>
+<p style="text-align:center;color:#94a3b8;margin-top:48px;">adblink v8.0 &mdash; Maintenance Reference &mdash; Generated June 2026</p>
+
+</main>
+</body>
+</html>
