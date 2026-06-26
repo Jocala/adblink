@@ -2,7 +2,7 @@
 
 adblink.8.0
 
-Guarded kodi_data creation — only runs on scoped-storage devices
+Guarded kodi_data creation - only runs on scoped-storage devices
 
 06/10/26
 
