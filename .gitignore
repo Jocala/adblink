@@ -22,12 +22,17 @@ CMakeScripts/
 compile_commands.json
 
 # ==================== Qt Creator / IDE Files ====================
-.qtcreator/
-.qtc_clangd/
-*.pro.user*
+.qtcreator/*
+.qtc_clangd/*
+**.pro.user*
 *.pro.user
 .qmake.stash
-CMakeLists.txt.user
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	xxx
+
+no changes added to commit (use "git add" and/or "git commit -a")
 
 # ==================== macOS ====================
 .DS_Store
