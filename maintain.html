@@ -1018,6 +1018,13 @@ QMessageBox::StandardButton reply = static_cast&lt;QMessageBox::StandardButton&g
   <td>Files listed via <code>busybox find</code> (type-based: dirs/files/links separately). Pull uses <code>adb pull</code> directly. If pull fails (permissions), file is <code>cp -R</code> to <code>/data/local/tmp/</code>, <code>chmod -R 755</code>, then pulled from there.</td>
   <td>The temp-copy fallback on pull failure handles permission-restricted files on unrooted devices.</td>
 </tr>
+
+<tr>
+  <td>File dialog</td>
+  <td>macOS</td>
+  <td>APK install chooser reported opening at full monitor width (1 user report, unconfirmed). Held fix on branch <code>fix/mac-filedialog-width</code>: <code>QFileDialog::DontUseNativeDialog</code> in <code>sideloadmanager.cpp</code>.</td>
+  <td>Unverified — kept out of <code>main</code> pending user confirmation. Same pattern already used in <code>adbprefdialog.cpp:321</code>.</td>
+</tr>
 </table>
 
 <hr>

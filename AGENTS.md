@@ -303,3 +303,7 @@ Built app is at `/Users/jeff/build-adblink/adblink.app/`. Contents:
 - `Contents/Info.plist` — references `adblink.icns`, bundle ID `jocala.com.adblink`
 
 DMG at `/Users/jeff/build-adblink/packages/adblink-8.0-Darwin.dmg` contains `adblink.app` + `Applications -> /Applications`.
+
+## Known issues / held-out fixes
+
+- **macOS: APK install chooser reported opening at full monitor width** (1 user report, unconfirmed; developer has never reproduced). Fix held on branch `fix/mac-filedialog-width` (origin): replace the static `QFileDialog::getOpenFileNames()` in `sideloadmanager.cpp` with a `QFileDialog` instance using `setOption(QFileDialog::DontUseNativeDialog, true)` — same pattern already used in `adbprefdialog.cpp:321`. Held out of `main` pending user confirmation.
