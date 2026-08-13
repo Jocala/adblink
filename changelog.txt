@@ -1,3 +1,9 @@
+08/13/26
+
+adblink.8.0
+
+APK install chooser on macOS now uses the Qt dialog instead of the native one, preventing the chooser from opening at full monitor width
+
 06/26/26
 
 adblink.8.0

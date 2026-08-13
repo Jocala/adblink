@@ -306,4 +306,4 @@ DMG at `/Users/jeff/build-adblink/packages/adblink-8.0-Darwin.dmg` contains `adb
 
 ## Known issues / held-out fixes
 
-- **macOS: APK install chooser reported opening at full monitor width** (1 user report, unconfirmed; developer has never reproduced). Fix held on branch `fix/mac-filedialog-width` (origin): replace the static `QFileDialog::getOpenFileNames()` in `sideloadmanager.cpp` with a `QFileDialog` instance using `setOption(QFileDialog::DontUseNativeDialog, true)` — same pattern already used in `adbprefdialog.cpp:321`. Held out of `main` pending user confirmation.
+- (none)

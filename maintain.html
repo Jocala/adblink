@@ -1022,8 +1022,8 @@ QMessageBox::StandardButton reply = static_cast&lt;QMessageBox::StandardButton&g
 <tr>
   <td>File dialog</td>
   <td>macOS</td>
-  <td>APK install chooser reported opening at full monitor width (1 user report, unconfirmed). Held fix on branch <code>fix/mac-filedialog-width</code>: <code>QFileDialog::DontUseNativeDialog</code> in <code>sideloadmanager.cpp</code>.</td>
-  <td>Unverified — kept out of <code>main</code> pending user confirmation. Same pattern already used in <code>adbprefdialog.cpp:321</code>.</td>
+  <td>APK install chooser previously opened at full monitor width (1 user report). Fixed with <code>QFileDialog::DontUseNativeDialog</code> in <code>sideloadmanager.cpp</code> — the Qt dialog renders at normal size.</td>
+  <td>Same pattern already used in <code>adbprefdialog.cpp:321</code>.</td>
 </tr>
 </table>
 
