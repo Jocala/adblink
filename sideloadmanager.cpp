@@ -22,8 +22,13 @@ void SideloadManager::sideloadApks(QWidget *parentWidget,
 
     QString install = readInstall();
 
-    QStringList filenames = QFileDialog::getOpenFileNames(parentWidget,
-        tr("APK files (*.apk);;All files (.*)"), install);
+    QFileDialog dialog(parentWidget, tr("APK files (*.apk);;All files (.*)"), install);
+    dialog.setFileMode(QFileDialog::ExistingFiles);
+    dialog.setNameFilter(tr("APK files (*.apk);;All files (.*)"));
+    dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+    QStringList filenames;
+    if (dialog.exec())
+        filenames = dialog.selectedFiles();
 
     if (!filenames.isEmpty()) {
         QMessageBox msgBox(parentWidget);
