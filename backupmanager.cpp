@@ -3,6 +3,7 @@
 #include "adbutils.h"
 #include "kodidatamanager.h"
 #include "restdialog.h"
+#include "restoreoptionsdialog.h"
 #include "getadbdata.h"
 #include "getreturncode.h"
 #include "logfile.h"
@@ -448,15 +449,39 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
         return false;
     }
 
-    QMessageBox msgBox(parent);
-    msgBox.setWindowTitle(QStringLiteral("Restore"));
-    msgBox.setText(QStringLiteral("Restore this backup to %1? This will overwrite existing Kodi data.").arg(device.daddr));
-    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    msgBox.setWindowModality(Qt::WindowModal);
-    QMessageBox::StandardButton reply = static_cast<QMessageBox::StandardButton>(msgBox.exec());
-    if (reply == QMessageBox::No) {
+    QStringList protectFiles;
+    if (dataManager && !jsonstring.isEmpty())
+        protectFiles = dataManager->readProtectFiles(jsonstring);
+
+    RestoreOptionsDialog restoreDialog(device.daddr, protectFiles, parent);
+    restoreDialog.setWindowModality(Qt::WindowModal);
+    restoreDialog.setModal(true);
+    if (restoreDialog.exec() != QDialog::Accepted) {
         --m_activeRestores;
         return false;
+    }
+    protectFiles = restoreDialog.checkedFiles();
+    if (dataManager && !jsonstring.isEmpty())
+        dataManager->writeProtectFiles(jsonstring, protectFiles);
+
+    QString protectDir;
+    if (!protectFiles.isEmpty()) {
+        protectDir = QDir::tempPath() + QStringLiteral("/adblink-protect-") + device.daddr;
+        protectDir.replace(':', '_');
+        QDir().mkpath(protectDir);
+        QString userdataPath = mcpath + QStringLiteral("/files/.kodi/userdata/");
+        for (int i = 0; i < protectFiles.size(); i++) {
+            cstring = adbPrefix + "shell ls " + userdataPath + protectFiles.at(i);
+            if (getreturncode(cstring)) {
+                cstring = adbPrefix + "pull " + userdataPath + protectFiles.at(i)
+                          + " \"" + protectDir + "/" + protectFiles.at(i) + "\"";
+                if (diag)
+                    logfile(device.daddr + ": restore protect pull: " + cstring);
+                runLongProcess(cstring, "protecting " + protectFiles.at(i) + " for " + device.daddr);
+            } else {
+                logfile(device.daddr + ": protect file not on device, skipping: " + protectFiles.at(i));
+            }
+        }
     }
 
     cstring = adbPrefix + "shell rm -r " + mcpath;
@@ -482,6 +507,8 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
             msgBox.setWindowModality(Qt::WindowModal);
             msgBox.exec();
             logfile(device.daddr + ": Error creating restore point: " + errorOutput);
+            if (!protectDir.isEmpty())
+                QDir(protectDir).removeRecursively();
             --m_activeRestores;
             return false;
         }
@@ -497,6 +524,21 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
     command = runLongProcess(cstring, "restore running for " + device.daddr);
 
     if (command.contains("bytes")) {
+        if (!protectDir.isEmpty()) {
+            QString userdataPath = mcpath + QStringLiteral("/files/.kodi/userdata/");
+            QDir pd(protectDir);
+            QStringList pulled = pd.entryList(QDir::Files, QDir::Name);
+            for (int i = 0; i < pulled.size(); i++) {
+                cstring = adbPrefix + "push \"" + protectDir + "/" + pulled.at(i)
+                          + "\" " + userdataPath + pulled.at(i);
+                if (diag)
+                    logfile(device.daddr + ": restore protect push: " + cstring);
+                command = getadbOutput(cstring);
+                if (!command.contains("1 file pushed"))
+                    logfile(device.daddr + ": Error restoring protected file " + pulled.at(i) + ": " + command);
+            }
+            QDir(protectDir).removeRecursively();
+        }
         cstring = getadbpath() + " -s " + device.daddr + " shell rm /sdcard/xbmc_env.properties";
         getadbOutput(cstring);
 
@@ -542,6 +584,8 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
         msgBox.setWindowModality(Qt::WindowModal);
         msgBox.exec();
         logfile(device.daddr + ": Error: Restore failed: " + command);
+        if (!protectDir.isEmpty())
+            QDir(protectDir).removeRecursively();
         --m_activeRestores;
         return false;
     }

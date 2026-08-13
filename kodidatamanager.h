@@ -32,6 +32,8 @@ public:
     QString readInstallPath(const QString &configPath) const;
     void writeInstallPath(const QString &configPath, const QString &install);
     QString readDonationValue(const QString &configPath) const;
+    QStringList readProtectFiles(const QString &configPath) const;
+    void writeProtectFiles(const QString &configPath, const QStringList &files);
 
     QString dataBaseDir;
     QString logFileDir;

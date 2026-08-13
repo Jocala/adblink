@@ -141,6 +141,9 @@ Files removed:
 
 The function uses `QDirIterator::Subdirectories` with `prepend` (reverse order) to process children before parents. Directories are removed via `QDir::removeRecursively()`, files via `QFile::remove()`. It logs each removed entry.
 
+### Restore file protection
+`restoreDevice()` (backupmanager.cpp) shows `RestoreOptionsDialog` (restoreoptionsdialog.cpp) before wiping the target — 9 checkboxes (guisettings.xml, advancedsettings.xml, sources.xml, favourites.xml, profiles.xml, RssFeeds.xml, mediasources.xml, passwords.xml, Lircmap.xml) for files to keep from the device during restore. Selection persisted in `adblink.json` key `protectfiles` (comma-separated; `KodiDataManager::readProtectFiles()/writeProtectFiles()`). Checked files are pulled to `QDir::tempPath()/adblink-protect-<daddr>` before `rm -r` and pushed back after the restore push; missing files skipped, failures logged but never abort a successful restore.
+
 ## Database schema & patterns
 
 ### `device` table (20 columns)

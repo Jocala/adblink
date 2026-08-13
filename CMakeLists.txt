@@ -79,6 +79,7 @@ set(SOURCES
     datadialog.cpp
     listfiledialog.cpp
     restdialog.cpp
+    restoreoptionsdialog.cpp
     backupdialog.cpp
     cachedialog.cpp
     keyboarddialog.cpp
@@ -156,6 +157,7 @@ set(HEADERS
     datadialog.h
     listfiledialog.h
     restdialog.h
+    restoreoptionsdialog.h
     backupdialog.h
     cachedialog.h
     keyboarddialog.h

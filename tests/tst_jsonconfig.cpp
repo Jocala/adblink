@@ -82,6 +82,19 @@ private slots:
         QCOMPARE(mgr->readDonationValue(m_jsonPath),
                  QStringLiteral("yes"));
     }
+
+    void protectFilesRoundTrip()
+    {
+        mgr->writeProtectFiles(m_jsonPath, {"guisettings.xml", "sources.xml", "passwords.xml"});
+        QCOMPARE(mgr->readProtectFiles(m_jsonPath),
+                 QStringList({"guisettings.xml", "sources.xml", "passwords.xml"}));
+    }
+
+    void protectFilesEmptyRoundTrip()
+    {
+        mgr->writeProtectFiles(m_jsonPath, QStringList());
+        QVERIFY(mgr->readProtectFiles(m_jsonPath).isEmpty());
+    }
 };
 
 QTEST_MAIN(TestJsonConfig)

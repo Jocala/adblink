@@ -821,6 +821,8 @@ QMessageBox::StandardButton reply = static_cast&lt;QMessageBox::StandardButton&g
 <tr><td>Force-stop Kodi</td><td><code>&lt;getadbpath()&gt; -s &lt;daddr&gt; shell am force-stop &lt;xbmcpackage&gt;</code></td></tr>
 <tr><td>Push restore</td><td><code>&lt;adbPrefix&gt; push "&lt;srcDir&gt;" &lt;mcpath&gt;/files/.kodi/</code></td></tr>
 <tr><td>Remove existing target</td><td><code>&lt;adbPrefix&gt; shell rm -r &lt;mcpath&gt;</code></td></tr>
+<tr><td>Protect pull (per checked file)</td><td><code>&lt;adbPrefix&gt; shell ls &lt;mcpath&gt;/files/.kodi/userdata/&lt;file&gt;</code> then <code>&lt;adbPrefix&gt; pull &lt;mcpath&gt;/files/.kodi/userdata/&lt;file&gt; "&lt;tmp&gt;/adblink-protect-&lt;daddr&gt;/"</code></td></tr>
+<tr><td>Protect push-back (per pulled file)</td><td><code>&lt;adbPrefix&gt; push "&lt;tmp&gt;/adblink-protect-&lt;daddr&gt;/&lt;file&gt;" &lt;mcpath&gt;/files/.kodi/userdata/&lt;file&gt;</code></td></tr>
 <tr><td>Create target dir</td><td><code>&lt;getadbpath()&gt; -s &lt;daddr&gt; shell mkdir -p &lt;mcpath&gt;/files/.kodi</code></td></tr>
 <tr><td>Write env file</td><td><code>&lt;getadbpath()&gt; -s &lt;daddr&gt; shell echo xbmc.data=&lt;mcpath&gt;/files &gt; /sdcard/xbmc_env.properties</code></td></tr>
 <tr><td>Remove old env file</td><td><code>&lt;getadbpath()&gt; -s &lt;daddr&gt; shell rm /sdcard/xbmc_env.properties</code></td></tr>

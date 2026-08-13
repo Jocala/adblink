@@ -199,6 +199,7 @@ void KodiDataManager::createJsonConfig(const QString &configPath)
         {"install", QDir::homePath()},
         {"backup", QDir::homePath()},
         {"localadb", QString()},
+        {"protectfiles", QString()},
         {"stopapp", QStringLiteral("org.xbmc.kodi")},
         {"startapp", QStringLiteral("org.xbmc.kodi/org.xbmc.kodi.Splash")},
     };
@@ -332,4 +333,17 @@ void KodiDataManager::writeInstallPath(const QString &configPath, const QString 
 QString KodiDataManager::readDonationValue(const QString &configPath) const
 {
     return readJsonValue(configPath, QStringLiteral("donation"));
+}
+
+QStringList KodiDataManager::readProtectFiles(const QString &configPath) const
+{
+    QString value = readJsonValue(configPath, QStringLiteral("protectfiles"));
+    if (value.isEmpty())
+        return QStringList();
+    return value.split(',', Qt::SkipEmptyParts);
+}
+
+void KodiDataManager::writeProtectFiles(const QString &configPath, const QStringList &files)
+{
+    writeJsonValue(configPath, QStringLiteral("protectfiles"), files.join(','));
 }
