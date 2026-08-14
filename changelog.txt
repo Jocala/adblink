@@ -3,6 +3,7 @@
 adblink.8.0
 
 APK install chooser on macOS now uses the Qt dialog instead of the native one, preventing the chooser from opening at full monitor width
+Restore now offers per-file protection of Kodi userdata XML files (guisettings, sources, favourites, passwords, etc.) - checked files are preserved on the device during a restore
 
 06/26/26
 
