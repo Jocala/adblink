@@ -230,6 +230,11 @@ Hardcoded (widgets removed, setters are no-ops): `ostype()` = `"0"`, `scoped()` 
 - **Debian working tree**: `/zstore/source/www/jocala.com/` (auto-updated via post-receive hook)
 - Latest commit: `68099dd` move deploy script to adblink repo (Jun 2026)
 
+### Local mirror
+- **URL**: `http://debian.local/www/jocala.com/` — local mirror of the production site
+- Served from the Debian working tree (`/zstore/source/www/jocala.com/`) via Apache
+- Source of truth for `deploy.sh` — changes staged here are pushed to production with `deploy.sh all|html|builds`
+
 ### Production server
 - **Host**: `jeff@jocala.com` (68.67.75.218)
 - **Docroot**: `/var/www/jocala.com/public_html/`
