@@ -26,7 +26,9 @@ case "${1:-html}" in
       exit 1
     fi
     echo "Deploying builds..."
-    rsync $RSYNC_OPTS "$@" "$PROD/downloads/"
+    for f in "$@"; do chmod 644 "$f" 2>/dev/null || true; done
+    rsync $RSYNC_OPTS --chmod=F644,D755 "$@" "$PROD/downloads/"
+    ssh jeff@jocala.com "chmod 644 /var/www/jocala.com/public_html/downloads/* 2>/dev/null || true"
     ;;
   all)
     shift
@@ -39,7 +41,9 @@ case "${1:-html}" in
       --exclude='*' \
       "$WWW/" "$PROD/"
     echo "Deploying builds..."
-    rsync $RSYNC_OPTS "$@" "$PROD/downloads/"
+    for f in "$@"; do chmod 644 "$f" 2>/dev/null || true; done
+    rsync $RSYNC_OPTS --chmod=F644,D755 "$@" "$PROD/downloads/"
+    ssh jeff@jocala.com "chmod 644 /var/www/jocala.com/public_html/downloads/* 2>/dev/null || true"
     ;;
   *)
     echo "Usage: $0 {html|builds <files>|all <files>}"
