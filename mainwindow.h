@@ -205,6 +205,8 @@ private:
     QStringList RunProcessList;
     QPushButton* setupDonateButton(QWidget* parent);
     QPushButton* donateButton;
+    void setDonateButtonActive(bool active);
+    QString readDonationValue();
 
     void setupMenuBar();
     void setupFileMenu();

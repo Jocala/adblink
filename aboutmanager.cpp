@@ -9,9 +9,10 @@ AboutManager::AboutManager(QObject *parent)
 }
 
 void AboutManager::showAbout(QWidget *parentWidget, const QString &databaseDir,
-                              const QString &versionText)
+                              const QString &versionText, const QString &donation)
 {
-    Dialog2 dialog2(parentWidget);
+    Q_UNUSED(databaseDir);
+    Dialog2 dialog2(parentWidget, donation);
     dialog2.setWindowModality(Qt::WindowModal);
     dialog2.setaLabel(versionText);
     dialog2.exec();

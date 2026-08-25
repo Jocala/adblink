@@ -281,6 +281,7 @@
 
 
         donateButton = setupDonateButton(statusBar);
+        setDonateButtonActive(readDonationValue() != "jocala.com");
 
         container = new QWidget(statusBar);
         container->setFixedHeight(statusBar->height());
@@ -800,7 +801,8 @@
     /////////////////////////////////////////////////////////////////////////
     void MainWindow::on_actionAbout_triggered()
     {
-        m_aboutManager->showAbout(this, databasedir, program + " " + version);
+        QString donation = readDonationValue();
+        m_aboutManager->showAbout(this, databasedir, program + " " + version, donation);
     }
 
 
@@ -1177,7 +1179,8 @@
          if (!mgr.exec(this))
              return;
 
-         PreferencesResult r = mgr.result();
+          PreferencesResult r = mgr.result();
+         setDonateButtonActive(r.donationValue != "jocala.com");
 
          switch (r.lgFontIndex) {
          case 0: lfontsize = 14; break;
@@ -2120,10 +2123,20 @@ QPushButton* MainWindow::setupDonateButton(QWidget* parent) {
         );
     connect(donateButton, &QPushButton::clicked, this, &MainWindow::on_donate_clicked);
 
-    donateButton->setVisible(true);
-    donateButton->setEnabled(true);
+    setDonateButtonActive(readDonationValue() != "jocala.com");
 
     return donateButton;
+}
+
+void MainWindow::setDonateButtonActive(bool active) {
+    if (donateButton) {
+        donateButton->setVisible(active);
+        donateButton->setEnabled(active);
+    }
+}
+
+QString MainWindow::readDonationValue() {
+    return m_dataManager->readDonationValue(databasedir + "adblink.json");
 }
 
 /////////////////////////////////////////////////

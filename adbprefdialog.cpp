@@ -207,6 +207,15 @@ void adbprefDialog::setupUiManual()
     addRow(adbButton, localAdbEdit, "External ADB", "adbButton", "Custom ADB. Leave blank to use adblink's included adb",
            "localadb", "Custom ADB. Leave blank to use adblink's included adb", &adbprefDialog::on_adbButton_clicked);
 
+    QHBoxLayout *donationRow = new QHBoxLayout();
+    QLabel *donationLabel = new QLabel("Donation:", this);
+    donationEdit = new QLineEdit(this);
+    donationEdit->setObjectName("donation");
+    donationEdit->setToolTip("Donation code");
+    donationRow->addWidget(donationLabel);
+    donationRow->addWidget(donationEdit);
+    mainLayout->addLayout(donationRow);
+
     // --- Bottom button row ---
     QHBoxLayout *bottomButtons = new QHBoxLayout();
     cancelButton = new QPushButton("Cancel", this);
@@ -347,6 +356,18 @@ void adbprefDialog::on_adbButton_clicked()
 
 void adbprefDialog::accept()
 {
+    QString t = donationEdit->text().trimmed();
+    if (!t.isEmpty() && t != "jocala.com") {
+        donationEdit->clear();
+        QMessageBox msgBox(this);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.setWindowTitle(QStringLiteral("Error"));
+        msgBox.setText(QStringLiteral("Invalid donation code"));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.exec();
+        return;
+    }
     QDialog::accept();
 }
 
@@ -356,6 +377,7 @@ QString adbprefDialog::downloaddir() const { return downloadPathEdit->text(); }
 QString adbprefDialog::installdir() const { return installPathEdit->text(); }
 QString adbprefDialog::backupdir() const { return backupPathEdit->text(); }
 QString adbprefDialog::localadb() const { return localAdbEdit->text(); }
+QString adbprefDialog::donation() const { return donationEdit->text(); }
 
 bool adbprefDialog::versioncheck() const { return versionCheckBox->isChecked(); }
 bool adbprefDialog::scrcpyargs() const { return scrcpyArgsCheckBox->isChecked(); }
@@ -377,6 +399,7 @@ void adbprefDialog::setdownloaddir(const QString &dir) { downloadPathEdit->setTe
 void adbprefDialog::setinstalldir(const QString &dir) { installPathEdit->setText(dir); }
 void adbprefDialog::setbackupdir(const QString &dir) { backupPathEdit->setText(dir); }
 void adbprefDialog::setlocaladb(const QString &path) { localAdbEdit->setText(path); }
+void adbprefDialog::setdonation(const QString &donation) { donationEdit->setText(donation); }
 
 void adbprefDialog::setversioncheck(bool val) { versionCheckBox->setChecked(val); }
 void adbprefDialog::setscrcpyargs(bool val) { scrcpyArgsCheckBox->setChecked(val); }

@@ -1,3 +1,9 @@
+08/25/26
+
+adblink.8.0
+
+Restored donation suppression for contributors
+
 08/13/26
 
 adblink.8.0

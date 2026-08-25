@@ -23,6 +23,7 @@ public:
     QString installdir() const;
     QString backupdir() const;
     QString localadb() const;
+    QString donation() const;
     bool versioncheck() const;
     bool scrcpyargs() const;
     bool startview() const;
@@ -42,6 +43,7 @@ public:
     void setinstalldir(const QString &dir);
     void setbackupdir(const QString &dir);
     void setlocaladb(const QString &path);
+    void setdonation(const QString &donation);
     void setversioncheck(bool val);
     void setscrcpyargs(bool val);
     void setstartview(bool val);
@@ -90,6 +92,7 @@ private:
     QLineEdit *installPathEdit;
     QLineEdit *backupPathEdit;
     QLineEdit *localAdbEdit;
+    QLineEdit *donationEdit;
 
     QPushButton *cancelButton;
     QPushButton *checkButton;

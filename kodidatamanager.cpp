@@ -199,6 +199,7 @@ void KodiDataManager::createJsonConfig(const QString &configPath)
         {"install", QDir::homePath()},
         {"backup", QDir::homePath()},
         {"localadb", QString()},
+        {"donation", QString()},
         {"protectfiles", QString()},
         {"stopapp", QStringLiteral("org.xbmc.kodi")},
         {"startapp", QStringLiteral("org.xbmc.kodi/org.xbmc.kodi.Splash")},

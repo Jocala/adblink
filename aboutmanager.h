@@ -12,7 +12,7 @@ public:
     explicit AboutManager(QObject *parent = nullptr);
 
     void showAbout(QWidget *parentWidget, const QString &databaseDir,
-                   const QString &versionText);
+                   const QString &versionText, const QString &donation = QString());
 };
 
 #endif // ABOUTMANAGER_H
