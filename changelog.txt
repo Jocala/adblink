@@ -1,3 +1,11 @@
+08/26/26
+
+adblink.8.1
+
+APK install now uses drag-and-drop dialog with drop order preserved
+Get Package Name now uses drag-and-drop with package-only logging
+Linux aapt replaced with Google build-tools 34.0.0 prebuilt for offline use
+
 08/25/26
 
 adblink.8.0
