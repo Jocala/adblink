@@ -33,18 +33,14 @@ void ApkUidManager::getApkPackageName(QWidget *parentWidget, const QString &aapt
     logfile(QStringLiteral("Package name extraction"));
     logfile(QStringLiteral("------------------------"));
 
-    QString rawAapt = aaptPath;
-    rawAapt.remove('"');
-    QString aaptDir = QFileInfo(rawAapt).absolutePath();
-
     QStringList extracted;
     QStringList failed;
 
     for (const QString &filename : filenames) {
-        QString cstring = QStringLiteral("LD_LIBRARY_PATH=\"%1/lib64:%1:$LD_LIBRARY_PATH\" %2 dump badging \"%3\"")
-                              .arg(aaptDir, aaptPath, filename);
+        QString cstring = aaptPath + QStringLiteral(" dump badging \"%1\"").arg(filename);
         QString command = getadbOutput(cstring);
-        if (command.contains(QStringLiteral("cannot open shared object"))
+        if (command.isEmpty()
+            || command.contains(QStringLiteral("cannot open shared object"))
             || command.contains(QStringLiteral("not found"))
             || command.contains(QStringLiteral("No such file"))) {
             QString fallback = QStringLiteral("/usr/bin/aapt dump badging \"%1\"").arg(filename);
@@ -70,8 +66,11 @@ void ApkUidManager::getApkPackageName(QWidget *parentWidget, const QString &aapt
                 }
             }
         }
-        if (!found)
+        if (!found) {
+            logfile(cstring);
+            logfile(command.left(500));
             failed << filename;
+        }
     }
 
     if (extracted.isEmpty() && failed.isEmpty())
