@@ -9,7 +9,8 @@ SCRIPT_DIR="$(dirname "$0")"
 VERSION=$(grep 'const QString version' "$SCRIPT_DIR/version.h" | sed 's/.*"\(.*\)".*/\1/')
 
 DEBIAN="jeff@192.168.1.39"
-WINDOWS="jeff@192.168.1.137"
+WINDOWS="jeff@192.168.1.42"
+WINDOWS_BACKUP="jeff@192.168.1.137"
 DOWNLOADS="/zstore/source/www/jocala.com/downloads"
 WEBSITE="/zstore/source/www/jocala.com"
 ADBLINK_REPO="/zstore/source/adblink"

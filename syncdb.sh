@@ -4,7 +4,8 @@ set -euo pipefail
 
 DB="$HOME/.jocala/adblink.db"
 DEBIAN="jeff@192.168.1.39"
-WINDOWS="jeff@192.168.1.137"
+WINDOWS="jeff@192.168.1.42"
+WINDOWS_BACKUP="jeff@192.168.1.137"
 LINUX_PATH="/home/jeff/.jocala/adblink.db"
 WINDOWS_PATH="C:/Users/jeff/AppData/Roaming/.jocala/adblink.db"
 
