@@ -33,12 +33,27 @@ void ApkUidManager::getApkPackageName(QWidget *parentWidget, const QString &aapt
     logfile(QStringLiteral("Package name extraction"));
     logfile(QStringLiteral("------------------------"));
 
+    QString rawAapt = aaptPath;
+    rawAapt.remove('"');
+    QString aaptDir = QFileInfo(rawAapt).absolutePath();
+
     QStringList extracted;
     QStringList failed;
 
     for (const QString &filename : filenames) {
-        QString cstring = aaptPath + " dump badging  " + '"' + filename + '"';
+        QString cstring = QStringLiteral("LD_LIBRARY_PATH=\"%1:$LD_LIBRARY_PATH\" %2 dump badging \"%3\"")
+                              .arg(aaptDir, aaptPath, filename);
         QString command = getadbOutput(cstring);
+        if (command.contains(QStringLiteral("cannot open shared object"))
+            || command.contains(QStringLiteral("not found"))
+            || command.contains(QStringLiteral("No such file"))) {
+            QString fallback = QStringLiteral("/usr/bin/aapt dump badging \"%1\"").arg(filename);
+            QString fbOut = getadbOutput(fallback);
+            if (fbOut.contains(QStringLiteral("package")))
+                command = fbOut;
+            else if (!fbOut.isEmpty())
+                command = fbOut;
+        }
         QStringList mstringlist = command.split(QRegularExpression("[\t\n\r]"), Qt::SkipEmptyParts);
 
         bool found = false;

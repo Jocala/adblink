@@ -374,6 +374,17 @@ else()
         "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.linux/fastboot"
         DESTINATION adbfiles
     )
+    install(FILES
+        "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.linux/libaapt.so.0"
+        "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.linux/libandroidfw.so.0"
+        "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.linux/libbacktrace.so.0"
+        "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.linux/libbase.so.0"
+        "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.linux/libcutils.so.0"
+        "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.linux/liblog.so.0"
+        "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.linux/libutils.so.0"
+        "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.linux/libziparchive.so.0"
+        DESTINATION adbfiles
+    )
     install(DIRECTORY
         "${CMAKE_SOURCE_DIR}/adbfiles/adbfiles.linux/icons/"
         DESTINATION adbfiles/icons
