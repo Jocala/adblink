@@ -41,7 +41,7 @@ void ApkUidManager::getApkPackageName(QWidget *parentWidget, const QString &aapt
     QStringList failed;
 
     for (const QString &filename : filenames) {
-        QString cstring = QStringLiteral("LD_LIBRARY_PATH=\"%1:$LD_LIBRARY_PATH\" %2 dump badging \"%3\"")
+        QString cstring = QStringLiteral("LD_LIBRARY_PATH=\"%1/lib64:%1:$LD_LIBRARY_PATH\" %2 dump badging \"%3\"")
                               .arg(aaptDir, aaptPath, filename);
         QString command = getadbOutput(cstring);
         if (command.contains(QStringLiteral("cannot open shared object"))
