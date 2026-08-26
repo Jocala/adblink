@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(adblink VERSION 8.0 LANGUAGES CXX)
+project(adblink VERSION 8.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -92,6 +92,7 @@ set(SOURCES
     thumbnailmanager.cpp
     forcequitdialog.cpp
     adbprefdialog.cpp
+    apkdropdialog.cpp
     sideloadmanager.cpp
     sleepdialog.cpp
     adbstring.cpp
@@ -170,6 +171,7 @@ set(HEADERS
     thumbnailmanager.h
     forcequitdialog.h
     adbprefdialog.h
+    apkdropdialog.h
     sideloadmanager.h
     sleepdialog.h
     adbstring.h

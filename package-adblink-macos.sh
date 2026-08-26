@@ -17,7 +17,7 @@ $CPACK --config "$BUILD_DIR/CPackConfig.cmake" \
   -B "$BUILD_DIR/packages"
 
 NOTARY_PROFILE="adblink-notary"
-DMG="$BUILD_DIR/packages/adblink-8.0-Darwin.dmg"
+DMG="$BUILD_DIR/packages/adblink-8.1-Darwin.dmg"
 xcrun notarytool submit "$DMG" --keychain-profile "$NOTARY_PROFILE" --wait
 xcrun stapler staple "$DMG"
 ls -lh "$BUILD_DIR/packages/"
