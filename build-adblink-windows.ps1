@@ -22,8 +22,8 @@ if (-not $vcvars) {
     exit 1
 }
 
-# Load Visual Studio environment so Ninja uses MSVC
-cmd /c "`"$vcvars`" > nul 2>&1 && set" | ForEach-Object {
+# Load Visual Studio environment so Ninja uses MSVC - pin to 14.51 to match Qt 6.11.1-static built with 14.51
+cmd /c "`"$vcvars`" -vcvars_ver=14.51 > nul 2>&1 && set" | ForEach-Object {
     if ($_ -match '^(\w+)=(.*)') {
         Set-Item -Path "env:$($matches[1])" -Value $matches[2]
     }
