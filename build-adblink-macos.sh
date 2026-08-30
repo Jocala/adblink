@@ -5,7 +5,7 @@ CMAKE="/opt/homebrew/bin/cmake"
 CTEST="/opt/homebrew/bin/ctest"
 
 SOURCE_DIR="/Users/jeff/source/adblink"
-BUILD_DIR="/Users/jeff/build-adblink"
+BUILD_DIR="/Users/jeff/source/builds/adblink"
 
 # Xcode 26.4 dropped x86_64 from cdefs.h, breaking universal builds. Xcode 26.6+ restored it.
 # If the universal build breaks again, uncomment the sysroot pin:

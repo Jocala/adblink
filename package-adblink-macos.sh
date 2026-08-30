@@ -5,7 +5,7 @@ SCRIPT_DIR="$(dirname "$0")"
 CPACK="/opt/homebrew/bin/cpack"
 CODESIGN_IDENTITY="Developer ID Application: jeff elkins (9Q77WK7W3R)"
 
-BUILD_DIR="/Users/jeff/build-adblink"
+BUILD_DIR="/Users/jeff/source/builds/adblink"
 
 codesign --force --deep --sign "$CODESIGN_IDENTITY" --timestamp \
   --options=runtime \

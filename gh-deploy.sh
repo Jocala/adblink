@@ -9,7 +9,7 @@ VERSION=$(grep 'const QString version' "$SCRIPT_DIR/version.h" | sed 's/.*"\(.*\
 
 DEBIAN="jeff@192.168.1.39"
 DOWNLOADS="/zstore/source/www/jocala.com/downloads"
-BUILD_DIR="/Users/jeff/build-adblink/packages"
+BUILD_DIR="/Users/jeff/source/builds/adblink/packages"
 TMPDIR="/tmp/adblink-gh-release"
 
 DMG="adblink-${VERSION}-Darwin.dmg"

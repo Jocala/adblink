@@ -9,10 +9,10 @@
 
 ### macOS
 ```sh
-cmake -S /Users/jeff/source/adblink -B /Users/jeff/build-adblink
-cmake --build /Users/jeff/build-adblink
-ctest --test-dir /Users/jeff/build-adblink --output-on-failure
-cpack --config /Users/jeff/build-adblink/CPackConfig.cmake
+cmake -S /Users/jeff/source/adblink -B /Users/jeff/source/builds/adblink
+cmake --build /Users/jeff/source/builds/adblink
+ctest --test-dir /Users/jeff/source/builds/adblink --output-on-failure
+cpack --config /Users/jeff/source/builds/adblink/CPackConfig.cmake
 ```
 Or use: `/Users/jeff/source/adblink/build-adblink-macos.sh` (build + test)
 Package only (after build): `/Users/jeff/source/adblink/package-adblink-macos.sh`
@@ -274,7 +274,7 @@ Hardcoded (widgets removed, setters are no-ops): `ostype()` = `"0"`, `scoped()` 
 ### Source locations
 | Platform | Source | Build |
 |---|---|---|
-| macOS | `/Volumes/source/adblink` | `/Users/jeff/build-adblink` |
+| macOS | `/Volumes/source/adblink` | `/Users/jeff/source/builds/adblink` |
 | Linux | `/zstore/source/adblink` | `/home/jeff/build-adblink` |
 | Windows | `C:\source\adblink` | `%USERPROFILE%\build-adblink` |
 
@@ -284,8 +284,11 @@ Builds are out-of-source (Samba share → local disk). Each platform has a build
 | Platform | Host | User | SSH key |
 |---|---|---|---|
 | Debian | `192.168.1.39` | `jeff` | `/Users/jeff/.ssh/id_ed25519` |
-| Windows (primary) | `192.168.1.42` (win10) | `jeff` | `/Users/jeff/.ssh/id_ed25519` |
-| Windows (backup) | `192.168.1.137` | `jeff` | `/Users/jeff/.ssh/id_ed25519` |
+| Windows (primary) | `192.168.1.170` (win10 VM) | `jeff` | `/Users/jeff/.ssh/id_ed25519` |
+| Windows (backup) | `192.168.1.137` (win11) | `jeff` | `/Users/jeff/.ssh/id_ed25519` |
+| Windows (retired) | `192.168.1.42` (win10 hardware) | `jeff` | `/Users/jeff/.ssh/id_ed25519` |
+
+Easy switch: `WINDOWS_HOST=backup ./stage.sh` or `WINDOWS_HOST=backup ./syncdb.sh` uses backup (137); default is primary (170). `WINDOWS_HOST=jeff@192.168.1.170` (or any `user@host`) overrides with any host.
 
 ### Packaging
 | Platform | Generator | Output |
@@ -305,13 +308,13 @@ Builds are out-of-source (Samba share → local disk). Each platform has a build
 - No `CPACK_RESOURCE_FILE_LICENSE` set (no license page on any platform)
 
 ### macOS bundle verification
-Built app is at `/Users/jeff/build-adblink/adblink.app/`. Contents:
+Built app is at `/Users/jeff/source/builds/adblink/adblink.app/`. Contents:
 - `Contents/MacOS/adblink` — arm64 binary
 - `Contents/MacOS/adbfiles/` — aapt, adb, busybox, fastboot, sqlite3 (all +x)
 - `Contents/Resources/adblink.icns` — application icon
 - `Contents/Info.plist` — references `adblink.icns`, bundle ID `jocala.com.adblink`
 
-DMG at `/Users/jeff/build-adblink/packages/adblink-8.0-Darwin.dmg` contains `adblink.app` + `Applications -> /Applications`.
+DMG at `/Users/jeff/source/builds/adblink/packages/adblink-8.0-Darwin.dmg` contains `adblink.app` + `Applications -> /Applications`.
 
 ## Known issues / held-out fixes
 

@@ -9,8 +9,19 @@ SCRIPT_DIR="$(dirname "$0")"
 VERSION=$(grep 'const QString version' "$SCRIPT_DIR/version.h" | sed 's/.*"\(.*\)".*/\1/')
 
 DEBIAN="jeff@192.168.1.39"
-WINDOWS="jeff@192.168.1.42"
-WINDOWS_BACKUP="jeff@192.168.1.137"
+# Windows build hosts — easy switch:
+#   ./stage.sh                    # uses primary (170)
+#   WINDOWS_HOST=backup ./stage.sh  # uses backup (137)
+WINDOWS_PRIMARY="jeff@192.168.1.170"   # win10 VM — primary
+WINDOWS_BACKUP="jeff@192.168.1.137"    # win11 — backup
+WINDOWS_RETIRED="jeff@192.168.1.42"    # win10 hardware — retired
+if [ "${WINDOWS_HOST:-}" = "backup" ]; then
+  WINDOWS="$WINDOWS_BACKUP"
+elif [ -n "${WINDOWS_HOST:-}" ]; then
+  WINDOWS="$WINDOWS_HOST"
+else
+  WINDOWS="$WINDOWS_PRIMARY"
+fi
 DOWNLOADS="/zstore/source/www/jocala.com/downloads"
 WEBSITE="/zstore/source/www/jocala.com"
 ADBLINK_REPO="/zstore/source/adblink"
@@ -44,7 +55,7 @@ ssh "$WINDOWS" "powershell -ExecutionPolicy Bypass -File C:\\source\\adblink\\pa
 echo ""
 echo "--- Copying packages to Debian downloads directory ---"
 
-scp "/Users/jeff/build-adblink/packages/$DMG" "$DEBIAN:$DOWNLOADS/$DMG"
+scp "/Users/jeff/source/builds/adblink/packages/$DMG" "$DEBIAN:$DOWNLOADS/$DMG"
 ssh "$DEBIAN" "cp /home/jeff/build-adblink/packages/$TGZ $DOWNLOADS/$TGZ"
 
 # Copy Windows package via SSH from Windows to Debian
