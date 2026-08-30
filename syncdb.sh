@@ -9,7 +9,6 @@ DEBIAN="jeff@192.168.1.39"
 #   WINDOWS_HOST=backup ./syncdb.sh  # uses backup (137)
 WINDOWS_PRIMARY="jeff@192.168.1.170"   # win10 VM — primary
 WINDOWS_BACKUP="jeff@192.168.1.137"    # win11 — backup
-WINDOWS_RETIRED="jeff@192.168.1.42"    # win10 hardware — retired
 if [ "${WINDOWS_HOST:-}" = "backup" ]; then
   WINDOWS="$WINDOWS_BACKUP"
 elif [ -n "${WINDOWS_HOST:-}" ]; then

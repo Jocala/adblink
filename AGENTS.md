@@ -286,7 +286,6 @@ Builds are out-of-source (Samba share → local disk). Each platform has a build
 | Debian | `192.168.1.39` | `jeff` | `/Users/jeff/.ssh/id_ed25519` |
 | Windows (primary) | `192.168.1.170` (win10 VM) | `jeff` | `/Users/jeff/.ssh/id_ed25519` |
 | Windows (backup) | `192.168.1.137` (win11) | `jeff` | `/Users/jeff/.ssh/id_ed25519` |
-| Windows (retired) | `192.168.1.42` (win10 hardware) | `jeff` | `/Users/jeff/.ssh/id_ed25519` |
 
 Easy switch: `WINDOWS_HOST=backup ./stage.sh` or `WINDOWS_HOST=backup ./syncdb.sh` uses backup (137); default is primary (170). `WINDOWS_HOST=jeff@192.168.1.170` (or any `user@host`) overrides with any host.
 
