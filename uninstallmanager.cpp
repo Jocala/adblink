@@ -17,9 +17,9 @@ void UninstallManager::uninstallPackage(QWidget *parentWidget,
                                         const QString &adbPrefix,
                                         RunLongProcessCallback runLongProcess)
 {
-    logfile("open uninstall dialog");
+    logfile(QString("open uninstall dialog: %1 adbPrefix=%2").arg(device.daddr, adbPrefix));
 
-    uninstallDialog dialog(device.daddr, "", parentWidget);
+    uninstallDialog dialog(adbPrefix, parentWidget);
     dialog.setWindowModality(Qt::WindowModal);
 
     QString package;
@@ -79,7 +79,7 @@ void UninstallManager::uninstallPackage(QWidget *parentWidget,
             msgBox.setStandardButtons(QMessageBox::Ok);
             msgBox.setWindowModality(Qt::WindowModal);
             msgBox.exec();
-            logfile(package + " uninstalled");
+            logfile(package + " uninstall failed: " + command.trimmed().left(500));
         } else {
             QMessageBox msgBox(parentWidget);
             msgBox.setIcon(QMessageBox::Information);

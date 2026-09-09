@@ -1,3 +1,9 @@
+09/09/26
+
+adblink.8.1
+
+Uninstall dialog: fixed empty package list on network devices (TCP port was omitted from adb command), added quoting for adb paths with spaces, in-process filtering (no grep dependency), proper package: parsing with error/unauthorized handling, and Clear now reloads full list
+
 09/01/26
 
 adblink.8.1

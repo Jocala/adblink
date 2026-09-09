@@ -13,6 +13,7 @@ class uninstallDialog : public QDialog
     Q_OBJECT
 
 public:
+    explicit uninstallDialog(const QString &adbPrefix, QWidget *parent = nullptr);
     explicit uninstallDialog(const QString &daddr, const QString &port, QWidget *parent = nullptr);
     ~uninstallDialog();
 
@@ -26,8 +27,7 @@ private slots:
     void on_apkclearButton_clicked();
 
 private:
-    QString m_daddr;
-    QString m_port;
+    QString m_adbPrefix;
     QString m_lastOutput;
 
     QLabel *m_titleLabel;
