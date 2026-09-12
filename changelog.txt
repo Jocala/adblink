@@ -1,3 +1,9 @@
+09/12/26
+
+adblink.8.1
+
+Comments field added to device record.
+
 09/09/26
 
 adblink.8.1
