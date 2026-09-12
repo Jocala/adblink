@@ -178,18 +178,16 @@ DeviceRecordDialog::DeviceRecordDialog(QWidget *parent, bool showkodi) :
 
     // ---------- Initial state ----------
 
-    if (!showkodi) {
-        this->setFixedWidth(275);
-    }
-
+    // keep dialog wide (540) even in Android view so Comments stays visible under File Path
+    // Kodi fields hide per showkodi, Comments stays visible in both views
     m_filepath->setVisible(showkodi);
     m_filepathButton->setVisible(showkodi);
     m_kodi2->setVisible(showkodi);
     m_kodi3->setVisible(showkodi);
     m_packagename->setVisible(showkodi);
     m_data_root->setVisible(showkodi);
-    m_comments->setVisible(showkodi);
-    m_commentsLabel->setVisible(showkodi);
+    m_comments->setVisible(true);
+    m_commentsLabel->setVisible(true);
 
     on_isusb_clicked(m_isusb->isChecked());
 }
