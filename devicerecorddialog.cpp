@@ -118,11 +118,11 @@ DeviceRecordDialog::DeviceRecordDialog(QWidget *parent, bool showkodi) :
 
     // Kodi fields (gridLayout)
     QWidget *kodiFieldsWidget = new QWidget(this);
-    kodiFieldsWidget->setGeometry(286, 24, 233, 117);
+    kodiFieldsWidget->setGeometry(286, 24, 233, 185);
     QGridLayout *gridLayout = new QGridLayout(kodiFieldsWidget);
     gridLayout->setContentsMargins(0, 0, 0, 0);
     gridLayout->setHorizontalSpacing(5);
-    gridLayout->setVerticalSpacing(0);
+    gridLayout->setVerticalSpacing(6);
 
     m_kodi2 = new QLabel("Package name");
 
@@ -142,12 +142,23 @@ DeviceRecordDialog::DeviceRecordDialog(QWidget *parent, bool showkodi) :
     m_filepath->setToolTip("<html><head/><body><p>Enter the file path for your Media Center.  "
                          "This is combined with Package Name, e.g.  org.xbmc.kodi/files/.kodi</p></body></html>");
 
+    m_commentsLabel = new QLabel("Comments");
+    m_commentsLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    m_comments = new QTextEdit();
+    m_comments->setPlaceholderText("Notes...");
+    m_comments->setToolTip("Free-form comments stored in flag2");
+    m_comments->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    m_comments->setMinimumHeight(50);
+    m_comments->setMaximumHeight(60);
+
     gridLayout->addWidget(m_kodi2, 0, 0);
     gridLayout->addWidget(m_packagename, 0, 1);
     gridLayout->addWidget(m_kodi3, 1, 0);
     gridLayout->addWidget(m_data_root, 1, 1);
     gridLayout->addWidget(m_filepathButton, 2, 0);
     gridLayout->addWidget(m_filepath, 2, 1);
+    gridLayout->addWidget(m_commentsLabel, 3, 0, Qt::AlignTop);
+    gridLayout->addWidget(m_comments, 3, 1);
 
     // ---------- Defaults ----------
 
@@ -177,6 +188,8 @@ DeviceRecordDialog::DeviceRecordDialog(QWidget *parent, bool showkodi) :
     m_kodi3->setVisible(showkodi);
     m_packagename->setVisible(showkodi);
     m_data_root->setVisible(showkodi);
+    m_comments->setVisible(showkodi);
+    m_commentsLabel->setVisible(showkodi);
 
     on_isusb_clicked(m_isusb->isChecked());
 }
@@ -225,6 +238,10 @@ bool DeviceRecordDialog::wsa() {
     return false;
 }
 
+QString DeviceRecordDialog::comments() {
+    return m_comments ? m_comments->toPlainText() : QString();
+}
+
 bool DeviceRecordDialog::scoped() {
     return false;
 }
@@ -263,6 +280,13 @@ void DeviceRecordDialog::setscope(const bool &scoped)
 
 void DeviceRecordDialog::setwsa(const bool &wsa)
 {
+    Q_UNUSED(wsa)
+}
+
+void DeviceRecordDialog::setComments(const QString &comments)
+{
+    if (m_comments)
+        m_comments->setPlainText(comments);
 }
 
 void DeviceRecordDialog::setversionLabel(const QString &versiontext)

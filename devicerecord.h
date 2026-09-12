@@ -16,7 +16,7 @@ struct DeviceRecord {
     bool isusb = false;
     bool disableroot = false;
     bool scoped = false; // flag1
-    bool wsa = false;    // flag2
+    QString comments;    // flag2 (was wsa)
     QString ostype = "0"; // Default after validation
     QString scrcpyarg; // flag5
 };

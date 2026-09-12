@@ -1996,8 +1996,8 @@ void MainWindow::applyDebouncedRefresh()
         QSqlQuery query;
         query.prepare(QStringLiteral(
             "INSERT INTO device (description, daddr, port, isusb, ostype, "
-            "data_root, xbmcpackage, pulldir, disableroot, filepath, flag5) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"));
+            "data_root, xbmcpackage, pulldir, disableroot, filepath, flag2, flag5) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"));
         query.addBindValue(name);
         query.addBindValue(serial);
         query.addBindValue(QString());
@@ -2008,6 +2008,7 @@ void MainWindow::applyDebouncedRefresh()
         query.addBindValue(QString());
         query.addBindValue(false);
         query.addBindValue(QStringLiteral("files/.kodi"));
+        query.addBindValue(QString());
         query.addBindValue(QString());
         if (!query.exec())
             logfile("Auto-add USB device failed: " + query.lastError().text());

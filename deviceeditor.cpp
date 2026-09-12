@@ -46,6 +46,7 @@ bool DeviceEditor::exec()
             dialog.setport(m_existingDevice.port);
         dialog.setdaddr(m_existingDevice.daddr);
         dialog.setisusb(m_existingDevice.isusb);
+        dialog.setComments(m_existingDevice.comments);
     }
     else
     {
@@ -60,6 +61,7 @@ bool DeviceEditor::exec()
         dialog.setport("5555");
         dialog.setscope(false);
         dialog.setwsa(false);
+        dialog.setComments("");
         dialog.setdaddr("");
         dialog.setisusb(false);
     }
@@ -81,6 +83,7 @@ bool DeviceEditor::exec()
     QString ostype = dialog.ostype();
     int disableroot = dialog.disableroot();
     QString scrcpy = dialog.scrcpy();
+    QString comments = dialog.comments();
 
     if (description.isEmpty())
     {
@@ -118,8 +121,8 @@ bool DeviceEditor::exec()
     if (!m_isUpdate)
     {
         sqlstatement = "INSERT INTO device (description, daddr, port, isusb, ostype, "
-                       "data_root, xbmcpackage, pulldir, disableroot, filepath, flag5) "
-                       "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                       "data_root, xbmcpackage, pulldir, disableroot, filepath, flag2, flag5) "
+                       "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         query.prepare(sqlstatement);
         query.addBindValue(description);
         query.addBindValue(daddr);
@@ -131,12 +134,13 @@ bool DeviceEditor::exec()
         query.addBindValue(pulldir);
         query.addBindValue(disableroot);
         query.addBindValue(filepath);
+        query.addBindValue(comments);
         query.addBindValue(scrcpy);
     }
     else
     {
         sqlstatement = "UPDATE device SET description = ?, daddr = ?, port = ?, isusb = ?, ostype = ?, "
-                       "data_root = ?, xbmcpackage = ?, pulldir = ?, disableroot = ?, filepath = ?, flag5 = ? "
+                       "data_root = ?, xbmcpackage = ?, pulldir = ?, disableroot = ?, filepath = ?, flag2 = ?, flag5 = ? "
                        "WHERE description = ?";
         query.prepare(sqlstatement);
         query.addBindValue(description);
@@ -149,6 +153,7 @@ bool DeviceEditor::exec()
         query.addBindValue(pulldir);
         query.addBindValue(disableroot);
         query.addBindValue(filepath);
+        query.addBindValue(comments);
         query.addBindValue(scrcpy);
         query.addBindValue(m_existingDescription);
     }
@@ -158,7 +163,7 @@ bool DeviceEditor::exec()
         QString errorMessage = query.lastError().text();
         logfile(QString("Query error: ") + errorMessage);
         logfile(QString("SQL statement: ") + sqlstatement);
-        logfile(QString("Bound values: description=%1, daddr=%2, port=%3, isusb=%4, ostype=%5, data_root=%6, xbmcpackage=%7, pulldir=%8, disableroot=%9, filepath=%10, scrcpy=%11")
+        logfile(QString("Bound values: description=%1, daddr=%2, port=%3, isusb=%4, ostype=%5, data_root=%6, xbmcpackage=%7, pulldir=%8, disableroot=%9, filepath=%10, comments=%11, scrcpy=%12")
                     .arg(description)
                     .arg(daddr)
                     .arg(port)
@@ -169,6 +174,7 @@ bool DeviceEditor::exec()
                     .arg(pulldir)
                     .arg(disableroot)
                     .arg(filepath)
+                    .arg(comments)
                     .arg(scrcpy));
 
         if (errorMessage.contains("Parameter count mismatch"))

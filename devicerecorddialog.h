@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QPushButton>
 #include <QLineEdit>
+#include <QTextEdit>
 #include <QCheckBox>
 #include <QLabel>
 #include <QGridLayout>
@@ -32,6 +33,7 @@ public:
     void setdataroot(const QString &data_root);
     void setport(const QString &port);
     void setdisableroot(const bool &disableroot);
+    void setComments(const QString &comments);
 
     ~DeviceRecordDialog();
 
@@ -45,6 +47,7 @@ public:
     QString data_root();
     QString port();
     QString ostype();
+    QString comments();
 
     bool isusb();
     bool scoped();
@@ -70,11 +73,13 @@ private:
     QLineEdit *m_port;
     QLineEdit *m_scrcpy;
     QLineEdit *m_data_root;
+    QTextEdit *m_comments;
 
     QCheckBox *m_isusb;
 
     QLabel *m_kodi2;
     QLabel *m_kodi3;
+    QLabel *m_commentsLabel;
 };
 
 #endif // DEVICERECORDDIALOG_H

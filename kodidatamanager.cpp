@@ -107,7 +107,7 @@ DeviceRecord KodiDataManager::queryDeviceRecord(const QString &description) cons
         record.isusb = query.value(QStringLiteral("isusb")).toBool();
         record.disableroot = query.value(QStringLiteral("disableroot")).toBool();
         record.scoped = query.value(QStringLiteral("flag1")).toBool();
-        record.wsa = query.value(QStringLiteral("flag2")).toBool();
+        record.comments = query.value(QStringLiteral("flag2")).toString();
         record.ostype = query.value(QStringLiteral("ostype")).toString();
         record.scrcpyarg = query.value(QStringLiteral("flag5")).toString();
     }
@@ -146,7 +146,7 @@ DeviceRecord KodiDataManager::queryDeviceByDaddr(const QString &daddr) const
         record.isusb = query.value(QStringLiteral("isusb")).toBool();
         record.disableroot = query.value(QStringLiteral("disableroot")).toBool();
         record.scoped = query.value(QStringLiteral("flag1")).toBool();
-        record.wsa = query.value(QStringLiteral("flag2")).toBool();
+        record.comments = query.value(QStringLiteral("flag2")).toString();
         record.ostype = query.value(QStringLiteral("ostype")).toString();
         record.scrcpyarg = query.value(QStringLiteral("flag5")).toString();
     }

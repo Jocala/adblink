@@ -42,7 +42,7 @@ private slots:
         QVERIFY(!rec.isusb);
         QVERIFY(!rec.disableroot);
         QVERIFY(!rec.scoped);
-        QVERIFY(!rec.wsa);
+        QVERIFY(rec.comments.isEmpty());
     }
 
     void defaultOsType()
@@ -61,6 +61,7 @@ private slots:
         QVERIFY(rec.description.isEmpty());
         QVERIFY(rec.port.isEmpty());
         QVERIFY(rec.scrcpyarg.isEmpty());
+        QVERIFY(rec.comments.isEmpty());
     }
 
     void assignmentAndReadback()
@@ -73,7 +74,7 @@ private slots:
         rec.isusb = true;
         rec.disableroot = true;
         rec.scoped = true;
-        rec.wsa = true;
+        rec.comments = QStringLiteral("my comment");
         rec.ostype = QStringLiteral("2");
         rec.scrcpyarg = QStringLiteral("--max-size=1080");
 
@@ -84,7 +85,7 @@ private slots:
         QVERIFY(rec.isusb);
         QVERIFY(rec.disableroot);
         QVERIFY(rec.scoped);
-        QVERIFY(rec.wsa);
+        QCOMPARE(rec.comments, QStringLiteral("my comment"));
         QCOMPARE(rec.ostype, QStringLiteral("2"));
         QCOMPARE(rec.scrcpyarg, QStringLiteral("--max-size=1080"));
     }
