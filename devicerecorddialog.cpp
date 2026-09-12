@@ -189,6 +189,13 @@ DeviceRecordDialog::DeviceRecordDialog(QWidget *parent, bool showkodi) :
     m_comments->setVisible(true);
     m_commentsLabel->setVisible(true);
 
+    if (!showkodi) {
+        kodiFieldsWidget->setGeometry(286, 24, 233, 70);
+        portUsbWidget->setGeometry(286, 102, 221, 30);
+        buttonWidget->setGeometry(197, 150, 145, 32);
+        setFixedHeight(200);
+    }
+
     on_isusb_clicked(m_isusb->isChecked());
 }
 
