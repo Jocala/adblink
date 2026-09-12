@@ -177,7 +177,7 @@ Thread-safe via `static QMutex` + `QMutexLocker`. Appends to `<logdir>/adblink.l
 Managed by `PreferencesManager`. Dialog (`adbprefDialog`, fixed 300x500) has:
 - 3 checkboxes (version check, scrcpy args, Kodi startup view)
 - 5 combos (default window size, 4 font sizes)
-- Terminal type (macOS: Terminal/iTerm2; Linux: Gnome/XFCE4/Konsole)
+- Terminal type (macOS: Terminal/iTerm2/Ghostty Terminal; Linux: Gnome/XFCE4/Konsole/Ghostty Terminal) — with guardrails: `ConsoleManager::isTerminalAvailable()` checks bundle (`/Applications/...`) + `QStandardPaths::findExecutable`; missing selection logs and falls back to Terminal/gnome-terminal with a `QMessageBox::Warning` (“%1 not found…”) and `adblink.log` entry; `terminalCommand/launchTerminal/openConsole/openAdbShell/openScrcpy` all handle fallback + `startDetached` failure; `adbprefDialog` marks missing entries “(not installed)” and warns on accept
 - 4 directory pickers (pull, APK, backup, external ADB)
 - 3 buttons (Cancel, Updates check, OK)
 

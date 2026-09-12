@@ -12,6 +12,7 @@
 #include <QJsonObject>
 #include <QMessageBox>
 #include <QProcess>
+#include <QStandardPaths>
 #include <QTextStream>
 
 #include "scpdialog.h"
@@ -33,6 +34,57 @@ ConsoleManager::OSType ConsoleManager::detectOs()
 #else
     return Linux;
 #endif
+}
+
+bool ConsoleManager::isTerminalAvailable(int choice) const
+{
+    if (m_os == Windows)
+        return true;
+    if (m_os == macOS) {
+        if (choice == 0) return true;
+        if (choice == 1) {
+            return QFileInfo::exists(QStringLiteral("/Applications/iTerm.app"))
+                || QFileInfo::exists(QDir::homePath() + QStringLiteral("/Applications/iTerm.app"));
+        }
+        if (choice == 2) {
+            return QFileInfo::exists(QStringLiteral("/Applications/Ghostty.app"))
+                || QFileInfo::exists(QDir::homePath() + QStringLiteral("/Applications/Ghostty.app"))
+                || !QStandardPaths::findExecutable(QStringLiteral("ghostty")).isEmpty();
+        }
+        return false;
+    }
+    if (m_os == Linux) {
+        switch (choice) {
+        case 0: return !QStandardPaths::findExecutable(QStringLiteral("gnome-terminal")).isEmpty();
+        case 1: return !QStandardPaths::findExecutable(QStringLiteral("xfce4-terminal")).isEmpty();
+        case 2: return !QStandardPaths::findExecutable(QStringLiteral("konsole")).isEmpty();
+        case 3: return !QStandardPaths::findExecutable(QStringLiteral("ghostty")).isEmpty();
+        default: return false;
+        }
+    }
+    return false;
+}
+
+QString ConsoleManager::terminalDisplayName(int choice) const
+{
+    if (m_os == macOS) {
+        switch (choice) {
+        case 0: return QStringLiteral("macOS Terminal");
+        case 1: return QStringLiteral("iTerm2 Terminal");
+        case 2: return QStringLiteral("Ghostty Terminal");
+        default: return QStringLiteral("macOS Terminal");
+        }
+    }
+    if (m_os == Linux) {
+        switch (choice) {
+        case 0: return QStringLiteral("Gnome Terminal");
+        case 1: return QStringLiteral("XFCE4 Terminal");
+        case 2: return QStringLiteral("KDE Konsole");
+        case 3: return QStringLiteral("Ghostty Terminal");
+        default: return QStringLiteral("Gnome Terminal");
+        }
+    }
+    return QStringLiteral("Terminal");
 }
 
 QString ConsoleManager::scrcpyScript(const QString &scriptDir, const QString &adbfilesDir, const QString &scrcpyDir) const
@@ -72,32 +124,56 @@ QString ConsoleManager::scrcpyScript(const QString &scriptDir, const QString &ad
 
 void ConsoleManager::launchTerminal(const QString &scriptPath, int terminalChoice) const
 {
-    QString cmd = terminalCommand(scriptPath, terminalChoice);
+    int effective = terminalChoice;
+    if (!isTerminalAvailable(terminalChoice)) {
+        logfile(QStringLiteral("Terminal %1 not found, falling back to %2")
+                .arg(terminalDisplayName(terminalChoice), terminalDisplayName(0)));
+        effective = 0;
+    }
+    QString cmd = terminalCommand(scriptPath, effective);
     if (!cmd.isEmpty()) {
         QStringList parts = QProcess::splitCommand(cmd);
-        if (!parts.isEmpty())
-            QProcess::startDetached(parts.takeFirst(), parts);
+        if (!parts.isEmpty()) {
+            if (!QProcess::startDetached(parts.takeFirst(), parts)) {
+                logfile(QStringLiteral("Failed to launch terminal: ") + cmd);
+                QMessageBox msgBox;
+                msgBox.setIcon(QMessageBox::Warning);
+                msgBox.setWindowTitle(QStringLiteral("Terminal launch failed"));
+                msgBox.setText(QStringLiteral("Failed to launch %1.").arg(terminalDisplayName(effective)));
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.setWindowModality(Qt::ApplicationModal);
+                msgBox.exec();
+            }
+        }
     }
 }
 
 QString ConsoleManager::terminalCommand(const QString &scriptPath, int terminalChoice) const
 {
+    int effective = terminalChoice;
+    if (!isTerminalAvailable(terminalChoice)) {
+        logfile(QStringLiteral("Terminal %1 not found, falling back to %2")
+                .arg(terminalDisplayName(terminalChoice), terminalDisplayName(0)));
+        effective = 0;
+    }
     if (m_os == Windows)
         return QStringLiteral("cmd.exe /c start \"\" ") + scriptPath;
 
     if (m_os == macOS) {
-        switch (terminalChoice) {
+        switch (effective) {
         case 0:  return QStringLiteral("open -a Terminal.app ") + scriptPath;
         case 1:  return QStringLiteral("open -a iTerm.app ") + scriptPath;
+        case 2:  return QStringLiteral("open -a Ghostty.app ") + scriptPath;
         default: return QStringLiteral("open -a Terminal.app ") + scriptPath;
         }
     }
 
     // Linux
-    switch (terminalChoice) {
+    switch (effective) {
     case 0:  return QStringLiteral("/usr/bin/gnome-terminal -- ") + scriptPath;
     case 1:  return QStringLiteral("/usr/bin/xfce4-terminal -e ") + scriptPath;
     case 2:  return QStringLiteral("/usr/bin/konsole -e ") + scriptPath;
+    case 3:  return QStringLiteral("/usr/bin/ghostty -e ") + scriptPath;
     default: return QStringLiteral("/usr/bin/gnome-terminal -- ") + scriptPath;
     }
 }
@@ -201,42 +277,78 @@ void ConsoleManager::openConsole(const QString &scriptDir, const QString &appHom
     }
 
     // Launch terminal
-    if (m_os == macOS)
     {
-        switch (mcheck)
-        {
-        case 0:
-            cstring = "open -a Terminal.app " + scriptDir + "cpath.sh";
-            break;
-        case 1:
-            cstring = "open -a iTerm.app " + scriptDir + "cpath.sh";
-            break;
-        default:
-            cstring = "open -a Terminal.app " + scriptDir + "cpath.sh";
+        int effective = mcheck;
+        bool fallback = false;
+        if (!isTerminalAvailable(mcheck)) {
+            logfile(QStringLiteral("Terminal %1 not found, falling back to %2")
+                    .arg(terminalDisplayName(mcheck), terminalDisplayName(0)));
+            effective = 0;
+            fallback = true;
         }
-    }
-    else if (m_os == Linux)
-    {
-        switch (mcheck)
+        if (m_os == macOS)
         {
-        case 0:
-            cstring = "/usr/bin/gnome-terminal --working-directory=" + appHome + " -x " + scriptDir + "cpath.sh";
-            break;
-        case 1:
-            cstring = "/usr/bin/xfce4-terminal --working-directory=" + appHome + " -x " + scriptDir + "cpath.sh";
-            break;
-        case 2:
-            cstring = "/usr/bin/konsole --workdir=" + appHome + " -e " + scriptDir + "cpath.sh";
-            break;
-        default:
-            cstring = "/usr/bin/gnome-terminal --working-directory=" + appHome + " -x " + scriptDir + "cpath.sh";
+            switch (effective)
+            {
+            case 0:
+                cstring = "open -a Terminal.app " + scriptDir + "cpath.sh";
+                break;
+            case 1:
+                cstring = "open -a iTerm.app " + scriptDir + "cpath.sh";
+                break;
+            case 2:
+                cstring = "open -a Ghostty.app " + scriptDir + "cpath.sh";
+                break;
+            default:
+                cstring = "open -a Terminal.app " + scriptDir + "cpath.sh";
+            }
+        }
+        else if (m_os == Linux)
+        {
+            switch (effective)
+            {
+            case 0:
+                cstring = "/usr/bin/gnome-terminal --working-directory=" + appHome + " -x " + scriptDir + "cpath.sh";
+                break;
+            case 1:
+                cstring = "/usr/bin/xfce4-terminal --working-directory=" + appHome + " -x " + scriptDir + "cpath.sh";
+                break;
+            case 2:
+                cstring = "/usr/bin/konsole --workdir=" + appHome + " -e " + scriptDir + "cpath.sh";
+                break;
+            case 3:
+                cstring = "/usr/bin/ghostty -e " + scriptDir + "cpath.sh";
+                break;
+            default:
+                cstring = "/usr/bin/gnome-terminal --working-directory=" + appHome + " -x " + scriptDir + "cpath.sh";
+            }
+        }
+        if (fallback) {
+            QMessageBox msgBox;
+            msgBox.setIcon(QMessageBox::Warning);
+            msgBox.setWindowTitle(QStringLiteral("Terminal not found"));
+            msgBox.setText(QStringLiteral("%1 not found. Falling back to %2. Change the terminal in Preferences.")
+                           .arg(terminalDisplayName(mcheck), terminalDisplayName(effective)));
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setWindowModality(Qt::ApplicationModal);
+            msgBox.exec();
         }
     }
 
     {
         QStringList parts = QProcess::splitCommand(cstring);
-        if (!parts.isEmpty())
-            QProcess::startDetached(parts.takeFirst(), parts);
+        if (!parts.isEmpty()) {
+            if (!QProcess::startDetached(parts.takeFirst(), parts)) {
+                logfile(QStringLiteral("Failed to launch terminal: ") + cstring);
+                QMessageBox msgBox;
+                msgBox.setIcon(QMessageBox::Warning);
+                msgBox.setWindowTitle(QStringLiteral("Terminal launch failed"));
+                msgBox.setText(QStringLiteral("Failed to launch %1.").arg(terminalDisplayName(mcheck)));
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.setWindowModality(Qt::ApplicationModal);
+                msgBox.exec();
+            }
+        }
     }
 }
 
@@ -341,44 +453,80 @@ void ConsoleManager::openAdbShell(const QString &daddr, const QString &scriptDir
             return;
         }
 
-        if (m_os == Linux)
         {
-            switch (mcheck)
-            {
-            case 0:
-                cstring = "/usr/bin/gnome-terminal --working-directory=" + appHome + " -x " + shelldir;
-                break;
-            case 1:
-                cstring = "/usr/bin/xfce4-terminal --working-directory=" + appHome + " -x " + shelldir;
-                break;
-            case 2:
-                cstring = "/usr/bin/konsole --workdir=" + appHome + " -e " + shelldir;
-                break;
-            default:
-                cstring = "/usr/bin/gnome-terminal --working-directory=" + appHome + " -x " + shelldir;
+            int effective = mcheck;
+            bool fallback = false;
+            if (!isTerminalAvailable(mcheck)) {
+                logfile(QStringLiteral("Terminal %1 not found, falling back to %2")
+                        .arg(terminalDisplayName(mcheck), terminalDisplayName(0)));
+                effective = 0;
+                fallback = true;
             }
-        }
-
-        if (m_os == macOS)
-        {
-            switch (mcheck)
+            if (m_os == Linux)
             {
-            case 0:
-                cstring = "open -a Terminal.app " + shelldir;
-                break;
-            case 1:
-                cstring = "open -a iTerm.app " + shelldir;
-                break;
-            default:
-                cstring = "open -a Terminal.app " + shelldir;
+                switch (effective)
+                {
+                case 0:
+                    cstring = "/usr/bin/gnome-terminal --working-directory=" + appHome + " -x " + shelldir;
+                    break;
+                case 1:
+                    cstring = "/usr/bin/xfce4-terminal --working-directory=" + appHome + " -x " + shelldir;
+                    break;
+                case 2:
+                    cstring = "/usr/bin/konsole --workdir=" + appHome + " -e " + shelldir;
+                    break;
+                case 3:
+                    cstring = "/usr/bin/ghostty -e " + shelldir;
+                    break;
+                default:
+                    cstring = "/usr/bin/gnome-terminal --working-directory=" + appHome + " -x " + shelldir;
+                }
+            }
+
+            if (m_os == macOS)
+            {
+                switch (effective)
+                {
+                case 0:
+                    cstring = "open -a Terminal.app " + shelldir;
+                    break;
+                case 1:
+                    cstring = "open -a iTerm.app " + shelldir;
+                    break;
+                case 2:
+                    cstring = "open -a Ghostty.app " + shelldir;
+                    break;
+                default:
+                    cstring = "open -a Terminal.app " + shelldir;
+                }
+            }
+            if (fallback) {
+                QMessageBox msgBox;
+                msgBox.setIcon(QMessageBox::Warning);
+                msgBox.setWindowTitle(QStringLiteral("Terminal not found"));
+                msgBox.setText(QStringLiteral("%1 not found. Falling back to %2. Change the terminal in Preferences.")
+                               .arg(terminalDisplayName(mcheck), terminalDisplayName(effective)));
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.setWindowModality(Qt::ApplicationModal);
+                msgBox.exec();
             }
         }
     }
 
     {
         QStringList parts = QProcess::splitCommand(cstring);
-        if (!parts.isEmpty())
-            QProcess::startDetached(parts.takeFirst(), parts);
+        if (!parts.isEmpty()) {
+            if (!QProcess::startDetached(parts.takeFirst(), parts)) {
+                logfile(QStringLiteral("Failed to launch terminal: ") + cstring);
+                QMessageBox msgBox;
+                msgBox.setIcon(QMessageBox::Warning);
+                msgBox.setWindowTitle(QStringLiteral("Terminal launch failed"));
+                msgBox.setText(QStringLiteral("Failed to launch %1.").arg(terminalDisplayName(mcheck)));
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.setWindowModality(Qt::ApplicationModal);
+                msgBox.exec();
+            }
+        }
     }
 }
 
@@ -539,41 +687,77 @@ void ConsoleManager::openScrcpy(QWidget *parent, const QString &daddr,
         }
     }
 
-    if (m_os == macOS)
     {
-        switch (mcheck)
-        {
-        case 0:
-            cstring = "open -a Terminal.app " + scriptDir + "/scrcpy.sh";
-            break;
-        case 1:
-            cstring = "open -a iTerm.app " + scriptDir + "/scrcpy.sh";
-            break;
-        default:
-            cstring = "open -a Terminal.app " + scriptDir + "/scrcpy.sh";
+        int effective = mcheck;
+        bool fallback = false;
+        if (!isTerminalAvailable(mcheck)) {
+            logfile(QStringLiteral("Terminal %1 not found, falling back to %2")
+                    .arg(terminalDisplayName(mcheck), terminalDisplayName(0)));
+            effective = 0;
+            fallback = true;
         }
-    }
-    else if (m_os == Linux)
-    {
-        switch (mcheck)
+        if (m_os == macOS)
         {
-        case 0:
-            cstring = "gnome-terminal --working-directory=" + QDir::fromNativeSeparators(appHome) + " -x " + scriptDir + "/scrcpy.sh";
-            break;
-        case 1:
-            cstring = "xfce4-terminal --working-directory=" + QDir::fromNativeSeparators(appHome) + " -x " + scriptDir + "/scrcpy.sh";
-            break;
-        case 2:
-            cstring = "konsole --workdir=" + QDir::fromNativeSeparators(appHome) + " -e " + scriptDir + "/scrcpy.sh";
-            break;
-        default:
-            cstring = "gnome-terminal --working-directory=" + QDir::fromNativeSeparators(appHome) + " -x " + scriptDir + "/scrcpy.sh";
+            switch (effective)
+            {
+            case 0:
+                cstring = "open -a Terminal.app " + scriptDir + "/scrcpy.sh";
+                break;
+            case 1:
+                cstring = "open -a iTerm.app " + scriptDir + "/scrcpy.sh";
+                break;
+            case 2:
+                cstring = "open -a Ghostty.app " + scriptDir + "/scrcpy.sh";
+                break;
+            default:
+                cstring = "open -a Terminal.app " + scriptDir + "/scrcpy.sh";
+            }
+        }
+        else if (m_os == Linux)
+        {
+            switch (effective)
+            {
+            case 0:
+                cstring = "gnome-terminal --working-directory=" + QDir::fromNativeSeparators(appHome) + " -x " + scriptDir + "/scrcpy.sh";
+                break;
+            case 1:
+                cstring = "xfce4-terminal --working-directory=" + QDir::fromNativeSeparators(appHome) + " -x " + scriptDir + "/scrcpy.sh";
+                break;
+            case 2:
+                cstring = "konsole --workdir=" + QDir::fromNativeSeparators(appHome) + " -e " + scriptDir + "/scrcpy.sh";
+                break;
+            case 3:
+                cstring = "/usr/bin/ghostty -e " + scriptDir + "/scrcpy.sh";
+                break;
+            default:
+                cstring = "gnome-terminal --working-directory=" + QDir::fromNativeSeparators(appHome) + " -x " + scriptDir + "/scrcpy.sh";
+            }
+        }
+        if (fallback) {
+            QMessageBox msgBox(parent);
+            msgBox.setIcon(QMessageBox::Warning);
+            msgBox.setWindowTitle(QStringLiteral("Terminal not found"));
+            msgBox.setText(QStringLiteral("%1 not found. Falling back to %2. Change the terminal in Preferences.")
+                           .arg(terminalDisplayName(mcheck), terminalDisplayName(effective)));
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.setWindowModality(Qt::WindowModal);
+            msgBox.exec();
         }
     }
 
     {
         QStringList parts = QProcess::splitCommand(cstring);
-        if (!parts.isEmpty())
-            QProcess::startDetached(parts.takeFirst(), parts);
+        if (!parts.isEmpty()) {
+            if (!QProcess::startDetached(parts.takeFirst(), parts)) {
+                logfile(QStringLiteral("Failed to launch terminal: ") + cstring);
+                QMessageBox msgBox(parent);
+                msgBox.setIcon(QMessageBox::Warning);
+                msgBox.setWindowTitle(QStringLiteral("Terminal launch failed"));
+                msgBox.setText(QStringLiteral("Failed to launch %1.").arg(terminalDisplayName(mcheck)));
+                msgBox.setStandardButtons(QMessageBox::Ok);
+                msgBox.setWindowModality(Qt::WindowModal);
+                msgBox.exec();
+            }
+        }
     }
 }

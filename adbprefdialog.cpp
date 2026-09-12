@@ -15,6 +15,9 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QFormLayout>
+#include <QDir>
+#include <QFileInfo>
+#include <QStandardPaths>
 
 #include <QDebug>
 
@@ -160,13 +163,44 @@ void adbprefDialog::setupUiManual()
     // --- Platform dropdowns ---
     macTermCombo = new QComboBox(this);
     macTermCombo->setObjectName("macTerm");
-    macTermCombo->addItems({"macOS Terminal", "iTerm2 Terminal"});
+    macTermCombo->addItems({"macOS Terminal", "iTerm2 Terminal", "Ghostty Terminal"});
     mainLayout->addWidget(macTermCombo);
 
     linTermCombo = new QComboBox(this);
     linTermCombo->setObjectName("linTerm");
-    linTermCombo->addItems({"Gnome Terminal", "XFCE4 Terminal", "KDE Konsole"});
+    linTermCombo->addItems({"Gnome Terminal", "XFCE4 Terminal", "KDE Konsole", "Ghostty Terminal"});
     mainLayout->addWidget(linTermCombo);
+
+    auto isMacTermAvailable = [](int idx) -> bool {
+        if (idx == 0) return true;
+        if (idx == 1) return QFileInfo::exists(QStringLiteral("/Applications/iTerm.app"))
+            || QFileInfo::exists(QDir::homePath() + QStringLiteral("/Applications/iTerm.app"));
+        if (idx == 2) return QFileInfo::exists(QStringLiteral("/Applications/Ghostty.app"))
+            || QFileInfo::exists(QDir::homePath() + QStringLiteral("/Applications/Ghostty.app"))
+            || !QStandardPaths::findExecutable(QStringLiteral("ghostty")).isEmpty();
+        return false;
+    };
+    auto isLinTermAvailable = [](int idx) -> bool {
+        switch (idx) {
+        case 0: return !QStandardPaths::findExecutable(QStringLiteral("gnome-terminal")).isEmpty();
+        case 1: return !QStandardPaths::findExecutable(QStringLiteral("xfce4-terminal")).isEmpty();
+        case 2: return !QStandardPaths::findExecutable(QStringLiteral("konsole")).isEmpty();
+        case 3: return !QStandardPaths::findExecutable(QStringLiteral("ghostty")).isEmpty();
+        default: return false;
+        }
+    };
+    for (int i = 0; i < macTermCombo->count(); ++i) {
+        if (!isMacTermAvailable(i)) {
+            macTermCombo->setItemText(i, macTermCombo->itemText(i) + QStringLiteral(" (not installed)"));
+            macTermCombo->setItemData(i, QStringLiteral("Not found on this system"), Qt::ToolTipRole);
+        }
+    }
+    for (int i = 0; i < linTermCombo->count(); ++i) {
+        if (!isLinTermAvailable(i)) {
+            linTermCombo->setItemText(i, linTermCombo->itemText(i) + QStringLiteral(" (not installed)"));
+            linTermCombo->setItemData(i, QStringLiteral("Not found on this system"), Qt::ToolTipRole);
+        }
+    }
 
 
     // --- Button rows ---
@@ -367,6 +401,42 @@ void adbprefDialog::accept()
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.exec();
         return;
+    }
+    {
+        bool missing = false;
+        QString name;
+        if (osp == 2) {
+            int idx = macTermCombo->currentIndex();
+            if (idx == 1) {
+                missing = !(QFileInfo::exists(QStringLiteral("/Applications/iTerm.app"))
+                    || QFileInfo::exists(QDir::homePath() + QStringLiteral("/Applications/iTerm.app")));
+            } else if (idx == 2) {
+                bool hasApp = QFileInfo::exists(QStringLiteral("/Applications/Ghostty.app"))
+                    || QFileInfo::exists(QDir::homePath() + QStringLiteral("/Applications/Ghostty.app"));
+                bool hasBin = !QStandardPaths::findExecutable(QStringLiteral("ghostty")).isEmpty();
+                missing = !(hasApp || hasBin);
+            }
+            if (missing) name = macTermCombo->currentText();
+        } else if (osp == 0) {
+            int idx = linTermCombo->currentIndex();
+            switch (idx) {
+            case 0: missing = QStandardPaths::findExecutable(QStringLiteral("gnome-terminal")).isEmpty(); break;
+            case 1: missing = QStandardPaths::findExecutable(QStringLiteral("xfce4-terminal")).isEmpty(); break;
+            case 2: missing = QStandardPaths::findExecutable(QStringLiteral("konsole")).isEmpty(); break;
+            case 3: missing = QStandardPaths::findExecutable(QStringLiteral("ghostty")).isEmpty(); break;
+            default: break;
+            }
+            if (missing) name = linTermCombo->currentText();
+        }
+        if (missing) {
+            QMessageBox msgBox(this);
+            msgBox.setIcon(QMessageBox::Warning);
+            msgBox.setWindowModality(Qt::WindowModal);
+            msgBox.setWindowTitle(QStringLiteral("Terminal not found"));
+            msgBox.setText(QStringLiteral("%1 not found on this system. adblink will fall back to the default terminal at launch.").arg(name));
+            msgBox.setStandardButtons(QMessageBox::Ok);
+            msgBox.exec();
+        }
     }
     QDialog::accept();
 }

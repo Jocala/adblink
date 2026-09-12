@@ -16,6 +16,9 @@ public:
     void setOsType(OSType os) { m_os = os; }
     OSType osType() const { return m_os; }
 
+    bool isTerminalAvailable(int choice) const;
+    QString terminalDisplayName(int choice) const;
+
     QString scrcpyScript(const QString &scriptDir, const QString &adbfilesDir, const QString &scrcpyDir) const;
 
     void launchTerminal(const QString &scriptPath, int terminalChoice) const;
