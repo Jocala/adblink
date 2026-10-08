@@ -2,6 +2,12 @@
 
 adblink.8.1
 
+Ghostty Terminal support added for macOS and Linux (Terminal/iTerm2/Ghostty and Gnome/XFCE/Konsole/Ghostty) with fallback guardrails and “not installed” hints.
+
+09/12/26
+
+adblink.8.1
+
 Comments field added to device record.
 
 09/09/26
