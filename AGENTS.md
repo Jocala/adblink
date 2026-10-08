@@ -269,12 +269,12 @@ Hardcoded (widgets removed, setters are no-ops): `ostype()` = `"0"`, `scoped()` 
 5. On Debian: `cd /zstore/source/www/jocala.com && git push`
 6. On macOS: `./gh-deploy.sh` — creates GitHub release with all 3 installer assets
 
-## Current status (Jun 2026)
+## Current status (Oct 2026)
 
 ### Source locations
 | Platform | Source | Build |
 |---|---|---|
-| macOS | `/Volumes/source/adblink` | `/Users/jeff/source/builds/adblink` |
+| macOS | `/Users/jeff/source/adblink` | `/Users/jeff/source/builds/adblink` |
 | Linux | `/zstore/source/adblink` | `/home/jeff/build-adblink` |
 | Windows | `C:\source\adblink` | `%USERPROFILE%\build-adblink` |
 
