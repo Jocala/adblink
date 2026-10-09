@@ -37,6 +37,8 @@
 #include "adbconnection.h"
 #include "adbdevice.h"
 #include "backupmanager.h"
+#include "pairdialog.h"
+#include "wirelesspairing.h"
 #include "cachemanager.h"
 #include "consolemanager.h"
 #include "datamovemanager.h"
@@ -1065,6 +1067,60 @@
         DeviceRecord device = queryDeviceRecord(selectedDescription);
 
         m_wirelessAdbManager->enableWirelessAdb(this, device, getadb());
+    }
+
+    void MainWindow::on_actionPair_device_triggered()
+    {
+        PairDialog dialog(this);
+        dialog.setHost(adhoc_ip ? adhoc_ip->text().trimmed() : QString());
+        if (dialog.exec() != QDialog::Accepted)
+            return;
+
+        const WirelessPairing::Request req = dialog.request();
+        logfile("Wireless pairing: " + req.host + ":" + req.pairPort
+                + (req.connectPort.isEmpty() ? QString() : " connect port " + req.connectPort));
+
+        RunProcessList << QStringLiteral("pairing");
+        server_running->setText(QStringLiteral("pairing with ") + req.host);
+        const WirelessPairing::Result result = WirelessPairing::run(getadbpath(), req);
+        RunProcessList.removeAll(QStringLiteral("pairing"));
+        server_running->setText(QString());
+
+        logfile("adb pair: " + result.pairOutput.simplified());
+        if (!result.connectOutput.isEmpty())
+            logfile("adb connect: " + result.connectOutput.simplified());
+
+        QMessageBox msgBox(this);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+
+        if (!result.paired) {
+            msgBox.setIcon(QMessageBox::Critical);
+            msgBox.setWindowTitle(QStringLiteral("Pairing failed"));
+            msgBox.setText(WirelessPairing::describeFailure(result.pairOutput));
+            msgBox.exec();
+            return;
+        }
+
+        QString text = QStringLiteral("Paired with %1. You won't need to pair this computer again.").arg(req.host);
+        if (req.connectPort.isEmpty()) {
+            text += QStringLiteral("\n\nTo connect, add a device with IP %1 and the port shown on the "
+                                   "main Wireless debugging screen.").arg(req.host);
+            msgBox.setIcon(QMessageBox::Information);
+        } else if (result.connected) {
+            text += QStringLiteral("\n\nConnected on %1:%2. To keep using it, add a device with "
+                                   "IP %1 and port %2.").arg(req.host, req.connectPort);
+            msgBox.setIcon(QMessageBox::Information);
+        } else {
+            text += QStringLiteral("\n\nConnecting on port %1 failed: %2")
+                        .arg(req.connectPort, WirelessPairing::describeFailure(result.connectOutput));
+            msgBox.setIcon(QMessageBox::Warning);
+        }
+        text += QStringLiteral("\n\nNote: Android picks a new connect port each time Wireless "
+                               "debugging is turned on, so you may need to update the device's port.");
+        msgBox.setWindowTitle(QStringLiteral("Wireless pairing"));
+        msgBox.setText(text);
+        msgBox.exec();
     }
 
 
@@ -2801,6 +2857,7 @@ void MainWindow::setupUtilityMenu()
     actionReload_devices = new QAction("Reload devices", this);
     View_Changelog = new QAction("View changelog", this);
     actionWireless_ADBD = new QAction("Wireless ADBD", this);
+    actionPair_device = new QAction("Pair device (Android 11+)", this);
     actionReboot = new QAction("Reboot device", this);
     menuUtility->addAction(actionSwitch_View);
     menuUtility->addAction(actionReiinstall_Busybox);
@@ -2811,6 +2868,7 @@ void MainWindow::setupUtilityMenu()
     menuUtility->addAction(actionReload_devices);
     menuUtility->addAction(View_Changelog);
     menuUtility->addAction(actionWireless_ADBD);
+    menuUtility->addAction(actionPair_device);
     menuUtility->addAction(actionReboot);
 }
 
@@ -2856,6 +2914,7 @@ void MainWindow::setupMenuConnections()
     connect(actionReload_devices,       &QAction::triggered, this, &MainWindow::on_actionReload_devices_triggered);
     connect(View_Changelog,             &QAction::triggered, this, &MainWindow::on_View_Changelog_triggered);
     connect(actionWireless_ADBD,        &QAction::triggered, this, &MainWindow::on_actionWireless_ADBD_triggered);
+    connect(actionPair_device,          &QAction::triggered, this, &MainWindow::on_actionPair_device_triggered);
     connect(actionReboot,               &QAction::triggered, this, &MainWindow::on_actionReboot_triggered);
     connect(actionAbout,                &QAction::triggered, this, &MainWindow::on_actionAbout_triggered);
     connect(actionHelp,                 &QAction::triggered, this, &MainWindow::on_actionHelp_triggered);

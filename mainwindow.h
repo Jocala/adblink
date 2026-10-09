@@ -166,6 +166,7 @@ private slots:
     void keypadButton_clicked();
     void fmButton_clicked();
     void on_actionWireless_ADBD_triggered();
+    void on_actionPair_device_triggered();
     void on_actionKodi_data_usage_triggered();
     void on_actionKodi_version();
 
@@ -319,6 +320,7 @@ private:
     QAction *actionQuit;
     QAction *actionHelp;
     QAction *actionReboot;
+    QAction *actionPair_device;
     QAction *actionDownload_Kodi;
     QAction *actionView_Kodi_Log;
     QAction *actionView_adbLink_Log;
