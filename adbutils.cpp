@@ -1,4 +1,5 @@
 #include "adbutils.h"
+#include "stringutils.h"
 #include <QCoreApplication>
 #include <QDir>
 #include <QDirIterator>
@@ -188,9 +189,11 @@ bool ensureBusyboxInstalled(QWidget *parent, const QString &adbPrefix, const QSt
 
 bool isPackageInstalled(const QString &adbPrefix, const QString &package)
 {
+    if (!isValidPackageName(package))
+        return false;
     QString cstring = adbPrefix + " shell pm list packages";
     QString result = getadbOutput(cstring);
-    return result.contains(package);
+    return packageListHas(result, package);
 }
 
 bool psOutputHasPackage(const QString &psOutput, const QString &package)

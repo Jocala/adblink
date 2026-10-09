@@ -1,4 +1,5 @@
 #include "deviceeditor.h"
+#include "stringutils.h"
 #include "devicerecorddialog.h"
 #include "logfile.h"
 #include <QMessageBox>
@@ -91,6 +92,18 @@ bool DeviceEditor::exec()
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setWindowTitle(QString());
         msgBox.setText(QStringLiteral("Description cannot be empty."));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
+        return false;
+    }
+
+    if (!xbmcpackage.isEmpty() && !isValidPackageName(xbmcpackage))
+    {
+        QMessageBox msgBox(m_parent);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("\"%1\" is not a valid package name (e.g. org.xbmc.kodi).").arg(xbmcpackage));
         msgBox.setStandardButtons(QMessageBox::Ok);
         msgBox.setWindowModality(Qt::WindowModal);
         msgBox.exec();

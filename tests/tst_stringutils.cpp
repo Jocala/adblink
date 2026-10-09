@@ -136,6 +136,51 @@ private slots:
         cache["abc123"] = "someweirdstatus";
         QCOMPARE(usbStatus(cache, "abc123"), QStringLiteral("Someweirdstatus"));
     }
+
+    // --- isValidPackageName ---
+    void validPackageNames()
+    {
+        QVERIFY(isValidPackageName("org.xbmc.kodi"));
+        QVERIFY(isValidPackageName("com.amazon.firetv.youtube"));
+        QVERIFY(isValidPackageName("net.kodi_fork.App2"));
+    }
+
+    void invalidPackageNames()
+    {
+        QVERIFY(!isValidPackageName(""));
+        QVERIFY(!isValidPackageName("kodi"));               // needs a dot
+        QVERIFY(!isValidPackageName("org.xbmc.kodi/"));
+        QVERIFY(!isValidPackageName("org..kodi"));
+        QVERIFY(!isValidPackageName(".org.kodi"));
+        QVERIFY(!isValidPackageName("org.xbmc.kodi "));
+        QVERIFY(!isValidPackageName("org.xbmc.kodi;rm -rf /sdcard"));
+        QVERIFY(!isValidPackageName("1org.kodi"));
+    }
+
+    // --- packageListHas ---
+    void packageListExactMatch()
+    {
+        const QString pm = "package:com.android.settings\r\npackage:org.xbmc.kodi\r\n";
+        QVERIFY(packageListHas(pm, "org.xbmc.kodi"));
+    }
+
+    void packageListNoPrefixMatch()
+    {
+        // Previously contains() made a fork count as Kodi being installed
+        QVERIFY(!packageListHas("package:org.xbmc.kodi.beta\n", "org.xbmc.kodi"));
+        QVERIFY(!packageListHas("package:org.xbmc.kodi\n", "org.xbmc"));
+    }
+
+    void packageListEmptyPackage()
+    {
+        // Previously contains("") was always true, allowing rm -r of Android/data
+        QVERIFY(!packageListHas("package:org.xbmc.kodi\n", ""));
+    }
+
+    void packageListAdbError()
+    {
+        QVERIFY(!packageListHas("error: no devices/emulators found\n", "org.xbmc.kodi"));
+    }
 };
 
 QTEST_MAIN(TestStringUtils)

@@ -1,4 +1,5 @@
 #include "backupmanager.h"
+#include "stringutils.h"
 #include "adbdevice.h"
 #include "adbutils.h"
 #include "kodidatamanager.h"
@@ -471,6 +472,21 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
                 logfile(device.daddr + ": protect file not on device, skipping: " + protectFiles.at(i));
             }
         }
+    }
+
+    // Never rm -r anything but this package's own folder
+    if (!isValidPackageName(device.xbmcpackage)
+        || !mcpath.endsWith(QStringLiteral("/") + device.xbmcpackage)) {
+        QMessageBox msgBox(parent);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("Refusing to restore: unexpected target path %1").arg(mcpath));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
+        logfile(device.daddr + ": Error: restore aborted, unsafe target path: " + mcpath);
+        --m_activeRestores;
+        return false;
     }
 
     cstring = adbPrefix + "shell rm -r " + mcpath;

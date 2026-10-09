@@ -47,3 +47,24 @@ QString usbStatus(const QHash<QString, QString> &cache, const QString &daddr)
         status[0] = status[0].toUpper();
     return status;
 }
+
+bool isValidPackageName(const QString &package)
+{
+    static const QRegularExpression re(
+        QStringLiteral("^[A-Za-z][A-Za-z0-9_]*(\\.[A-Za-z][A-Za-z0-9_]*)+$"));
+    return re.match(package).hasMatch();
+}
+
+bool packageListHas(const QString &pmOutput, const QString &package)
+{
+    if (!isValidPackageName(package))
+        return false;
+    const QString wanted = QStringLiteral("package:") + package;
+    const QStringList lines = pmOutput.split(QRegularExpression(QStringLiteral("[\r\n]+")),
+                                             Qt::SkipEmptyParts);
+    for (const QString &line : lines) {
+        if (line.trimmed() == wanted)
+            return true;
+    }
+    return false;
+}
