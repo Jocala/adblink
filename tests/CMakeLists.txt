@@ -86,3 +86,10 @@ qt_add_executable(tst_kodienv tst_kodienv.cpp
     "${CMAKE_SOURCE_DIR}/kodienv.cpp")
 target_link_libraries(tst_kodienv PRIVATE testsupport Qt6::Test)
 add_test(NAME kodienv COMMAND tst_kodienv)
+
+# --- Test: Kodi running detection from ps output ---
+qt_add_executable(tst_psrunning tst_psrunning.cpp
+    "${CMAKE_SOURCE_DIR}/adbutils.cpp"
+    "${CMAKE_SOURCE_DIR}/getadbdata.cpp")
+target_link_libraries(tst_psrunning PRIVATE testsupport Qt6::Test Qt6::Widgets)
+add_test(NAME psrunning COMMAND tst_psrunning)

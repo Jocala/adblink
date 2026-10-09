@@ -1,4 +1,5 @@
 #include "datamovemanager.h"
+#include "adbutils.h"
 #include "datadialog.h"
 #include "devicerecord.h"
 #include "getadbdata.h"
@@ -11,8 +12,8 @@ void DataMoveManager::moveKodiData(QWidget *parent, const DeviceRecord &device,
                                     const QString &adbPrefix, bool scoped,
                                     RunLongProcessCallback runLongProcess)
 {
-    QString cstring = adbPrefix + " shell ps | grep " + device.xbmcpackage;
-    QString command = getadbOutput(cstring);
+    QString cstring;
+    QString command;
 
     QString destination;
     QString source;
@@ -20,7 +21,7 @@ void DataMoveManager::moveKodiData(QWidget *parent, const DeviceRecord &device,
     QString n_data_root;
     int choice;
 
-    if (command.contains(device.xbmcpackage))
+    if (isPackageRunning(adbPrefix, device.xbmcpackage))
     {
         QMessageBox msgBox(parent);
         msgBox.setWindowTitle(QStringLiteral("Stop Kodi"));

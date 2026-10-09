@@ -311,10 +311,7 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
         }
     }
 
-    cstring = getadbpath() + " -s " + device.daddr + " shell ps | grep " + device.xbmcpackage;
-    command = getadbOutput(cstring);
-
-    if (command.contains(device.xbmcpackage)) {
+    if (isPackageRunning(adbPrefix, device.xbmcpackage)) {
         QMessageBox msgBox(parent);
         msgBox.setWindowTitle(QStringLiteral("Stop Kodi"));
         msgBox.setText(QStringLiteral("Cannot restore while Kodi is running on %1.\n Stop %2?").arg(device.daddr, device.xbmcpackage));
