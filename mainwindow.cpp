@@ -37,6 +37,9 @@
 #include "adbconnection.h"
 #include "adbdevice.h"
 #include "backupmanager.h"
+#include "safetysnapshot.h"
+#include <QDateTime>
+#include <QLocale>
 #include "cachemanager.h"
 #include "consolemanager.h"
 #include "datamovemanager.h"
@@ -1599,6 +1602,63 @@ void MainWindow::restoreButton_clicked() {
 
 
 //////////////////////////////////////////////
+void MainWindow::on_actionUndo_restore_triggered()
+{
+    QString selectedDescription;
+    if (!validateDeviceSelection(selectedDescription))
+        return;
+
+    DeviceRecord device = queryDeviceRecord(selectedDescription);
+
+    const QString root = BackupManager::safetySnapshotRoot(jsonstring, device.daddr);
+    const QString latest = SafetySnapshot::latestSnapshot(
+        QDir(root).entryList(QDir::Dirs | QDir::NoDotAndDotDot));
+    if (latest.isEmpty() || !QDir(root + "/" + latest + "/userdata").exists()) {
+        QMessageBox msgBox(this);
+        msgBox.setIcon(QMessageBox::Information);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("No safety backup found for %1.\n\n"
+                                      "adbLink saves one automatically each time you restore.")
+                           .arg(device.daddr));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
+        return;
+    }
+
+    if (!::isPackageInstalled(getadb(), device.xbmcpackage)) {
+        QMessageBox msgBox(this);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("%1 not installed").arg(device.xbmcpackage));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
+        return;
+    }
+
+    const QDateTime when = QDateTime::fromString(latest, "yyyy-MM-dd_HHmmss");
+    QMessageBox confirm(this);
+    confirm.setWindowTitle(QStringLiteral("Undo last restore"));
+    confirm.setText(QStringLiteral("Put back the Kodi data saved from %1 on %2?\n\n"
+                                   "Kodi's current data will be saved first, so you can undo this too.")
+                        .arg(device.daddr, QLocale().toString(when, QLocale::ShortFormat)));
+    confirm.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    confirm.setDefaultButton(QMessageBox::No);
+    confirm.setWindowModality(Qt::WindowModal);
+    if (confirm.exec() != QMessageBox::Yes)
+        return;
+
+    const QString adbPrefix = getadb() + " ";
+    m_backupManager->restoreDevice(this, device, adbPrefix, ::isScopedStorage(getadb()),
+                                   jsonstring, m_dataManager,
+                                   [this](const QString &cmd, const QString &title) {
+                                       return RunLongProcess(cmd, title);
+                                   },
+                                   root + "/" + latest);
+}
+
+//////////////////////////////////////////////
 void MainWindow::mvdataButton_clicked()
 {
     QString selectedDescription;
@@ -2778,6 +2838,7 @@ void MainWindow::setupKodiMenu()
     actionKodi_data_usage = new QAction("Kodi data size", this);
     actionKodi_version = new QAction("Check Kodi version", this);
     actionCreate_kodi_data = new QAction("Create kodi_data", this);
+    actionUndo_restore = new QAction("Undo last restore", this);
     menuKodi->addAction(actionView_Kodi_Log);
     menuKodi->addAction(actionEdit_XML);
     menuKodi->addAction(actionSplash_Screen);
@@ -2787,6 +2848,8 @@ void MainWindow::setupKodiMenu()
     menuKodi->addAction(actionKodi_version);
     menuKodi->addAction(actionKodi_data_usage);
     menuKodi->addAction(actionCreate_kodi_data);
+    menuKodi->addSeparator();
+    menuKodi->addAction(actionUndo_restore);
 }
 
 void MainWindow::setupUtilityMenu()
@@ -2842,6 +2905,7 @@ void MainWindow::setupMenuConnections()
     connect(actionKodi_data_usage,      &QAction::triggered, this, &MainWindow::on_actionKodi_data_usage_triggered);
     connect(actionKodi_version   ,      &QAction::triggered, this, &MainWindow::on_actionKodi_version);
     connect(actionCreate_kodi_data,     &QAction::triggered, this, &MainWindow::on_actionCreate_kodi_data_triggered);
+    connect(actionUndo_restore,         &QAction::triggered, this, &MainWindow::on_actionUndo_restore_triggered);
     connect(actionSwitch_View,          &QAction::triggered, this, &MainWindow::on_actionSwitch_View_triggered);
     connect(actionReiinstall_Busybox, &QAction::triggered, this, [this](bool) {
         QString adb = getadb();

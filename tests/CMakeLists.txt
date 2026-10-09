@@ -93,3 +93,26 @@ qt_add_executable(tst_psrunning tst_psrunning.cpp
     "${CMAKE_SOURCE_DIR}/getadbdata.cpp")
 target_link_libraries(tst_psrunning PRIVATE testsupport Qt6::Test Qt6::Widgets)
 add_test(NAME psrunning COMMAND tst_psrunning)
+
+# --- Test: safety snapshots before restore ---
+qt_add_executable(tst_safetysnapshot tst_safetysnapshot.cpp
+    "${CMAKE_SOURCE_DIR}/safetysnapshot.cpp")
+target_link_libraries(tst_safetysnapshot PRIVATE testsupport Qt6::Test)
+add_test(NAME safetysnapshot COMMAND tst_safetysnapshot)
+
+# --- Test: end-to-end restore + safety snapshot against a fake adb (Unix) ---
+if(UNIX)
+    qt_add_executable(tst_restoreflow tst_restoreflow.cpp
+        "${CMAKE_SOURCE_DIR}/backupmanager.cpp"
+        "${CMAKE_SOURCE_DIR}/safetysnapshot.cpp"
+        "${CMAKE_SOURCE_DIR}/kodienv.cpp"
+        "${CMAKE_SOURCE_DIR}/adbdevice.cpp"
+        "${CMAKE_SOURCE_DIR}/adbutils.cpp"
+        "${CMAKE_SOURCE_DIR}/getadbdata.cpp"
+        "${CMAKE_SOURCE_DIR}/getreturncode.cpp"
+        "${CMAKE_SOURCE_DIR}/restdialog.cpp"
+        "${CMAKE_SOURCE_DIR}/restoreoptionsdialog.cpp")
+    target_link_libraries(tst_restoreflow PRIVATE testsupport Qt6::Test Qt6::Widgets)
+    add_test(NAME restoreflow COMMAND tst_restoreflow)
+    set_tests_properties(restoreflow PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+endif()

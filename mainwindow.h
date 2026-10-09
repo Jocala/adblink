@@ -176,6 +176,7 @@ private slots:
     void on_actiondelthumb_triggered();
     void on_actionPush_remote_triggered();
     void on_actionCreate_kodi_data_triggered();
+    void on_actionUndo_restore_triggered();
     void scpyButton_clicked();
     void pushTimers_clicked();
     void on_actionView_Changelog_triggered();
@@ -336,6 +337,7 @@ private:
     QAction *actionGet_UID_from_APK_file;
     QAction *actionSend_text;
     QAction *actionCreate_kodi_data;
+    QAction *actionUndo_restore;
     QAction *actionEdit_XML;
     QAction *actionSwitch_View;
     QAction *actionReload_devices;

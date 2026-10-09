@@ -9,10 +9,13 @@
 #include "getreturncode.h"
 #include "kodienv.h"
 #include "logfile.h"
+#include "safetysnapshot.h"
 
 #include <QDir>
 #include <QFile>
+#include <QDateTime>
 #include <QFileDialog>
+#include <QFileInfo>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMessageBox>
@@ -239,7 +242,9 @@ bool BackupManager::backupDevice(QWidget *parent, const DeviceRecord &device,
 
     removeMetadataFiles(dir);
 
-    if (QDir(dir + "userdata").exists()) {
+    // A userdata folder alone proves nothing: the destination is usually the
+    // previous backup folder. Require adb to report a completed pull.
+    if (SafetySnapshot::adbPullSucceeded(command) && QDir(dir + "userdata").exists()) {
         if (dataManager && !jsonstring.isEmpty())
             dataManager->writeBackupPath(jsonstring, dir);
         logfile("backup completed successfully for " + device.daddr);
@@ -272,7 +277,8 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
                                    const QString &adbPrefix, bool scoped,
                                    const QString &jsonstring,
                                    KodiDataManager *dataManager,
-                                   std::function<QString(const QString&, const QString&)> runLongProcess)
+                                   std::function<QString(const QString&, const QString&)> runLongProcess,
+                                   const QString &presetDir)
 {
     ++m_activeRestores;
     logfile("Starting restore for " + device.daddr);
@@ -406,9 +412,11 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
     if (dataManager && !jsonstring.isEmpty())
         backup = dataManager->readBackupPath(jsonstring);
     QDir backupDir(backup);
-    QString dir = QFileDialog::getExistingDirectory(parent, "Choose Backup Folder for " + device.daddr,
-                                                     backupDir.absolutePath(),
-                                                     QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    QString dir = presetDir;
+    if (dir.isEmpty())
+        dir = QFileDialog::getExistingDirectory(parent, "Choose Backup Folder for " + device.daddr,
+                                                backupDir.absolutePath(),
+                                                QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
     if (dir.isEmpty()) {
         --m_activeRestores;
         return false;
@@ -489,6 +497,56 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
         return false;
     }
 
+    // Safety snapshot: save what's on the device now, so this restore can be
+    // undone (Kodi > Undo last restore) or recovered if it fails part-way.
+    QString snapshotDir;
+    const int snapshotKeep = SafetySnapshot::parseKeepSetting(
+        (dataManager && !jsonstring.isEmpty())
+            ? dataManager->readJsonValue(jsonstring, QStringLiteral("safetysnapshots"))
+            : QString());
+    if (snapshotKeep > 0 && !jsonstring.isEmpty()) {
+        cstring = adbPrefix + "shell ls " + mcpath + "/files/.kodi/userdata";
+        if (getreturncode(cstring)) {
+            snapshotDir = safetySnapshotRoot(jsonstring, device.daddr) + QStringLiteral("/")
+                          + SafetySnapshot::snapshotFolderName(QDateTime::currentDateTime());
+            QDir().mkpath(snapshotDir);
+            cstring = adbPrefix + "pull " + mcpath + "/files/.kodi/. \""
+                      + QDir::toNativeSeparators(snapshotDir) + "\"";
+            if (diag)
+                logfile(device.daddr + ": safety snapshot command: " + cstring);
+            command = runLongProcess(cstring, "safety backup for " + device.daddr);
+
+            if (!SafetySnapshot::adbPullSucceeded(command)
+                || !QDir(snapshotDir + QStringLiteral("/userdata")).exists()) {
+                logfile(device.daddr + ": Error: safety snapshot failed: " + command.simplified());
+                QDir(snapshotDir).removeRecursively();
+                snapshotDir.clear();
+
+                QMessageBox msgBox(parent);
+                msgBox.setIcon(QMessageBox::Warning);
+                msgBox.setWindowTitle(QStringLiteral("Safety backup failed"));
+                msgBox.setText(QStringLiteral("adbLink could not save a copy of Kodi's current data on %1 "
+                                              "before restoring.\n\nIf you continue, the current data will be "
+                                              "deleted and cannot be recovered.\n\nContinue anyway?")
+                                   .arg(device.daddr));
+                msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+                msgBox.setDefaultButton(QMessageBox::No);
+                msgBox.setWindowModality(Qt::WindowModal);
+                if (msgBox.exec() != QMessageBox::Yes) {
+                    if (!protectDir.isEmpty())
+                        QDir(protectDir).removeRecursively();
+                    logfile(device.daddr + ": restore cancelled after failed safety snapshot");
+                    --m_activeRestores;
+                    return false;
+                }
+            } else {
+                logfile(device.daddr + ": safety snapshot saved to " + snapshotDir);
+            }
+        } else {
+            logfile(device.daddr + ": no existing Kodi data, safety snapshot not needed");
+        }
+    }
+
     cstring = adbPrefix + "shell rm -r " + mcpath;
     runLongProcess(cstring, "preparing target for " + device.daddr);
 
@@ -512,8 +570,7 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
             msgBox.setWindowModality(Qt::WindowModal);
             msgBox.exec();
             logfile(device.daddr + ": Error creating restore point: " + errorOutput);
-            if (!protectDir.isEmpty())
-                QDir(protectDir).removeRecursively();
+            reportRecovery(parent, device.daddr, snapshotDir, protectDir);
             --m_activeRestores;
             return false;
         }
@@ -567,14 +624,28 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
             getadbOutput(cstring);
         }
 
-        if (dataManager && !jsonstring.isEmpty())
+        // Don't remember a safety snapshot as the user's backup folder
+        if (dataManager && !jsonstring.isEmpty() && presetDir.isEmpty())
             dataManager->writeBackupPath(jsonstring, dir);
         logfile("Restore completed successfully for " + device.daddr);
+
+        if (!snapshotDir.isEmpty()) {
+            const QString root = safetySnapshotRoot(jsonstring, device.daddr);
+            const QStringList existing = QDir(root).entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+            for (const QString &old : SafetySnapshot::snapshotsToPrune(existing, snapshotKeep)) {
+                QDir(root + QStringLiteral("/") + old).removeRecursively();
+                logfile(device.daddr + ": pruned old safety snapshot " + old);
+            }
+        }
+
         if (--m_activeRestores == 0) {
             QMessageBox msgBox(parent);
             msgBox.setIcon(QMessageBox::Information);
             msgBox.setWindowTitle(QString());
-            msgBox.setText(QStringLiteral("Restore complete. See log."));
+            msgBox.setText(snapshotDir.isEmpty()
+                               ? QStringLiteral("Restore complete. See log.")
+                               : QStringLiteral("Restore complete. See log.\n\nThe previous Kodi data was saved "
+                                                "and can be put back with Kodi > Undo last restore."));
             msgBox.setStandardButtons(QMessageBox::Ok);
             msgBox.setWindowModality(Qt::WindowModal);
             msgBox.exec();
@@ -589,9 +660,41 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
         msgBox.setWindowModality(Qt::WindowModal);
         msgBox.exec();
         logfile(device.daddr + ": Error: Restore failed: " + command);
-        if (!protectDir.isEmpty())
-            QDir(protectDir).removeRecursively();
+        reportRecovery(parent, device.daddr, snapshotDir, protectDir);
         --m_activeRestores;
         return false;
     }
+}
+
+QString BackupManager::safetySnapshotRoot(const QString &jsonstring, const QString &daddr)
+{
+    return SafetySnapshot::deviceSnapshotRoot(QFileInfo(jsonstring).absolutePath(), daddr);
+}
+
+void BackupManager::reportRecovery(QWidget *parent, const QString &daddr,
+                                   const QString &snapshotDir, const QString &protectDir) const
+{
+    // The device folder has already been deleted, so tell the user where their
+    // previous data is instead of silently discarding it.
+    QString text;
+    if (!snapshotDir.isEmpty()) {
+        text = QStringLiteral("The previous Kodi data from %1 was saved to:\n%2\n\n"
+                              "Use Kodi > Undo last restore to put it back.")
+                   .arg(daddr, QDir::toNativeSeparators(snapshotDir));
+        if (!protectDir.isEmpty())
+            QDir(protectDir).removeRecursively(); // also contained in the snapshot
+    } else if (!protectDir.isEmpty()) {
+        text = QStringLiteral("Your protected files from %1 were kept in:\n%2")
+                   .arg(daddr, QDir::toNativeSeparators(protectDir));
+    } else {
+        return;
+    }
+    logfile(daddr + ": recovery data: " + (snapshotDir.isEmpty() ? protectDir : snapshotDir));
+    QMessageBox msgBox(parent);
+    msgBox.setIcon(QMessageBox::Information);
+    msgBox.setWindowTitle(QStringLiteral("Your data is safe"));
+    msgBox.setText(text);
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setWindowModality(Qt::WindowModal);
+    msgBox.exec();
 }
