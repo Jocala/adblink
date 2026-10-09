@@ -42,12 +42,19 @@ public:
                        const QString &adbPrefix, bool scoped,
                        const QString &jsonstring,
                        KodiDataManager *dataManager,
-                       std::function<QString(const QString&, const QString&)> runLongProcess);
+                       std::function<QString(const QString&, const QString&)> runLongProcess,
+                       const QString &presetDir = QString());
+
+    // Folder holding this device's safety snapshots (taken before each restore).
+    static QString safetySnapshotRoot(const QString &jsonstring, const QString &daddr);
 
 signals:
     void logMessage(const QString &msg) const;
 
 private:
+    void reportRecovery(QWidget *parent, const QString &daddr,
+                        const QString &snapshotDir, const QString &protectDir) const;
+
     KodiDataManager *m_dataManager = nullptr;
     int m_activeBackups = 0;
     int m_activeRestores = 0;

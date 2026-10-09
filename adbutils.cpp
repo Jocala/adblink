@@ -1,4 +1,5 @@
 #include "adbutils.h"
+#include "stringutils.h"
 #include <QCoreApplication>
 #include <QDir>
 #include <QDirIterator>
@@ -188,9 +189,39 @@ bool ensureBusyboxInstalled(QWidget *parent, const QString &adbPrefix, const QSt
 
 bool isPackageInstalled(const QString &adbPrefix, const QString &package)
 {
+    if (!isValidPackageName(package))
+        return false;
     QString cstring = adbPrefix + " shell pm list packages";
     QString result = getadbOutput(cstring);
-    return result.contains(package);
+    return packageListHas(result, package);
+}
+
+bool psOutputHasPackage(const QString &psOutput, const QString &package)
+{
+    if (package.isEmpty())
+        return false;
+    const QStringList lines = psOutput.split(QRegularExpression(QStringLiteral("[\r\n]+")),
+                                             Qt::SkipEmptyParts);
+    for (const QString &line : lines) {
+        const QStringList cols = line.simplified().split(QLatin1Char(' '));
+        if (cols.isEmpty())
+            continue;
+        const QString name = cols.last();
+        if (name == package || name.startsWith(package + QLatin1Char(':')))
+            return true;
+    }
+    return false;
+}
+
+bool isPackageRunning(const QString &adbPrefix, const QString &package)
+{
+    if (package.isEmpty())
+        return false;
+    // The device shell interprets "|" and "||"; "ps -A" fails or lists
+    // nothing on old toolbox ps, so fall back to plain "ps".
+    const QString cstring = adbPrefix + " shell ps -A | grep " + package
+                            + " || ps | grep " + package;
+    return psOutputHasPackage(::getadbOutput(cstring), package);
 }
 
 void syncWaitForProcess(QProcess &process, int timeoutMs)
@@ -372,9 +403,7 @@ void logDeviceDiagnostics(const QString &adbPrefix, const QString &daddr,
             + " (api=" + QString::number(apiLevel)
             + ", restricted=" + (restrictedAccess ? "yes" : "no") + ")");
 
-    QString runningCheck = adbPrefix + " shell ps | grep " + xbmcpackage;
-    QString runningResult = ::getadbOutput(runningCheck);
-    logfile("Kodi running: " + QString(runningResult.contains(xbmcpackage) ? "yes" : "no"));
+    logfile("Kodi running: " + QString(::isPackageRunning(adbPrefix, xbmcpackage) ? "yes" : "no"));
 
     QString scopedPath = dataRoot + "kodi_data/" + xbmcpackage + "/files/.kodi";
     QString legacyPath = dataRoot + "Android/data/" + xbmcpackage + "/files/.kodi";

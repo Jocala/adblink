@@ -33,6 +33,12 @@ bool ensureBusyboxInstalled(QWidget *parent, const QString &adbPrefix, const QSt
 
 // Check if a package is installed on the device
 bool isPackageInstalled(const QString &adbPrefix, const QString &package);
+// True if `package` (or one of its ":service" processes) appears in ps output.
+bool psOutputHasPackage(const QString &psOutput, const QString &package);
+// True if `package` is running on the device. Uses "ps -A" (needed on
+// Android 8+, where plain "ps" only lists the shell's own processes) with a
+// plain "ps" fallback for older toolbox-based devices.
+bool isPackageRunning(const QString &adbPrefix, const QString &package);
 
 // Check if scoped storage restrictions are in effect on the device
 bool isScopedStorage(const QString &adbPrefix);
