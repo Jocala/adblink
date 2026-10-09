@@ -6,6 +6,7 @@
 #include "restoreoptionsdialog.h"
 #include "getadbdata.h"
 #include "getreturncode.h"
+#include "kodienv.h"
 #include "logfile.h"
 
 #include <QDir>
@@ -118,56 +119,74 @@ bool BackupManager::backupDevice(QWidget *parent, const DeviceRecord &device,
         ::logDeviceDiagnostics(getadbpath() + " -s " + device.daddr, device.daddr,
                                device.xbmcpackage, device.data_root);
 
-    QString cstring = getadbpath() + " -s " + device.daddr + " shell /data/local/tmp/adblink/busybox find /storage -type d -maxdepth 1";
-    QString s = getadbOutput(cstring);
-
-    QStringList list = s.split('\n');
-    for (int i = 0; i < list.size(); i++) {
-        list[i].remove('\r');
-        list[i].remove('\n');
-        if (list[i] == "Android" ||
-            list[i] == "Permission denied" ||
-            list[i] == "/storage/emulated" ||
-            list[i] == "/storage" ||
-            list[i] == "/storage/self" ||
-            list[i].isEmpty()) {
-            list.removeAt(i);
-            i--;
-        }
-    }
-
-    QString n_data_root = "/sdcard";
-    list.insert(0, "/sdcard");
-
-    if (list.count() > 1) {
-        restDialog dialog(parent);
-        dialog.setWindowModality(Qt::WindowModal);
-        dialog.setWindowTitle("Backup for " + device.daddr);
-        dialog.setadb_restore(list);
-        if (dialog.exec() == QDialog::Accepted) {
-            n_data_root = dialog.restore_data_root();
-        } else {
-            --m_activeBackups;
-            return false;
-        }
-    }
-
-    if (!n_data_root.startsWith("/"))
-        n_data_root.prepend("/");
-    if (!n_data_root.endsWith("/"))
-        n_data_root.append("/");
-
+    QString cstring;
     QString mcpath;
-    if (scoped) {
-        mcpath = n_data_root + "kodi_data/" + device.xbmcpackage;
-    } else {
-        mcpath = n_data_root + "Android/data/" + device.xbmcpackage;
+
+    // Kodi always uses the location in xbmc_env.properties when it exists, so
+    // back up from there (as restore and Edit XML do). Fixes issue #3.
+    cstring = adbPrefix + "shell ls /sdcard/xbmc_env.properties";
+    QString envCheck = getadbOutput(cstring);
+    if (!envCheck.contains("No such file")) {
+        cstring = adbPrefix + "shell cat /sdcard/xbmc_env.properties";
+        QString envContent = getadbOutput(cstring);
+        mcpath = parseXbmcEnvDataRoot(envContent, device.xbmcpackage);
+        if (diag) {
+            logfile(device.daddr + ": xbmc_env.properties content: " + envContent.simplified());
+            logfile(device.daddr + ": env parsed mcpath: \"" + mcpath + "\"");
+        }
     }
 
-    if (diag) {
-        logfile(device.daddr + ": backup n_data_root=" + n_data_root
-                + " scoped=" + (scoped ? "true" : "false")
-                + " mcpath=" + mcpath);
+    if (mcpath.isEmpty()) {
+        cstring = getadbpath() + " -s " + device.daddr + " shell /data/local/tmp/adblink/busybox find /storage -type d -maxdepth 1";
+        QString s = getadbOutput(cstring);
+
+        QStringList list = s.split('\n');
+        for (int i = 0; i < list.size(); i++) {
+            list[i].remove('\r');
+            list[i].remove('\n');
+            if (list[i] == "Android" ||
+                list[i] == "Permission denied" ||
+                list[i] == "/storage/emulated" ||
+                list[i] == "/storage" ||
+                list[i] == "/storage/self" ||
+                list[i].isEmpty()) {
+                list.removeAt(i);
+                i--;
+            }
+        }
+
+        QString n_data_root = "/sdcard";
+        list.insert(0, "/sdcard");
+
+        if (list.count() > 1) {
+            restDialog dialog(parent);
+            dialog.setWindowModality(Qt::WindowModal);
+            dialog.setWindowTitle("Backup for " + device.daddr);
+            dialog.setadb_restore(list);
+            if (dialog.exec() == QDialog::Accepted) {
+                n_data_root = dialog.restore_data_root();
+            } else {
+                --m_activeBackups;
+                return false;
+            }
+        }
+
+        if (!n_data_root.startsWith("/"))
+            n_data_root.prepend("/");
+        if (!n_data_root.endsWith("/"))
+            n_data_root.append("/");
+
+        if (scoped) {
+            mcpath = n_data_root + "kodi_data/" + device.xbmcpackage;
+        } else {
+            mcpath = n_data_root + "Android/data/" + device.xbmcpackage;
+        }
+
+        if (diag) {
+            logfile(device.daddr + ": backup n_data_root=" + n_data_root
+                    + " scoped=" + (scoped ? "true" : "false")
+                    + " mcpath=" + mcpath);
+        }
     }
 
     cstring = adbPrefix + "shell ls " + mcpath + "/files/.kodi";
@@ -276,45 +295,18 @@ bool BackupManager::restoreDevice(QWidget *parent, const DeviceRecord &device,
     QString kbase;
     bool xbmc_env = false;
 
-    cstring = getadbpath() + " -s " + device.daddr + " shell ls /sdcard/xbmc_env.properties";
+    cstring = adbPrefix + "shell ls /sdcard/xbmc_env.properties";
     command = getadbOutput(cstring);
     if (!command.contains("No such file")) {
-        cstring = getadbpath() + " -s " + device.daddr + " shell cat /sdcard/xbmc_env.properties";
+        cstring = adbPrefix + "shell cat /sdcard/xbmc_env.properties";
         command = getadbOutput(cstring);
-        command.replace(QRegularExpression("[\r\n]"), "");
-        mcpath.clear();
-        const QString envPrefix("xbmc.data=");
-        int idx = command.indexOf(envPrefix);
-        if (idx >= 0) {
-            mcpath = command.mid(idx + envPrefix.length()).trimmed();
-            bool valid = mcpath.startsWith("/");
-            if (valid && mcpath.endsWith("/files"))
-                mcpath.chop(6);
-            else
-                valid = false;
-            if (valid) {
-                QString suffix = QStringLiteral("/") + device.xbmcpackage;
-                if (mcpath.endsWith(suffix)) {
-                    QString structure = mcpath.left(mcpath.length() - suffix.length());
-                    bool isScopedStruc = structure.endsWith(QStringLiteral("/kodi_data"));
-                    bool isLegacyStruc = structure.endsWith(QStringLiteral("/Android/data"));
-                    if (mcpath.startsWith("/sdcard/")) {
-                        if ((scoped && !isScopedStruc) || (!scoped && !isLegacyStruc))
-                            valid = false;
-                    } else if (!isLegacyStruc) {
-                        valid = false;
-                    }
-                } else {
-                    valid = false;
-                }
-            }
-            if (!valid)
-                mcpath.clear();
-        }
+        // Use whatever Kodi uses, even if it doesn't match the scoped-storage
+        // guess (e.g. kodi_data on a Fire OS 7 device). See issue #3.
+        mcpath = parseXbmcEnvDataRoot(command, device.xbmcpackage);
         if (!mcpath.isEmpty())
             xbmc_env = true;
         if (diag) {
-            logfile(device.daddr + ": xbmc_env.properties content: " + command);
+            logfile(device.daddr + ": xbmc_env.properties content: " + command.simplified());
             logfile(device.daddr + ": env parsed mcpath: \"" + mcpath + "\"");
         }
     }

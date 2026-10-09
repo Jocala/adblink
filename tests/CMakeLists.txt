@@ -80,3 +80,9 @@ qt_add_executable(tst_logviewerdialog tst_logviewerdialog.cpp
     "${CMAKE_SOURCE_DIR}/adbutils.cpp")
 target_link_libraries(tst_logviewerdialog PRIVATE testsupport Qt6::Test Qt6::Widgets)
 add_test(NAME logviewerdialog COMMAND tst_logviewerdialog)
+
+# --- Test: xbmc_env.properties parsing (issue #3) ---
+qt_add_executable(tst_kodienv tst_kodienv.cpp
+    "${CMAKE_SOURCE_DIR}/kodienv.cpp")
+target_link_libraries(tst_kodienv PRIVATE testsupport Qt6::Test)
+add_test(NAME kodienv COMMAND tst_kodienv)
