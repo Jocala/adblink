@@ -80,3 +80,10 @@ qt_add_executable(tst_logviewerdialog tst_logviewerdialog.cpp
     "${CMAKE_SOURCE_DIR}/adbutils.cpp")
 target_link_libraries(tst_logviewerdialog PRIVATE testsupport Qt6::Test Qt6::Widgets)
 add_test(NAME logviewerdialog COMMAND tst_logviewerdialog)
+
+# --- Test: Kodi running detection from ps output ---
+qt_add_executable(tst_psrunning tst_psrunning.cpp
+    "${CMAKE_SOURCE_DIR}/adbutils.cpp"
+    "${CMAKE_SOURCE_DIR}/getadbdata.cpp")
+target_link_libraries(tst_psrunning PRIVATE testsupport Qt6::Test Qt6::Widgets)
+add_test(NAME psrunning COMMAND tst_psrunning)

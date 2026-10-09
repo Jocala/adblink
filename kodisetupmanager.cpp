@@ -24,10 +24,7 @@ void KodiSetupManager::createKodiData(QWidget *parentWidget,
     QString cstring;
     QString command;
 
-    cstring = adbPrefix + " shell ps | grep " + device.xbmcpackage;
-    command = getadbOutput(cstring);
-
-    if (command.contains(device.xbmcpackage)) {
+    if (isPackageRunning(adbPrefix, device.xbmcpackage)) {
         QMessageBox msgBox(parentWidget);
         msgBox.setWindowTitle(QStringLiteral("Stop Kodi"));
         msgBox.setText(QStringLiteral("Cannot create path while Kodi is running.\n Stop %1 on device?").arg(device.xbmcpackage));
