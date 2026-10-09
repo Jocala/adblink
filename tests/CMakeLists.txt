@@ -80,3 +80,12 @@ qt_add_executable(tst_logviewerdialog tst_logviewerdialog.cpp
     "${CMAKE_SOURCE_DIR}/adbutils.cpp")
 target_link_libraries(tst_logviewerdialog PRIVATE testsupport Qt6::Test Qt6::Widgets)
 add_test(NAME logviewerdialog COMMAND tst_logviewerdialog)
+
+# --- Test: Android 11+ wireless pairing ---
+qt_add_executable(tst_wirelesspairing tst_wirelesspairing.cpp
+    "${CMAKE_SOURCE_DIR}/wirelesspairing.cpp"
+    "${CMAKE_SOURCE_DIR}/adbutils.cpp"
+    "${CMAKE_SOURCE_DIR}/getadbdata.cpp")
+target_link_libraries(tst_wirelesspairing PRIVATE testsupport Qt6::Test Qt6::Widgets)
+add_test(NAME wirelesspairing COMMAND tst_wirelesspairing)
+set_tests_properties(wirelesspairing PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")

@@ -51,6 +51,8 @@ set(SOURCES
     adbdevice.cpp
     adboutput.cpp
     adbutils.cpp
+    pairdialog.cpp
+    wirelesspairing.cpp
     backupmanager.cpp
     cachemanager.cpp
     connectadb.cpp
@@ -135,6 +137,8 @@ set(HEADERS
     aboutmanager.h
     adboutput.h
     adbutils.h
+    pairdialog.h
+    wirelesspairing.h
     backupmanager.h
     cachemanager.h
     connectadb.h
