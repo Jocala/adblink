@@ -51,6 +51,7 @@ set(SOURCES
     adbdevice.cpp
     adboutput.cpp
     adbutils.cpp
+    kodienv.cpp
     backupmanager.cpp
     cachemanager.cpp
     connectadb.cpp
@@ -135,6 +136,7 @@ set(HEADERS
     aboutmanager.h
     adboutput.h
     adbutils.h
+    kodienv.h
     backupmanager.h
     cachemanager.h
     connectadb.h
