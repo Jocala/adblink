@@ -1,3 +1,10 @@
+10/13/26
+
+adblink.8.2
+
+adb updated to 37.0.1 for macOS, Windows and Linux.
+Windows scrcpy updated to 5.0.1.
+
 09/12/26
 
 adblink.8.1

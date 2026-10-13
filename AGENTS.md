@@ -37,7 +37,7 @@ cmake --build "%USERPROFILE%\build-adblink" --target package-win
 Qt Creator uses the same build dir with Ninja — run vcvars64.bat first or let Qt Creator handle it.
 Build + test: `C:\source\adblink\build-adblink-windows.ps1`
 Package only (after build): `C:\source\adblink\package-adblink-windows.ps1`
-The `package-win` target wraps `iscc` and produces `packages/adblink-8.1-win64.exe`.
+The `package-win` target wraps `iscc` and produces `packages/adblink-8.2-win64.exe`.
 
 Single test (any platform):
 ```sh
@@ -212,7 +212,7 @@ Hardcoded (widgets removed, setters are no-ops): `ostype()` = `"0"`, `scoped()` 
 
 ## Key paths
 
-- `version.h` → `const QString version = "8.1"`
+- `version.h` → `const QString version = "8.2"`
 - `program.h` → `PROGRAM "adblink"`
 - `changelog.txt` — full history
 - `adbfiles/<platform>/` — bundled ADB and tool binaries per OS
@@ -313,7 +313,7 @@ Built app is at `/Users/jeff/source/builds/adblink/adblink.app/`. Contents:
 - `Contents/Resources/adblink.icns` — application icon
 - `Contents/Info.plist` — references `adblink.icns`, bundle ID `jocala.com.adblink`
 
-DMG at `/Users/jeff/source/builds/adblink/packages/adblink-8.1-Darwin.dmg` contains `adblink.app` + `Applications -> /Applications`.
+DMG at `/Users/jeff/source/builds/adblink/packages/adblink-8.2-Darwin.dmg` contains `adblink.app` + `Applications -> /Applications`.
 
 ## Known issues / held-out fixes
 
