@@ -215,7 +215,7 @@ Hardcoded (widgets removed, setters are no-ops): `ostype()` = `"0"`, `scoped()` 
 - `version.h` → `const QString version = "8.2"`
 - `program.h` → `PROGRAM "adblink"`
 - `changelog.txt` — full history
-- `adbfiles/<platform>/` — bundled ADB and tool binaries per OS
+- `adbfiles/<platform>/` — bundled ADB and tool binaries per OS (8.2 payload: adb 37.0.1-15733141 all platforms; Windows scrcpy 5.0.1)
 - `logfile.cpp` — thread-safe logging singleton
 - `adbutils.cpp` — `syncWaitForProcess()`, `isScopedStorage()`, `resolveKodiPath()`
 - `kodidatamanager.cpp` — CRUD for device records, schema creation, JSON config defaults
