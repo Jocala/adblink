@@ -575,7 +575,7 @@ void ConsoleManager::openScrcpy(QWidget *parent, const QString &daddr,
     if (!scrcpyarg.isEmpty())
         line = scrcpyarg;
 
-    QString argval;
+    QString argval = scrcpyarg;
     if (scrcpy)
     {
         scpDialog dialog;
