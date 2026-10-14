@@ -4,7 +4,7 @@
 
 set -e
 
-RSYNC_OPTS="-avz --no-group --omit-dir-times"
+RSYNC_OPTS="-avz --no-group --omit-dir-times --prune-empty-dirs"
 PROD="jeff@jocala.com:/var/www/jocala.com/public_html"
 WWW="/zstore/source/www/jocala.com"
 
@@ -15,6 +15,7 @@ case "${1:-html}" in
       --include='*.html' \
       --include='version.txt' \
       --include='changelog.txt' \
+      --exclude='.git/' \
       --include='*/' \
       --exclude='*' \
       "$WWW/" "$PROD/"
@@ -37,6 +38,7 @@ case "${1:-html}" in
       --include='*.html' \
       --include='version.txt' \
       --include='changelog.txt' \
+      --exclude='.git/' \
       --include='*/' \
       --exclude='*' \
       "$WWW/" "$PROD/"
