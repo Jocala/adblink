@@ -44,7 +44,7 @@ Single test (any platform):
 cmake --build <build_dir> --target <test_name>
 ```
 
-11 test executables: `adbstring`, `database`, `jsonconfig`, `logfile`, `getadbpath`, `devicerecord`, `iptablesort`, `stringutils`, `getreturncode`, `devicerecorddialog`, `logviewerdialog`.
+12 test executables: `adbstring`, `database`, `jsonconfig`, `logfile`, `getadbpath`, `devicerecord`, `iptablesort`, `stringutils`, `getreturncode`, `devicerecorddialog`, `logviewerdialog`, `refreshadb`.
 
 Tests use Qt Test (`Qt6::Test`). Each test file ends with `#include "tst_xxx.moc"` and uses `QTEST_MAIN` or `QTEST_APPLESS_MAIN`. A static `testsupport` lib supplies shared test deps.
 
@@ -303,7 +303,11 @@ Easy switch: `WINDOWS_HOST=backup ./stage.sh` or `WINDOWS_HOST=backup ./syncdb.s
 - macOS: `install(PROGRAMS ...)` for adbfiles (enforces +x), POST_BUILD copies adbfiles + icns into bundle
 - Linux: `install(PROGRAMS ...)` for adbfiles, `install(DIRECTORY ...)` for icons
 - macOS icon copied via POST_BUILD to `Contents/Resources/adblink.icns`
-- `packaging/fix-permissions.cmake` — CPack pre-build script, chmods +x on macOS adbfiles before DMG creation
+- `install(PROGRAMS ...)` for macOS/Linux adbfiles enforces +x, so no
+  permission-fix step is needed before packaging
+- `packaging/sign-after-install.cmake` — CPack pre-build script
+  (`CPACK_PRE_BUILD_SCRIPTS`, macOS only), signs the staged bundle with
+  Developer ID + runtime + entitlements before DMG creation
 - No `CPACK_RESOURCE_FILE_LICENSE` set (no license page on any platform)
 
 ### macOS bundle verification

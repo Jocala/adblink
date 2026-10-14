@@ -107,6 +107,7 @@ set(SOURCES
     preferencesmanager.cpp
     remotepushmanager.cpp
     rebootmanager.cpp
+    refreshadbmanager.cpp
     datausagemanager.cpp
     databaseresetmanager.cpp
     deleterecordmanager.cpp
@@ -188,6 +189,7 @@ set(HEADERS
     preferencesmanager.h
     remotepushmanager.h
     rebootmanager.h
+    refreshadbmanager.h
     datausagemanager.h
     databaseresetmanager.h
     deleterecordmanager.h
@@ -420,6 +422,8 @@ else()
     if(APPLE)
         set(CPACK_GENERATOR "DragNDrop")
         set(CPACK_BINARY_TZ OFF)
+        set(CPACK_PRE_BUILD_SCRIPTS
+            "${CMAKE_SOURCE_DIR}/packaging/sign-after-install.cmake")
     elseif(UNIX)
         set(CPACK_GENERATOR "TGZ")
         set(CPACK_BINARY_TZ OFF)

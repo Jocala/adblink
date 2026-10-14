@@ -80,3 +80,11 @@ qt_add_executable(tst_logviewerdialog tst_logviewerdialog.cpp
     "${CMAKE_SOURCE_DIR}/adbutils.cpp")
 target_link_libraries(tst_logviewerdialog PRIVATE testsupport Qt6::Test Qt6::Widgets)
 add_test(NAME logviewerdialog COMMAND tst_logviewerdialog)
+
+# --- Test: Refresh ADB devices parser ---
+qt_add_executable(tst_refreshadb tst_refreshadb.cpp
+    "${CMAKE_SOURCE_DIR}/refreshadbmanager.cpp"
+    "${CMAKE_SOURCE_DIR}/getadbdata.cpp"
+    "${CMAKE_SOURCE_DIR}/adbutils.cpp")
+target_link_libraries(tst_refreshadb PRIVATE testsupport Qt6::Test Qt6::Widgets)
+add_test(NAME refreshadb COMMAND tst_refreshadb)

@@ -1,3 +1,17 @@
+10/14/26
+
+adblink.8.2
+
+Refresh ADB is now a main-window button (Kodi and Android views) in place of
+Reset ADB. Refresh asks the adb server for device status and updates the Status
+column to match; network-device status now reflects what adb actually reports.
+
+The old Reset ADB button is now "Stop ADB" in the Utility menu. It asks for
+confirmation, then stops the adb server and disconnects all network devices.
+
+Fixed per-device Scrcpy arguments being ignored when "Ask for Scrcpy
+arguments" is unchecked in preferences.
+
 10/13/26
 
 adblink.8.2

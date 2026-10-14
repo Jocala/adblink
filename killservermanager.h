@@ -13,7 +13,7 @@ class KillServerManager : public QObject
 public:
     explicit KillServerManager(QObject *parent = nullptr);
 
-    void killServer(QWidget *parentWidget, QTableWidget *deviceTable);
+    bool killServer(QWidget *parentWidget, QTableWidget *deviceTable);
 };
 
 #endif // KILLSERVERMANAGER_H

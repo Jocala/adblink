@@ -56,6 +56,7 @@ class KillServerManager;
 class KeypadManager;
 class RemotePushManager;
 class RebootManager;
+class RefreshAdbManager;
 class ScreenCapManager;
 class SendTextManager;
 class SideloadManager;
@@ -191,7 +192,7 @@ private slots:
     void on_actionKeypad_triggered();
     void on_actionSwitch_View_triggered();
     void switchSize();
-    void on_actionReload_devices_triggered();
+    void refreshAdbButton_clicked();
     void on_infoArchitecture_triggered();
     void setupMenus();
     void applyDebouncedRefresh();
@@ -240,6 +241,7 @@ private:
     ScreenCapManager *m_screenCapManager;
     SendTextManager *m_sendTextManager;
     RebootManager *m_rebootManager;
+    RefreshAdbManager *m_refreshAdbManager;
     SplashScreenManager *m_splashScreenManager;
     ThumbnailManager *m_thumbnailManager;
     TimerManager *m_timerManager;
@@ -338,7 +340,7 @@ private:
     QAction *actionCreate_kodi_data;
     QAction *actionEdit_XML;
     QAction *actionSwitch_View;
-    QAction *actionReload_devices;
+    QAction *actionStop_adb;
 
     const QSize lMainWindowSize = QSize(850, 555);
     const QSize lGridButtonSize = QSize(180, 66);

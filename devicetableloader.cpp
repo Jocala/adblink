@@ -23,14 +23,8 @@ void DeviceTableLoader::loadTable(QTableWidget *table, int windowSizeSelector,
                                     QSize sMain, QSize mMain, QSize lMain,
                                     UsbStatusCallback usbStatus)
 {
-    QSet<QString> connectedDeviceIds;
     QSet<QString> selectedDescriptions;
     for (int row = 0; row < table->rowCount(); ++row) {
-        if (table->item(row, 2) &&
-            table->item(row, 2)->text() == "Connected" &&
-            table->item(row, 0)) {
-            connectedDeviceIds.insert(table->item(row, 0)->data(Qt::UserRole).toString());
-        }
         if (table->item(row, 0) && table->item(row, 0)->isSelected())
             selectedDescriptions.insert(table->item(row, 0)->text());
     }
@@ -57,7 +51,7 @@ void DeviceTableLoader::loadTable(QTableWidget *table, int windowSizeSelector,
     }
     table->setFont(tableFont);
 
-    QString sqlstatement = "SELECT id, description, daddr, isusb FROM device";
+    QString sqlstatement = "SELECT id, description, daddr, isusb, port FROM device";
     QSqlQuery query;
     if (!query.exec(sqlstatement)) {
         logfile("Query failed: " + query.lastError().text());
@@ -81,10 +75,15 @@ void DeviceTableLoader::loadTable(QTableWidget *table, int windowSizeSelector,
         table->setItem(row, 1, new QTableWidgetItem(ip));
 
         QString status;
-        if (isUsb)
+        if (isUsb) {
             status = usbStatus(query.value(2).toString());
-        else
-            status = connectedDeviceIds.contains(deviceId) ? "Connected" : "Disconnected";
+        } else {
+            QString daddr = query.value(2).toString();
+            QString port = query.value(4).toString();
+            if (port.isEmpty())
+                port = QStringLiteral("5555");
+            status = usbStatus(daddr + QLatin1Char(':') + port);
+        }
 
         table->setItem(row, 2, new QTableWidgetItem(status));
         row++;

@@ -65,6 +65,7 @@
 #include "stringutils.h"
 #include "remotepushmanager.h"
 #include "rebootmanager.h"
+#include "refreshadbmanager.h"
     #include "deviceeditor.h"
 
 #ifdef Q_OS_WIN
@@ -154,6 +155,7 @@
            , m_screenCapManager(new ScreenCapManager(this))
            , m_sendTextManager(new SendTextManager(this))
            , m_rebootManager(new RebootManager(this))
+           , m_refreshAdbManager(new RefreshAdbManager(this))
            , m_splashScreenManager(new SplashScreenManager(this))
            , m_thumbnailManager(new ThumbnailManager(this))
            , m_timerManager(new TimerManager(this))
@@ -862,7 +864,14 @@
 
     void MainWindow::killServer_clicked()
     {
-        m_killServerManager->killServer(this, deviceTable);
+        if (!m_killServerManager->killServer(this, deviceTable))
+            return;
+        for (auto it = m_usbStatusCache.begin(); it != m_usbStatusCache.end();) {
+            if (it.key().contains(QLatin1Char(':')))
+                it = m_usbStatusCache.erase(it);
+            else
+                ++it;
+        }
     }
 
 
@@ -2020,11 +2029,10 @@ void MainWindow::applyDebouncedRefresh()
         loadDeviceTableX(deviceTable);
 }
 
-void MainWindow::on_actionReload_devices_triggered()
+void MainWindow::refreshAdbButton_clicked()
 {
-
-   loadDeviceTableX(deviceTable);;
-
+    m_refreshAdbManager->refreshStatuses(m_usbStatusCache, getadbpath());
+    loadDeviceTableX(deviceTable);
 }
 
 /////////////////////////////////////////////////
@@ -2386,8 +2394,8 @@ for (int i = 0; i < 16; ++i) {
             grid1Buttons[i]->setToolTip("Capture the device screen (Ctrl+C)");
             break;
         case 9:
-            grid1Buttons[i]->setText("Reset ADB");
-            grid1Buttons[i]->setToolTip("Reset the ADB server");
+            grid1Buttons[i]->setText("Refresh ADB");
+            grid1Buttons[i]->setToolTip("Refresh device status from the ADB server");
             break;
         case 10:
             grid1Buttons[i]->setText("Scrcpy");
@@ -2468,8 +2476,8 @@ for (int i = 0; i < 12; ++i) {
             grid2Buttons[i]->setToolTip("Capture the device screen (Ctrl+C)");
             break;
         case 5:
-            grid2Buttons[i]->setText("Reset ADB");
-            grid2Buttons[i]->setToolTip("Reset the ADB server");
+            grid2Buttons[i]->setText("Refresh ADB");
+            grid2Buttons[i]->setToolTip("Refresh device status from the ADB server");
             break;
         case 6:
             grid2Buttons[i]->setText("Start App");
@@ -2706,7 +2714,7 @@ void MainWindow::initGridConnections() {
  connect(grid1Buttons[6], &QPushButton::clicked, this, &MainWindow::mvdataButton_clicked);
  connect(grid1Buttons[7], &QPushButton::clicked, this, &MainWindow::pushTimers_clicked);
  connect(grid1Buttons[8], &QPushButton::clicked, this, &MainWindow::screenCap);
- connect(grid1Buttons[9], &QPushButton::clicked, this, &MainWindow::killServer_clicked);
+ connect(grid1Buttons[9], &QPushButton::clicked, this, &MainWindow::refreshAdbButton_clicked);
  connect(grid1Buttons[10], &QPushButton::clicked, this, &MainWindow::scpyButton_clicked);
  connect(grid1Buttons[11], &QPushButton::clicked, this, &MainWindow::cacheButton_clicked);
  connect(grid1Buttons[12], &QPushButton::clicked, this, &MainWindow::doConsole_clicked);
@@ -2720,7 +2728,7 @@ void MainWindow::initGridConnections() {
  connect(grid2Buttons[2], &QPushButton::clicked, this, &MainWindow::uninstall_Button_clicked);
  connect(grid2Buttons[3], &QPushButton::clicked, this, &MainWindow::infoArchitecture);
  connect(grid2Buttons[4], &QPushButton::clicked, this, &MainWindow::screenCap);
- connect(grid2Buttons[5], &QPushButton::clicked, this, &MainWindow::killServer_clicked);
+ connect(grid2Buttons[5], &QPushButton::clicked, this, &MainWindow::refreshAdbButton_clicked);
  connect(grid2Buttons[6], &QPushButton::clicked, this, &MainWindow::startapp_clicked);
  connect(grid2Buttons[7], &QPushButton::clicked, this, &MainWindow::stopapp_clicked);
  connect(grid2Buttons[8], &QPushButton::clicked, this, &MainWindow::adbshellButton_clicked);
@@ -2798,7 +2806,7 @@ void MainWindow::setupUtilityMenu()
     Erase_adbLink_database = new QAction("Initialize adblink", this);
     actionSend_text = new QAction("Send text to device", this);
     actionGet_UID_from_APK_file = new QAction("Get package name", this);
-    actionReload_devices = new QAction("Reload devices", this);
+    actionStop_adb = new QAction("Stop ADB", this);
     View_Changelog = new QAction("View changelog", this);
     actionWireless_ADBD = new QAction("Wireless ADBD", this);
     actionReboot = new QAction("Reboot device", this);
@@ -2808,7 +2816,7 @@ void MainWindow::setupUtilityMenu()
     menuUtility->addAction(Erase_adbLink_database);
     menuUtility->addAction(actionSend_text);
     menuUtility->addAction(actionGet_UID_from_APK_file);
-    menuUtility->addAction(actionReload_devices);
+    menuUtility->addAction(actionStop_adb);
     menuUtility->addAction(View_Changelog);
     menuUtility->addAction(actionWireless_ADBD);
     menuUtility->addAction(actionReboot);
@@ -2853,7 +2861,7 @@ void MainWindow::setupMenuConnections()
     connect(Erase_adbLink_database,     &QAction::triggered, this, &MainWindow::on_Erase_adbLink_database_triggered);
     connect(actionSend_text,            &QAction::triggered, this, &MainWindow::on_actionSend_text_triggered);
     connect(actionGet_UID_from_APK_file,&QAction::triggered, this, &MainWindow::on_actionGet_UID_from_APK_file_triggered);
-    connect(actionReload_devices,       &QAction::triggered, this, &MainWindow::on_actionReload_devices_triggered);
+    connect(actionStop_adb,             &QAction::triggered, this, &MainWindow::killServer_clicked);
     connect(View_Changelog,             &QAction::triggered, this, &MainWindow::on_View_Changelog_triggered);
     connect(actionWireless_ADBD,        &QAction::triggered, this, &MainWindow::on_actionWireless_ADBD_triggered);
     connect(actionReboot,               &QAction::triggered, this, &MainWindow::on_actionReboot_triggered);

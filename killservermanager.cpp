@@ -11,15 +11,15 @@ KillServerManager::KillServerManager(QObject *parent)
 {
 }
 
-void KillServerManager::killServer(QWidget *parentWidget, QTableWidget *deviceTable)
+bool KillServerManager::killServer(QWidget *parentWidget, QTableWidget *deviceTable)
 {
     QMessageBox msgBox(parentWidget);
-    msgBox.setWindowTitle(QStringLiteral("Disconnect"));
-    msgBox.setText(QStringLiteral("Disconnect all IPs?"));
+    msgBox.setWindowTitle(QStringLiteral("Stop ADB"));
+    msgBox.setText(QStringLiteral("Stop the ADB server and disconnect all devices?"));
     msgBox.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
     msgBox.setWindowModality(Qt::WindowModal);
     if (msgBox.exec() == QMessageBox::Cancel)
-        return;
+        return false;
 
     QString cstring = getadbpath() + " kill-server";
     getadbOutput(cstring);
@@ -40,4 +40,5 @@ void KillServerManager::killServer(QWidget *parentWidget, QTableWidget *deviceTa
     }
 
     deviceTable->viewport()->update();
+    return true;
 }
