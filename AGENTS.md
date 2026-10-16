@@ -101,8 +101,8 @@ Core blocking wait: polls `waitForFinished(100)` in a loop, calls `QCoreApplicat
 Persistent `QProcess` running `adb track-devices`, not polling. Streams device state changes continuously.
 
 - `startTrackDevices()`: creates QProcess, connects `readyReadStandardOutput` → `onTrackOutput`, connects `finished` → `onTrackFinished` (auto-restart after 1s).
-- `onTrackOutput()`: reads lines (format `SERIAL\tSTATUS`), strips leading digit prefixes from serial numbers, updates `m_usbStatusCache` (QHash<QString,QString>), starts 150ms debounce timer.
-- `applyDebouncedRefresh()` (debounce timeout): iterates cache, skips network devices (contains `:`), skips non-`"device"` status, skips existing DB records, then INSERTs a new device record with default Kodi values. Duplicate descriptions get `-2`, `-3`, etc. suffix.
+- `onTrackOutput()`: appends `readAllStandardOutput()` to `m_trackBuffer` and passes it to `parseTrackDevices()` (`stringutils.cpp`), which consumes adb's 4-hex-digit length-prefixed chunks. One chunk carries the **whole** device list, so the prefix appears once per chunk — never per line. Each payload line is `SERIAL\tSTATUS`. Updates `m_usbStatusCache` (QHash<QString,QString>), starts 150ms debounce timer.
+- `applyDebouncedRefresh()` (debounce timeout): iterates cache, skips network devices (contains `:`), skips devices whose status is not connected/recovery/rescue (`isConnectedStatus()`), skips existing DB records, then INSERTs a new device record with default Kodi values. Duplicate descriptions get `-2`, `-3`, etc. suffix.
 - `m_quitting` guard in `onTrackFinished` prevents restart during shutdown.
 
 ### Status display
@@ -311,6 +311,20 @@ Easy switch: `WINDOWS_HOST=backup ./stage.sh` or `WINDOWS_HOST=backup ./syncdb.s
 - `packaging/sign-after-install.cmake` — CPack pre-build script
   (`CPACK_PRE_BUILD_SCRIPTS`, macOS only), signs the staged bundle with
   Developer ID + runtime + entitlements before DMG creation
+- `packaging/adblink.entitlements` is shared by the dev bundle
+  (`build-adblink-macos.sh`) and packaging (`sign-after-install.cmake`), so dev
+  and release cannot drift. `com.apple.security.automation.apple-events` is
+  **required**: a hardened-runtime app that sends Apple Events without it is
+  re-prompted for automation on every use (tccd logs "requires entitlement
+  com.apple.security.automation.apple-events but it is missing"). adblink sends
+  Apple Events for the terminal launch (`open -a <terminal>`) and for every
+  `QDesktopServices::openUrl` link (help, changelog, donate, Kodi download).
+  Dropping the key silently reintroduces those prompts. It is a
+  hardened-runtime resource-access entitlement, not a sandbox one, and is
+  unrestricted for Developer ID (no provisioning profile, no notarization
+  change).
+- `packaging/Info.plist.in` — keep `NSAppleEventsUsageDescription` in step with
+  that entitlement; without it the automation request has no user-facing reason.
 - No `CPACK_RESOURCE_FILE_LICENSE` set (no license page on any platform)
 
 ### macOS bundle verification
@@ -337,11 +351,21 @@ DMG at `/Users/jeff/source/builds/adblink/packages/adblink-8.2-Darwin.dmg` conta
 - Verification: on win10, set a device's Scrcpy arg, uncheck the preference, launch scrcpy, confirm `%APPDATA%\.jocala\scripts\scrcpy.bat` contains the arg. Before the fix it read `scrcpy.exe -s <ip:port> ` with a trailing space.
 - Adjacent, unfixed: the arg string is concatenated unquoted into `.bat`/`.sh`, so multi-token values with spaces and cmd metacharacters are still unsafe.
 
-### "Refresh ADB" button removed in the 6.5 UI rework — OPEN, awaiting info (2026-10-13)
-- Report: connecting is a hassle and a device must be reconnected after every reboot; "Refresh ADB" used to solve it effortlessly. Reporter's premise that a connection survives a reboot is wrong (adb TCP transports never survive a device reboot), but two real regressions sit under it.
-- The old widget was `refreshConnectedDevices` (`27a08c8:mainwindow.ui:313-333`, slot `mainwindow.cpp:3154`): it only ran `adb devices` and rebuilt the device/status lists live from the adb server — it never ran `adb connect`. Removed in the May 2025 rework (`c1f6c38` → `a4adba4`).
-- Regression 1: `devicetableloader.cpp:83-89` derives IP-device status from the *previous table contents*, so every network device reads "Disconnected" at startup regardless of real adb state. Regression 2: no bulk reconnect — only the Connect button / row double-click, one `adb connect` (5 s timeout) at a time.
-- Aggravating factor: `onApplicationQuit()` force-kills the server (`adb kill-server` + `taskkill /f /im adb.exe` / `pkill -9 adb`, `mainwindow.cpp:428-443`), so connections also die on every app restart.
-- Already half-plumbed: `onTrackOutput()` caches `ip:port` serials from `track-devices` (`mainwindow.cpp:1961-1964`); only the auto-add and the loader's USB branch ignore them.
-- Stale help: `assets/adbserver.html` still documents "Refresh" and "Stop" buttons that do not exist.
-- Full plan, open questions, file targets and verification: `~/.opencode/plan/adblink-refresh-adb-todo.md`. No code written.
+### Deliberate behaviour — do not "fix"
+
+- **adblink kills the adb server on exit.** `onApplicationQuit()` runs `adb kill-server`, then `taskkill /f /im adb.exe` (Windows) / `pkill -9 adb` (POSIX) (`mainwindow.cpp:428-443`). Fixed policy: adblink does not leave a server running. The consequences are intended — IP devices need Connect again after an app restart, and always after a device reboot, because an adb TCP transport never survives one. Note the POSIX/Windows kill matches by process name, so it also stops adb processes adblink did not start; that breadth is deliberate too.
+- **Ghostty's "Allow Ghostty to execute `<path>`?" dialog is out of scope.** It is Ghostty's own script-execution gate, raised because the macOS Ghostty path opens `~/.jocala/scripts/console.sh` as a document (`consolemanager.cpp:497`). Ghostty offers no persisted allow, so it appears on every ADB Shell click. Known workarounds: Ghostty's AppleScript API (`new surface configuration` + its `command` field, Ghostty 1.3+, needs the automation consent above) or `open -na Ghostty.app --args` (a separate instance, extra Dock icon). Both were considered and declined — suppressing another application's security prompt is not adblink's job. Do not re-investigate this as an adblink bug.
+
+### "Refresh ADB" — CLOSED (2026-10-16)
+
+Reported 2026-10-13 as "removed in 6.5; I have to reconnect a device constantly". The premise is wrong (an adb TCP transport never survives a device reboot) and the behaviour is now additionally by design (kill-on-exit, above). Nothing remains open:
+
+- The widget was `refreshConnectedDevices` (`27a08c8:mainwindow.ui:313-333`), removed in the May 2025 UI rework (`c1f6c38` → `a4adba4`). It only ran `adb devices` to re-sync the view; it never ran `adb connect`.
+- Restored in 8.2 as a main-window grid button backed by `RefreshAdbManager` (`refreshadbmanager.cpp`), with `tst_refreshadb`.
+- Status regression fixed: the loader no longer derives IP-device status from the previous table contents (`connectedDeviceIds` is gone); it consults `m_usbStatusCache` with the `daddr:port` key, so the Status column reflects adb rather than a sticky UI flag.
+- `assets/adbserver.html` no longer documents the removed buttons.
+- Bulk auto-`adb connect` was deliberately **not** implemented and should not be re-opened: it cannot help Android 11+ wireless-debugging devices, whose port is random per boot (`onntab1`/`onntab2`), so their reconnect is always a discovery-driven, manual act.
+
+### Recovery / Rescue counts as connected — landed 2026-10-16
+
+`isConnectedStatus()` (`stringutils.cpp`) is the single predicate for "usable" (true for connected/recovery/rescue); `usbStatus()` still renders "Recovery" so the operator can see the device booted into recovery. Hardware-verified on a Lenovo TB-X606F in recovery. Companion work and the gotchas learned (status is a display string, not an enum; `sideload` is excluded on purpose) are in `~/.opencode/plan/adblink-recovery-status-todo.md`.

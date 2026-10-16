@@ -10,6 +10,21 @@ row disconnects it. Delete record stays blocked while the device is reachable.
 Utility > Reboot device is now a submenu with "Reboot" (normal) and "Recovery"
 (adb reboot recovery). Both ask for confirmation.
 
+Fixed duplicate device entries. A device could be listed twice, the second copy
+with a stray character at the front of its name (aHA1DB3G7, for example), and
+the device's real entry could read Disconnected while the device was in fact
+connected. adblink was misreading the length header adb puts in front of its
+device list whenever more than one device was attached.
+
+macOS: adblink now declares the Apple Events entitlement, and the permission
+prompt explains what it is for, so macOS can remember your approval instead of
+asking again on every use. That covers opening a terminal, and the help,
+changelog and download links.
+
+Note: if Ghostty is selected as the terminal, Ghostty itself asks for
+confirmation before running adblink's shell script. That is Ghostty's own
+security prompt, not an adblink permission, and it is unaffected by the above.
+
 10/14/26
 
 adblink.8.2
