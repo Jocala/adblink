@@ -58,3 +58,40 @@ bool isConnectedStatus(const QString &status)
     };
     return connectedStates.contains(status.trimmed().toLower());
 }
+
+QList<QPair<QString, QString>> parseTrackDevices(QByteArray &buffer)
+{
+    QList<QPair<QString, QString>> entries;
+
+    while (buffer.size() >= 4) {
+        bool ok = false;
+        const int payloadLength = buffer.left(4).toInt(&ok, 16);
+        if (!ok) {
+            // not a length prefix; drop one byte and look for the next frame
+            buffer.remove(0, 1);
+            continue;
+        }
+        if (buffer.size() < 4 + payloadLength)
+            break;
+
+        const QByteArray payload = buffer.mid(4, payloadLength);
+        buffer.remove(0, 4 + payloadLength);
+
+        const QList<QByteArray> lines = payload.split('\n');
+        for (const QByteArray &rawLine : lines) {
+            const QByteArray line = rawLine.trimmed();
+            if (line.isEmpty())
+                continue;
+            const int tab = line.indexOf('\t');
+            if (tab < 0)
+                continue;
+            const QString serial = QString::fromLatin1(line.left(tab)).trimmed();
+            if (serial.isEmpty())
+                continue;
+            entries.append(qMakePair(serial,
+                QString::fromLatin1(line.mid(tab + 1)).trimmed()));
+        }
+    }
+
+    return entries;
+}

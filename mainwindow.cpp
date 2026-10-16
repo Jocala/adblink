@@ -1960,31 +1960,20 @@ void MainWindow::startTrackDevices()
     connect(m_trackDevicesProcess, &QProcess::finished,
             this, &MainWindow::onTrackFinished);
 
+    m_trackBuffer.clear();
     m_trackDevicesProcess->start(getadbpath(), QStringList() << QStringLiteral("track-devices"));
 }
 
 void MainWindow::onTrackOutput()
 {
-    while (m_trackDevicesProcess->canReadLine()) {
-        QByteArray line = m_trackDevicesProcess->readLine().trimmed();
-        if (line.isEmpty())
-            continue;
+    m_trackBuffer.append(m_trackDevicesProcess->readAllStandardOutput());
 
-        QString lineStr = QString::fromLatin1(line);
-        QString serial = lineStr.section('\t', 0, 0).trimmed();
-        int firstLetter = 0;
-        while (firstLetter < serial.length() && serial.at(firstLetter).isDigit())
-            firstLetter++;
-        if (firstLetter > 0)
-            serial = serial.mid(firstLetter);
-        QString status = lineStr.section('\t', 1, 1).trimmed();
-        if (serial.isEmpty())
-            continue;
-
-        if (status == QLatin1String("offline"))
-            m_usbStatusCache.remove(serial);
+    const QList<QPair<QString, QString>> entries = parseTrackDevices(m_trackBuffer);
+    for (const QPair<QString, QString> &entry : entries) {
+        if (entry.second == QLatin1String("offline"))
+            m_usbStatusCache.remove(entry.first);
         else
-            m_usbStatusCache[serial] = status;
+            m_usbStatusCache[entry.first] = entry.second;
     }
 
     m_trackDebounce->start(150);
@@ -2002,7 +1991,7 @@ void MainWindow::applyDebouncedRefresh()
         const QString &serial = it.key();
         if (serial.contains(QLatin1Char(':')))
             continue;
-        if (it.value() != QLatin1String("device"))
+        if (!isConnectedStatus(usbStatus(m_usbStatusCache, serial)))
             continue;
         if (!m_dataManager->queryDeviceByDaddr(serial).daddr.isEmpty())
             continue;

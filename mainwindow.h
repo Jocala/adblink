@@ -254,6 +254,7 @@ private:
     KodiDownloadCoordinator *m_kodiDownloadCoordinator;
     QTimer m_progressTimer;
     QHash<QString, QString> m_usbStatusCache;
+    QByteArray m_trackBuffer;
     QProcess *m_trackDevicesProcess = nullptr;
     QTimer *m_trackDebounce = nullptr;
     bool m_quitting = false;

@@ -176,6 +176,94 @@ private slots:
         QFETCH(bool, expected);
         QCOMPARE(isConnectedStatus(status), expected);
     }
+
+    // --- parseTrackDevices ---
+    void parseTrackDevicesSingle()
+    {
+        QByteArray buffer("0012HA1DB3G7\trecovery\n");
+        const QList<QPair<QString, QString>> entries = parseTrackDevices(buffer);
+        QCOMPARE(entries.size(), 1);
+        QCOMPARE(entries.at(0).first, QStringLiteral("HA1DB3G7"));
+        QCOMPARE(entries.at(0).second, QStringLiteral("recovery"));
+        QVERIFY(buffer.isEmpty());
+    }
+
+    void parseTrackDevicesDeviceState()
+    {
+        const QByteArray payload("VHG02613012985\tdevice\n");
+        QCOMPARE(payload.size(), 22);
+        QByteArray buffer = QByteArray("0016") + payload;
+        const QList<QPair<QString, QString>> entries = parseTrackDevices(buffer);
+        QCOMPARE(entries.size(), 1);
+        QCOMPARE(entries.at(0).first, QStringLiteral("VHG02613012985"));
+        QCOMPARE(entries.at(0).second, QStringLiteral("device"));
+        QVERIFY(buffer.isEmpty());
+    }
+
+    void parseTrackDevicesMultiDeviceHexPrefix()
+    {
+        // one chunk, two devices: the prefix is the whole payload length (0x2a),
+        // so a digit-only strip would mangle the first serial to "aHA1DB3G7"
+        const QByteArray payload("HA1DB3G7\trecovery\nVHG02613005678\trecovery\n");
+        QCOMPARE(payload.size(), 42);
+        QByteArray buffer = QByteArray("002a") + payload;
+
+        const QList<QPair<QString, QString>> entries = parseTrackDevices(buffer);
+        QCOMPARE(entries.size(), 2);
+        QCOMPARE(entries.at(0).first, QStringLiteral("HA1DB3G7"));
+        QCOMPARE(entries.at(0).second, QStringLiteral("recovery"));
+        QCOMPARE(entries.at(1).first, QStringLiteral("VHG02613005678"));
+        QCOMPARE(entries.at(1).second, QStringLiteral("recovery"));
+        QVERIFY(buffer.isEmpty());
+    }
+
+    void parseTrackDevicesKeepsLeadingDigits()
+    {
+        QByteArray buffer("00101234abcd\tdevice\n");
+        const QList<QPair<QString, QString>> entries = parseTrackDevices(buffer);
+        QCOMPARE(entries.size(), 1);
+        QCOMPARE(entries.at(0).first, QStringLiteral("1234abcd"));
+        QCOMPARE(entries.at(0).second, QStringLiteral("device"));
+        QVERIFY(buffer.isEmpty());
+    }
+
+    void parseTrackDevicesEmptyList()
+    {
+        QByteArray buffer("0000");
+        QCOMPARE(parseTrackDevices(buffer).size(), 0);
+        QVERIFY(buffer.isEmpty());
+    }
+
+    void parseTrackDevicesPartialFrame()
+    {
+        const QByteArray frame("0012HA1DB3G7\trecovery\n");
+        QByteArray buffer = frame.left(10);
+        QCOMPARE(parseTrackDevices(buffer).size(), 0);
+        QCOMPARE(buffer.size(), 10);
+
+        buffer.append(frame.mid(10));
+        const QList<QPair<QString, QString>> entries = parseTrackDevices(buffer);
+        QCOMPARE(entries.size(), 1);
+        QCOMPARE(entries.at(0).first, QStringLiteral("HA1DB3G7"));
+        QVERIFY(buffer.isEmpty());
+    }
+
+    void parseTrackDevicesIncompleteTrailer()
+    {
+        QByteArray buffer("0012HA1DB3G7\trecovery\n0012");
+        const QList<QPair<QString, QString>> entries = parseTrackDevices(buffer);
+        QCOMPARE(entries.size(), 1);
+        QCOMPARE(buffer, QByteArray("0012"));
+    }
+
+    void parseTrackDevicesResync()
+    {
+        QByteArray buffer("zzzz0012HA1DB3G7\trecovery\n");
+        const QList<QPair<QString, QString>> entries = parseTrackDevices(buffer);
+        QCOMPARE(entries.size(), 1);
+        QCOMPARE(entries.at(0).first, QStringLiteral("HA1DB3G7"));
+        QVERIFY(buffer.isEmpty());
+    }
 };
 
 QTEST_MAIN(TestStringUtils)
