@@ -2,7 +2,7 @@
 
 adblink.8.2
 
-Refresh ADB is now a main-window button (Kodi and Android views) in place of
+Refresh ADB is again a main-window button (Kodi and Android views) in place of
 Reset ADB. Refresh asks the adb server for device status and updates the Status
 column to match; network-device status now reflects what adb actually reports.
 
