@@ -38,7 +38,7 @@ changelog and download links.
 
 adblink.8.1
 
-Ghostty Terminal support added for macOS and Linux (Terminal/iTerm2/Ghostty and Gnome/XFCE/Konsole/Ghostty) with fallback guardrails and “not installed” hints.
+Ghostty Terminal support added for macOS and Linux (Terminal/iTerm2/Ghostty and Gnome/XFCE/Konsole/Ghostty) with fallback guardrails and "not installed" hints.
 
 09/12/26
 
@@ -252,7 +252,7 @@ by right-click actions.
 adblink now combines adblink (Kodi) and adblink2 (Android),
 offering two views: Kodi view, retaining all original Kodi
 functionality, and Android view, for users seeking
-adbLink’s features without Kodi. 
+adbLink's features without Kodi. 
 
 Device selection has moved from a dropdown list
 to a scrollable table. The active device is
@@ -610,7 +610,7 @@ jocala.com has reverted to http from https.
 
 Windows 7 users may need to clear Windows 7 DNS cache:
 
-From a command prompt type “ipconfig /flushdns” (without the quotes).
+From a command prompt type "ipconfig /flushdns" (without the quotes).
 
 Your browser may also need to clear its cache as well.
 
@@ -1684,7 +1684,7 @@ bug cleanup in win32 file deletion routines
 adbLink V1.0 changelog
 
 Fix for OS X Fire TV root
-Application home directory change: “adbLink”
+Application home directory change: "adbLink"
 Addition of preferences dialog 
 Addition of support for XBMC forks (BeyondXBMC, XBMCLauncher, etc)
 Pulled files folder preference
