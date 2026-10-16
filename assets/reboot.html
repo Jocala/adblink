@@ -1,10 +1,28 @@
 <!DOCTYPE html>
 <html><head><title>Menu items: Reboot device</title>
 <link rel="stylesheet" href="style.css"></head><body>
-Android only<p><h2>Reboot device</h2> Reboots the connected device.
+Android only<p><h2>Reboot device</h2> Reboots the connected device. Select a
+device in the device table, then choose one of the two items.
 <p>
+<b>Reboot</b> &mdash; reboots the device normally, via <code>adb reboot</code>.
+</p>
 <p>
+<b>Recovery</b> &mdash; reboots the device into recovery mode, via
+<code>adb reboot recovery</code>.
+</p>
 <p>
+Both items ask for confirmation first. After a network device is rebooted,
+adblink disconnects it and its status changes to "Disconnected"; a USB device
+stays in the table and reappears when it comes back.
+</p>
+<h3>Recovery mode</h3>
+<p>
+Whether the device exposes recovery depends on the hardware. Some devices
+bring adbd up while in recovery, in which case the status column reads
+"Recovery", ADB Shell still works, and the <b>Reboot</b> item is the way back
+to a normal boot. Others show a recovery menu that has to be driven with the
+device's own buttons, and adblink cannot get it out of that state.
+</p>
 <p>If you have questions or comments, please email jocala@jocala.com.
 adblink produces a log file, adblink.log, with each run. Include it in your
 email or post if you're having problems.</p>

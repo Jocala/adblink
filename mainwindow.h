@@ -146,6 +146,7 @@ private slots:
     bool fileExists(QString path);
     void kill_server();
     void on_actionReboot_triggered();
+    void on_actionRebootRecovery_triggered();
     void deleteRecord(QString descrip);
     void on_donate_clicked();
     void do_versioncheck();
@@ -314,6 +315,7 @@ private:
     QMenu *menuFile;
     QMenu *menuKodi;
     QMenu *menuUtility;
+    QMenu *menuReboot;
     QMenu *menuAbout;
     QMenu *menuHelp;
 
@@ -321,6 +323,7 @@ private:
     QAction *actionQuit;
     QAction *actionHelp;
     QAction *actionReboot;
+    QAction *actionRebootRecovery;
     QAction *actionDownload_Kodi;
     QAction *actionView_Kodi_Log;
     QAction *actionView_adbLink_Log;

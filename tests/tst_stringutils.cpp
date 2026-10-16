@@ -136,6 +136,46 @@ private slots:
         cache["abc123"] = "someweirdstatus";
         QCOMPARE(usbStatus(cache, "abc123"), QStringLiteral("Someweirdstatus"));
     }
+
+    void usbStatusRecovery()
+    {
+        QHash<QString, QString> cache;
+        cache["abc123"] = "recovery";
+        QCOMPARE(usbStatus(cache, "abc123"), QStringLiteral("Recovery"));
+    }
+
+    void usbStatusRescue()
+    {
+        QHash<QString, QString> cache;
+        cache["abc123"] = "rescue";
+        QCOMPARE(usbStatus(cache, "abc123"), QStringLiteral("Rescue"));
+    }
+
+    // --- isConnectedStatus ---
+    void isConnectedStatusValues_data()
+    {
+        QTest::addColumn<QString>("status");
+        QTest::addColumn<bool>("expected");
+
+        QTest::newRow("connected")    << QStringLiteral("Connected")    << true;
+        QTest::newRow("recovery")     << QStringLiteral("Recovery")     << true;
+        QTest::newRow("rescue")       << QStringLiteral("Rescue")       << true;
+        QTest::newRow("lowercase")    << QStringLiteral("connected")    << true;
+        QTest::newRow("spaces")       << QStringLiteral("  Recovery  ") << true;
+        QTest::newRow("disconnected") << QStringLiteral("Disconnected") << false;
+        QTest::newRow("offline")      << QStringLiteral("Offline")      << false;
+        QTest::newRow("unauthorized") << QStringLiteral("Unauthorized") << false;
+        QTest::newRow("sideload")     << QStringLiteral("Sideload")     << false;
+        QTest::newRow("device")       << QStringLiteral("device")       << false;
+        QTest::newRow("empty")        << QStringLiteral("")             << false;
+    }
+
+    void isConnectedStatusValues()
+    {
+        QFETCH(QString, status);
+        QFETCH(bool, expected);
+        QCOMPARE(isConnectedStatus(status), expected);
+    }
 };
 
 QTEST_MAIN(TestStringUtils)

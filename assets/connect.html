@@ -18,8 +18,18 @@ IP address and port (default 5555) from the device record are used to issue
 <li><strong>Connected</strong> &mdash; device is reachable and ready for use</li>
 <li><strong>Offline</strong> &mdash; device was found but is in an offline state</li>
 <li><strong>Unauthorized</strong> &mdash; device rejected the connection; check for an authorization prompt on the device</li>
+<li><strong>Recovery</strong> &mdash; device has booted into recovery mode; adb shell works, but the normal Android app layer does not</li>
+<li><strong>Rescue</strong> &mdash; device has booted into rescue mode; adb shell works</li>
 <li><strong>Unable to connect</strong> &mdash; device is unreachable or refused the connection</li>
 </ul>
+
+<p>
+A device in <strong>Recovery</strong> or <strong>Rescue</strong> is treated as
+connected: ADB Shell, Disconnect and the other device actions are available,
+and double-clicking its row disconnects it. Selection-sensitive features that
+need the running Android system, such as scrcpy or installing apps, will report
+their own failure from the device.
+</p>
 
 <h3>Notes</h3>
 <ul>

@@ -1,5 +1,6 @@
 #include "stringutils.h"
 #include <QRegularExpression>
+#include <QStringList>
 
 QString stripString(const QString &str)
 {
@@ -46,4 +47,14 @@ QString usbStatus(const QHash<QString, QString> &cache, const QString &daddr)
     if (!status.isEmpty())
         status[0] = status[0].toUpper();
     return status;
+}
+
+bool isConnectedStatus(const QString &status)
+{
+    static const QStringList connectedStates = {
+        QStringLiteral("connected"),
+        QStringLiteral("recovery"),
+        QStringLiteral("rescue")
+    };
+    return connectedStates.contains(status.trimmed().toLower());
 }

@@ -14,7 +14,8 @@ public:
     explicit RebootManager(QObject *parent = nullptr);
 
     void rebootDevice(QWidget *parentWidget, QTableWidget *deviceTable,
-                      bool isUsb, const QString &adbPrefix);
+                      bool isUsb, const QString &adbPrefix,
+                      const QString &mode = QString());
 };
 
 #endif // REBOOTMANAGER_H

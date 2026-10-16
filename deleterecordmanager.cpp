@@ -2,6 +2,7 @@
 #include "getadbdata.h"
 #include "adbutils.h"
 #include "logfile.h"
+#include "stringutils.h"
 
 #include <QMessageBox>
 #include <QTableWidget>
@@ -35,7 +36,7 @@ void DeleteRecordManager::deleteSelectedDevice(QWidget *parentWidget,
 
     if (!descrip.isEmpty()) {
         if (deviceTable->item(selectedRow, 2) &&
-            deviceTable->item(selectedRow, 2)->text() == "Connected") {
+            isConnectedStatus(deviceTable->item(selectedRow, 2)->text())) {
             QMessageBox msgBox(parentWidget);
             msgBox.setIcon(QMessageBox::Warning);
             msgBox.setWindowTitle(QString());

@@ -2,6 +2,7 @@
 #include "adbutils.h"
 #include "getadbdata.h"
 #include "logfile.h"
+#include "stringutils.h"
 
 #include <QMessageBox>
 #include <QTableWidget>
@@ -26,7 +27,7 @@ void DisconnectManager::disconnectDevice(QWidget *parentWidget, QTableWidget *de
         msgBox.exec();
         return;
     }
-    if (deviceTable->item(selectedRow, 2)->text() != "Connected") {
+    if (!isConnectedStatus(deviceTable->item(selectedRow, 2)->text())) {
         QMessageBox msgBox(parentWidget);
         msgBox.setIcon(QMessageBox::Critical);
         msgBox.setWindowTitle(QString());

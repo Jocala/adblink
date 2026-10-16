@@ -218,7 +218,7 @@ kbd { background: #eef2f6; border: 1px solid #cbd5e1; border-radius: 3px; paddin
 <tr><td><code>KillServerManager</code></td><td><code>killservermanager.cpp/.h</code></td><td>Disconnect all network devices (<code>adb kill-server</code>). Returns false when cancelled; on success the caller drops cached network-device statuses so repainted rows stay Disconnected.</td></tr>
 <tr><td><code>KeypadManager</code></td><td><code>keypadmanager.cpp/.h</code></td><td>Virtual keypad dialog — sends keyevents to device.</td></tr>
 <tr><td><code>RemotePushManager</code></td><td><code>remotepushmanager.cpp/.h</code></td><td>Push remote files to Kodi (custom keymaps, etc.).</td></tr>
-<tr><td><code>RebootManager</code></td><td><code>rebootmanager.cpp/.h</code></td><td>Reboot device via <code>adb reboot</code>.</td></tr>
+<tr><td><code>RebootManager</code></td><td><code>rebootmanager.cpp/.h</code></td><td>Reboot device via <code>adb reboot</code>, or <code>adb reboot recovery</code> when a mode is passed.</td></tr>
 <tr><td><code>ScreenCapManager</code></td><td><code>screencapmanager.cpp/.h</code></td><td>Capture device screen via <code>screencap</code> + pull to local.</td></tr>
 <tr><td><code>SendTextManager</code></td><td><code>sendtextmanager.cpp/.h</code></td><td>Send text input to device via <code>adb shell input text</code>.</td></tr>
 <tr><td><code>SideloadManager</code></td><td><code>sideloadmanager.cpp/.h</code></td><td>APK install (sideload) dialog + progress.</td></tr>
@@ -319,7 +319,8 @@ kbd { background: #eef2f6; border: 1px solid #cbd5e1; border-radius: 3px; paddin
 <tr><td>Stop ADB</td><td><code>actionStop_adb</code></td><td><code>killServer_clicked</code></td><td><code>killservermanager.cpp/.h</code></td><td>Confirm, then run <code>adb kill-server</code>. All network devices are disconnected and must be reconnected individually.</td></tr>
 <tr><td>View changelog</td><td><code>View_Changelog</code></td><td><code>on_View_Changelog_triggered</code></td><td><code>about.cpp/.h</code>, <code>changelog.txt</code></td><td>Opens changelog from the app's data directory. mainwindow.cpp:1646</td></tr>
 <tr><td>Wireless ADBD</td><td><code>actionWireless_ADBD</code></td><td><code>on_actionWireless_ADBD_triggered</code></td><td><code>wirelessadbmanager.cpp/.h</code></td><td>Enable/disable ADB over TCP/IP on device. mainwindow.cpp:1057</td></tr>
-<tr><td>Reboot device</td><td><code>actionReboot</code></td><td><code>on_actionReboot_triggered</code></td><td><code>rebootmanager.cpp/.h</code></td><td>Reboot device via <code>adb reboot</code>. mainwindow.cpp:836</td></tr>
+<tr><td>Reboot device</td><td><code>actionReboot</code></td><td><code>on_actionReboot_triggered</code></td><td><code>rebootmanager.cpp/.h</code></td><td>Submenu "Reboot device" containing <b>Reboot</b> and <b>Recovery</b>. Normal reboot via <code>adb reboot</code>. mainwindow.cpp:840</td></tr>
+<tr><td>Reboot device</td><td><code>actionRebootRecovery</code></td><td><code>on_actionRebootRecovery_triggered</code></td><td><code>rebootmanager.cpp/.h</code></td><td>Reboot into recovery via <code>adb reboot recovery</code>. mainwindow.cpp:853</td></tr>
 </table>
 
 <h3 id="menu-about">3.4 &mdash; About &amp; Help Menus</h3>
@@ -341,7 +342,7 @@ kbd { background: #eef2f6; border: 1px solid #cbd5e1; border-radius: 3px; paddin
 <tr><td>1</td><td>Disconnect</td><td>Disconnect selected device (Ctrl+E)</td><td>Ctrl+E</td><td><code>disButton_clicked</code></td><td><code>disconnectmanager.cpp</code></td><td>ADB disconnect. Optionally bypasses confirmation prompt via JSON <code>"bypassdisconnect"</code>.</td></tr>
 <tr><td>2</td><td>New</td><td>Add new device (Ctrl+G)</td><td>Ctrl+G</td><td>lambda → <code>dataentry(true)</code></td><td><code>deviceeditormanager.cpp</code></td><td>Open DeviceRecordDialog to add a new device to SQLite.</td></tr>
 <tr><td>3</td><td>Edit</td><td>Edit selected device (Ctrl+W)</td><td>Ctrl+W</td><td>lambda → <code>dataentry(false)</code></td><td><code>deviceeditormanager.cpp</code></td><td>Open DeviceRecordDialog to edit the selected device's record.</td></tr>
-<tr><td>4</td><td>Delete</td><td>Delete selected device (Ctrl+I)</td><td>Ctrl+I</td><td><code>delRecordButton_clicked</code></td><td><code>deleterecordmanager.cpp</code></td><td>Delete selected device from SQLite. Blocked if device status is Connected.</td></tr>
+<tr><td>4</td><td>Delete</td><td>Delete selected device (Ctrl+I)</td><td>Ctrl+I</td><td><code>delRecordButton_clicked</code></td><td><code>deleterecordmanager.cpp</code></td><td>Delete selected device from SQLite. Blocked if device status is Connected/Recovery/Rescue.</td></tr>
 <tr><td>5</td><td>Clear</td><td>Clear ad hoc IP field (Ctrl+J)</td><td>Ctrl+J</td><td><code>on_clearAdhocButton_clicked</code></td><td><code>mainwindow.cpp</code></td><td>Clears the Ad hoc IP address text field.</td></tr>
 </table>
 
@@ -549,7 +550,7 @@ kbd { background: #eef2f6; border: 1px solid #cbd5e1; border-radius: 3px; paddin
 <tr><td>Insert new device</td><td>INSERT INTO device (11 columns)</td><td>Duplicate description check first</td></tr>
 <tr><td>Update device</td><td>UPDATE device SET ... WHERE description = ?</td><td>No duplicate check</td></tr>
 <tr><td>Ad-hoc insert</td><td>INSERT OR REPLACE INTO device (7 columns)</td><td>Description hardcoded <code>"Ad hoc"</code></td></tr>
-<tr><td>Delete device</td><td>DELETE FROM device WHERE description = ?</td><td>Blocked if device status is <code>"Connected"</code></td></tr>
+<tr><td>Delete device</td><td>DELETE FROM device WHERE description = ?</td><td>Blocked if device status is <code>"Connected"</code>, <code>"Recovery"</code> or <code>"Rescue"</code></td></tr>
 </table>
 
 <h3 id="db-json">8.2 &mdash; JSON Config Keys (<code>adblink.json</code>)</h3>
@@ -667,6 +668,7 @@ kbd { background: #eef2f6; border: 1px solid #cbd5e1; border-radius: 3px; paddin
 <tr><td><code>checkslash</code></td><td>11</td><td><code>QString checkslash(const QString &amp;path)</code></td><td>Ensure leading and trailing <code>/</code>.</td><td>Various</td></tr>
 <tr><td><code>validateIPAddress</code></td><td>21</td><td><code>bool validateIPAddress(const QString &amp;ip)</code></td><td>Regex matching IPv4 dotted-decimal or DNS hostname.</td><td>AdhocManager</td></tr>
 <tr><td><code>usbStatus</code></td><td>38</td><td><code>QString usbStatus(cache, daddr)</code></td><td>Maps track-devices state to display text: "device" → "Connected", missing → "Disconnected", else capitalize first letter.</td><td>DeviceTableLoader</td></tr>
+<tr><td><code>isConnectedStatus</code></td><td>52</td><td><code>bool isConnectedStatus(status)</code></td><td>True for "Connected", "Recovery", "Rescue" (case-insensitive). Gates adb shell and every other device action.</td><td>MainWindow, DisconnectManager, DeleteRecordManager</td></tr>
 </table>
 
 <h3 id="help-log">9.3 &mdash; logfile.cpp</h3>
@@ -892,7 +894,7 @@ QMessageBox::StandardButton reply = static_cast&lt;QMessageBox::StandardButton&g
 <tr><td>Connect</td><td><code>connectmanager.cpp:82</code></td><td><code>&lt;adbPath&gt; connect &lt;daddr&gt;:&lt;port&gt;</code></td></tr>
 <tr><td>Disconnect</td><td><code>disconnectmanager.cpp:63</code></td><td><code>&lt;getadbpath()&gt; disconnect &lt;daddr&gt;</code></td></tr>
 <tr><td>Kill server</td><td><code>killservermanager.cpp:24</code></td><td><code>&lt;getadbpath()&gt; kill-server</code></td></tr>
-<tr><td>Reboot</td><td><code>rebootmanager.cpp:30</code></td><td><code>&lt;adbPrefix&gt; reboot</code></td></tr>
+<tr><td>Reboot</td><td><code>rebootmanager.cpp:34</code></td><td><code>&lt;adbPrefix&gt; reboot</code> / <code>&lt;adbPrefix&gt; reboot recovery</code></td></tr>
 </table>
 
 <h3 id="adb-cmds-kodi">11.8 &mdash; Kodi Data &amp; Cache</h3>

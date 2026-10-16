@@ -8,5 +8,6 @@ QString stripString(const QString &str);
 QString checkslash(const QString &qpath);
 bool validateIPAddress(const QString &ipAddress);
 QString usbStatus(const QHash<QString, QString> &cache, const QString &daddr);
+bool isConnectedStatus(const QString &status);
 
 #endif // STRINGUTILS_H

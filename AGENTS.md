@@ -106,7 +106,9 @@ Persistent `QProcess` running `adb track-devices`, not polling. Streams device s
 - `m_quitting` guard in `onTrackFinished` prevents restart during shutdown.
 
 ### Status display
-`usbStatus()` in `stringutils.cpp`: maps cache values to display text — `"device"` → `"Connected"`, missing → `"Disconnected"`, otherwise capitalize first letter (`"unauthorized"` → `"Unauthorized"`).
+`usbStatus()` in `stringutils.cpp`: maps cache values to display text — `"device"` → `"Connected"`, missing → `"Disconnected"`, otherwise capitalize first letter (`"unauthorized"` → `"Unauthorized"`, `"recovery"` → `"Recovery"`).
+
+`isConnectedStatus()` (same file): case-insensitive predicate, true for `Connected`/`Recovery`/`Rescue`. This is the gate for every "is the selected device usable" check — `validateDeviceSelection()`, double-click, Disconnect, and the Delete-record block. Do not compare a status cell against the literal `"Connected"`.
 
 ## Device table
 
@@ -170,6 +172,7 @@ Thread-safe via `static QMutex` + `QMutexLocker`. Appends to `<logdir>/adblink.l
 - `checkslash(path)`: ensure leading and trailing `/`.
 - `validateIPAddress(ip)`: regex matching IPv4 dotted-decimal or DNS hostname.
 - `usbStatus(cache, daddr)`: map track-devices state to display text.
+- `isConnectedStatus(status)`: true for `Connected`/`Recovery`/`Rescue` (a recovery-mode device runs adbd, so shell works).
 - `adbString(input)`: escape single quotes, wrap in double quotes.
 
 ## Preferences (`adblink.json`)

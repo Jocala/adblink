@@ -1,3 +1,15 @@
+10/16/26
+
+adblink.8.2
+
+A device in Recovery or Rescue mode is now treated as connected. The status
+column still shows Recovery or Rescue, but the device actions that need a live
+adb connection - ADB Shell in particular - now work, and double-clicking the
+row disconnects it. Delete record stays blocked while the device is reachable.
+
+Utility > Reboot device is now a submenu with "Reboot" (normal) and "Recovery"
+(adb reboot recovery). Both ask for confirmation.
+
 10/14/26
 
 adblink.8.2

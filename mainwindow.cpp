@@ -754,7 +754,7 @@
 
         QString status = deviceTable->item(row, 2)->text();
 
-        if (status == "Connected") {
+        if (isConnectedStatus(status)) {
             disButton_clicked();
         } else if (status == "Disconnected") {
             connButton_clicked();
@@ -846,6 +846,20 @@
         DeviceRecord device = queryDeviceRecord(selectedDescription);
 
         m_rebootManager->rebootDevice(this, deviceTable, device.isusb, getadb());
+    }
+
+
+
+    /////////////////////////////////////////
+    void MainWindow::on_actionRebootRecovery_triggered()
+    {
+        QString selectedDescription;
+        if (!validateDeviceSelection(selectedDescription))
+            return;
+
+        DeviceRecord device = queryDeviceRecord(selectedDescription);
+
+        m_rebootManager->rebootDevice(this, deviceTable, device.isusb, getadb(), "recovery");
     }
 
 
@@ -1785,7 +1799,7 @@ bool MainWindow::validateDeviceSelection(QString& selectedDescription) {
  bool hasConnectedDevice = false;
  for (int i = 0; i < deviceTable->rowCount(); ++i) {
                if (deviceTable->item(i, 2) &&
-                   deviceTable->item(i, 2)->text() == "Connected") {
+                   isConnectedStatus(deviceTable->item(i, 2)->text())) {
               hasConnectedDevice = true;
               break;
                }
@@ -1818,7 +1832,7 @@ bool MainWindow::validateDeviceSelection(QString& selectedDescription) {
 
  // Check if the selected device is connected
  if (deviceTable->item(selectedRow, 2) &&
-     deviceTable->item(selectedRow, 2)->text() != "Connected") {
+     !isConnectedStatus(deviceTable->item(selectedRow, 2)->text())) {
                QMessageBox msgBox(this);
                msgBox.setIcon(QMessageBox::Critical);
                msgBox.setWindowTitle(QString());
@@ -2809,7 +2823,11 @@ void MainWindow::setupUtilityMenu()
     actionStop_adb = new QAction("Stop ADB", this);
     View_Changelog = new QAction("View changelog", this);
     actionWireless_ADBD = new QAction("Wireless ADBD", this);
-    actionReboot = new QAction("Reboot device", this);
+    menuReboot = new QMenu("Reboot device", this);
+    actionReboot = new QAction("Reboot", this);
+    actionRebootRecovery = new QAction("Recovery", this);
+    menuReboot->addAction(actionReboot);
+    menuReboot->addAction(actionRebootRecovery);
     menuUtility->addAction(actionSwitch_View);
     menuUtility->addAction(actionReiinstall_Busybox);
     menuUtility->addAction(infoArchitecture2);
@@ -2819,7 +2837,7 @@ void MainWindow::setupUtilityMenu()
     menuUtility->addAction(actionStop_adb);
     menuUtility->addAction(View_Changelog);
     menuUtility->addAction(actionWireless_ADBD);
-    menuUtility->addAction(actionReboot);
+    menuUtility->addAction(menuReboot->menuAction());
 }
 
 void MainWindow::setupAboutMenu()
@@ -2865,6 +2883,7 @@ void MainWindow::setupMenuConnections()
     connect(View_Changelog,             &QAction::triggered, this, &MainWindow::on_View_Changelog_triggered);
     connect(actionWireless_ADBD,        &QAction::triggered, this, &MainWindow::on_actionWireless_ADBD_triggered);
     connect(actionReboot,               &QAction::triggered, this, &MainWindow::on_actionReboot_triggered);
+    connect(actionRebootRecovery,       &QAction::triggered, this, &MainWindow::on_actionRebootRecovery_triggered);
     connect(actionAbout,                &QAction::triggered, this, &MainWindow::on_actionAbout_triggered);
     connect(actionHelp,                 &QAction::triggered, this, &MainWindow::on_actionHelp_triggered);
 }
