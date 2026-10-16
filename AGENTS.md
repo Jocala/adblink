@@ -292,6 +292,26 @@ Builds are out-of-source (Samba share → local disk). Each platform has a build
 
 Easy switch: `WINDOWS_HOST=backup ./stage.sh` or `WINDOWS_HOST=backup ./syncdb.sh` uses backup (137); default is primary (170). `WINDOWS_HOST=jeff@192.168.1.170` (or any `user@host`) overrides with any host.
 
+### Distributing source to the build hosts
+
+macOS is the authoritative source. Linux and Windows compile their **own** trees, so
+every all-platform build requires the macOS commits to reach both hosts before they
+are built:
+
+```sh
+git push origin main                  # Debian bare repo; no post-receive hook
+ssh jeff@192.168.1.39 "cd /zstore/source/adblink && git stash && git pull"
+ssh jeff@192.168.1.170 "cd C:\\source\\adblink && git stash && git pull"
+```
+
+`stage.sh` performs both pulls itself (`stage.sh:44,48-50`), so running it needs no
+manual step. The Windows path needs doubled backslashes over ssh, and the pulls are
+separate ssh calls rather than one `;`-chained command (`d2bd0b9`) — cmd mangles them.
+
+This is a required part of every all-platform build, not a decision point, and skipping
+it **fails silently**: the host compiles the previous commit and the installers look
+perfectly normal. Confirm each host with `git log --oneline -1` after the pull.
+
 ### Packaging
 | Platform | Generator | Output |
 |---|---|---|
