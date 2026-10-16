@@ -21,10 +21,6 @@ prompt explains what it is for, so macOS can remember your approval instead of
 asking again on every use. That covers opening a terminal, and the help,
 changelog and download links.
 
-Note: if Ghostty is selected as the terminal, Ghostty itself asks for
-confirmation before running adblink's shell script. That is Ghostty's own
-security prompt, not an adblink permission, and it is unaffected by the above.
-
 10/14/26
 
 adblink.8.2
