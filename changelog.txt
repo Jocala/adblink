@@ -2,6 +2,13 @@
 
 adblink.8.2
 
+Refresh ADB is now a main-window button (Kodi and Android views) in place of
+Reset ADB. Refresh asks the adb server for device status and updates the Status
+column to match; network-device status now reflects what adb actually reports.
+
+The old Reset ADB button is now "Stop ADB" in the Utility menu. It asks for
+confirmation, then stops the adb server and disconnects all network devices.
+
 A device in Recovery or Rescue mode is now treated as connected. The status
 column still shows Recovery or Rescue, but the device actions that need a live
 adb connection - ADB Shell in particular - now work, and double-clicking the
@@ -16,27 +23,16 @@ the device's real entry could read Disconnected while the device was in fact
 connected. adblink was misreading the length header adb puts in front of its
 device list whenever more than one device was attached.
 
-macOS: adblink now declares the Apple Events entitlement, and the permission
-prompt explains what it is for, so macOS can remember your approval instead of
-asking again on every use. That covers opening a terminal, and the help,
-changelog and download links.
-
-10/14/26
-
-adblink.8.2
+Fixed per-device Scrcpy arguments being ignored when "Ask for Scrcpy
+arguments" is unchecked in preferences.
 
 adb updated to 37.0.1 for macOS, Windows and Linux.
 Windows scrcpy updated to 5.0.1.
 
-Refresh ADB is now a main-window button (Kodi and Android views) in place of
-Reset ADB. Refresh asks the adb server for device status and updates the Status
-column to match; network-device status now reflects what adb actually reports.
-
-The old Reset ADB button is now "Stop ADB" in the Utility menu. It asks for
-confirmation, then stops the adb server and disconnects all network devices.
-
-Fixed per-device Scrcpy arguments being ignored when "Ask for Scrcpy
-arguments" is unchecked in preferences.
+macOS: adblink now declares the Apple Events entitlement, and the permission
+prompt explains what it is for, so macOS can remember your approval instead of
+asking again on every use. That covers opening a terminal, and the help,
+changelog and download links.
 
 09/12/26
 
