@@ -24,6 +24,8 @@
 	<string>${MACOSX_BUNDLE_BUNDLE_VERSION}</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>10.15</string>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>adblink opens a terminal to run adb shell, and opens help pages in your browser.</string>
 	<key>NSHumanReadableCopyright</key>
 	<string></string>
 	<key>NSPrincipalClass</key>
