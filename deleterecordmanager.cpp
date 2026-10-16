@@ -1,6 +1,4 @@
 #include "deleterecordmanager.h"
-#include "getadbdata.h"
-#include "adbutils.h"
 #include "logfile.h"
 #include "stringutils.h"
 
@@ -18,7 +16,6 @@ void DeleteRecordManager::deleteSelectedDevice(QWidget *parentWidget,
                                                 DeleteRecordCallback deleteRecord)
 {
     QString descrip;
-    QString daddr;
 
     int selectedRow = deviceTable->currentRow();
     if (selectedRow >= 0 && deviceTable->item(selectedRow, 0)) {
@@ -62,12 +59,6 @@ void DeleteRecordManager::deleteSelectedDevice(QWidget *parentWidget,
             logfile("Device table was reset during delete operation");
             return;
         }
-        daddr = deviceTable->item(selectedRow, 1)->text();
-
-        QString cstring = getadbpath() + " disconnect " + daddr;
-        QString command = getadbOutput(cstring);
-        logfile(command);
-        logfile("disconnect: " + daddr);
 
         deviceTable->removeRow(selectedRow);
         logfile(descrip + " is deleted");

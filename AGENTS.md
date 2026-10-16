@@ -351,6 +351,12 @@ DMG at `/Users/jeff/source/builds/adblink/packages/adblink-8.2-Darwin.dmg` conta
 - Verification: on win10, set a device's Scrcpy arg, uncheck the preference, launch scrcpy, confirm `%APPDATA%\.jocala\scripts\scrcpy.bat` contains the arg. Before the fix it read `scrcpy.exe -s <ip:port> ` with a trailing space.
 - Adjacent, unfixed: the arg string is concatenated unquoted into `.bat`/`.sh`, so multi-token values with spaces and cmd metacharacters are still unsafe.
 
+### Record delete fired a bogus `adb disconnect` (fixed 2026-10-16, all platforms)
+
+- Symptom: deleting any device record logged an adb error, e.g. `error: no such device 'USB:5555'` followed by `disconnect: USB`.
+- Cause: `DeleteRecordManager::deleteSelectedDevice()` re-read the **IP table cell** after `deleteRecord()` and ran `adb disconnect <that cell>` — with no USB guard (unlike `disconnectmanager.cpp:41` and `connectmanager.cpp:61`), no port (so adb appended its own default), and for USB records the cell is the literal string `USB`. The delete gate refuses any device whose status is connected/recovery/rescue, so the target was never connected: the call was either a no-op that logged an error, or — if the displayed status was stale — it silently dropped a live transport the user may have been using from a terminal.
+- Fix: the disconnect was removed; nothing replaced it. If a teardown is ever wanted it must use the record's own `daddr:port` (the DB keeps the port separate from `daddr`) and skip USB records.
+
 ### Deliberate behaviour — do not "fix"
 
 - **adblink kills the adb server on exit.** `onApplicationQuit()` runs `adb kill-server`, then `taskkill /f /im adb.exe` (Windows) / `pkill -9 adb` (POSIX) (`mainwindow.cpp:428-443`). Fixed policy: adblink does not leave a server running. The consequences are intended — IP devices need Connect again after an app restart, and always after a device reboot, because an adb TCP transport never survives one. Note the POSIX/Windows kill matches by process name, so it also stops adb processes adblink did not start; that breadth is deliberate too.
