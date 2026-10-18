@@ -71,20 +71,21 @@ ssh "$DEBIAN" "ls -lh $DOWNLOADS/$DMG $DOWNLOADS/$TGZ $DOWNLOADS/$EXE"
 # -- Update website files --------------------------------------------------
 
 echo ""
-echo "--- Updating version.txt and index.html ---"
+echo "--- Updating version.txt and adblink.html ---"
 
 OLDVER=$(ssh "$DEBIAN" "cat $WEBSITE/version.txt" | xargs)
 echo "Current version: $OLDVER, new version: $VERSION"
 
 ssh "$DEBIAN" "echo '$VERSION' > $WEBSITE/version.txt"
 
-# Replace download filenames in index.html (any old version → new)
-ssh "$DEBIAN" "sed -i 's|downloads/adblink-[0-9.]*-Darwin.dmg|downloads/$DMG|g' $WEBSITE/index.html"
-ssh "$DEBIAN" "sed -i 's|downloads/adblink-[0-9.]*-Linux.tar.gz|downloads/$TGZ|g' $WEBSITE/index.html"
-ssh "$DEBIAN" "sed -i 's|downloads/adblink-[0-9.]*-win64.exe|downloads/$EXE|g' $WEBSITE/index.html"
+# Download links and version labels live in adblink.html (the product page);
+# index.html is the landing page and links there.
+ssh "$DEBIAN" "sed -i 's|downloads/adblink-[0-9.]*-Darwin.dmg|downloads/$DMG|g' $WEBSITE/adblink.html"
+ssh "$DEBIAN" "sed -i 's|downloads/adblink-[0-9.]*-Linux.tar.gz|downloads/$TGZ|g' $WEBSITE/adblink.html"
+ssh "$DEBIAN" "sed -i 's|downloads/adblink-[0-9.]*-win64.exe|downloads/$EXE|g' $WEBSITE/adblink.html"
 
 # Replace version labels in link text (any old version → new)
-ssh "$DEBIAN" "sed -i '/for \(Windows\|macOS\|Linux\)/s/v[0-9.]*/v${VERSION}/g' $WEBSITE/index.html"
+ssh "$DEBIAN" "sed -i '/for \(Windows\|macOS\|Linux\)/s/v[0-9.]*/v${VERSION}/g' $WEBSITE/adblink.html"
 
 # -- Remind about remaining manual steps -----------------------------------
 

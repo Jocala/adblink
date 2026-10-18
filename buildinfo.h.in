@@ -1,0 +1,8 @@
+#ifndef BUILDINFO_H
+#define BUILDINFO_H
+
+#include <QString>
+
+const QString buildStamp = "@ADBLINK_BUILD_STAMP@";
+
+#endif // BUILDINFO_H

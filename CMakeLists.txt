@@ -1,10 +1,38 @@
 cmake_minimum_required(VERSION 3.16)
-project(adblink VERSION 8.2 LANGUAGES CXX)
+project(adblink VERSION 8.3 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
+
+string(TIMESTAMP ADBLINK_BUILD_TIME "built %Y-%m-%d %H:%M UTC")
+execute_process(
+    COMMAND git rev-parse --short HEAD
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    OUTPUT_VARIABLE ADBLINK_GIT_COMMIT
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+)
+if("${ADBLINK_GIT_COMMIT}" STREQUAL "")
+    set(ADBLINK_GIT_COMMIT "unknown")
+endif()
+execute_process(
+    COMMAND git status --porcelain
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    OUTPUT_VARIABLE ADBLINK_GIT_DIRTY
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+)
+if(NOT "${ADBLINK_GIT_DIRTY}" STREQUAL "")
+    set(ADBLINK_GIT_COMMIT "${ADBLINK_GIT_COMMIT}+dirty")
+endif()
+set(ADBLINK_BUILD_STAMP "${ADBLINK_BUILD_TIME}, git ${ADBLINK_GIT_COMMIT}")
+configure_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/buildinfo.h.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/buildinfo.h"
+    @ONLY
+)
 
 if("${CMAKE_BUILD_TYPE}" STREQUAL "")
     set(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
@@ -226,7 +254,7 @@ qt_add_executable(adblink
     ${ADBLINK_EXTRA_FILES}
 )
 
-target_include_directories(adblink PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(adblink PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
 target_link_libraries(adblink PRIVATE
     Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Sql Qt6::Network Qt6::Concurrent

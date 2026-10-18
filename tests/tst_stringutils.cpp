@@ -264,6 +264,65 @@ private slots:
         QCOMPARE(entries.at(0).first, QStringLiteral("HA1DB3G7"));
         QVERIFY(buffer.isEmpty());
     }
+
+    void parseTrackDevicesBogusLengthResync()
+    {
+        // "074T" used to parse as a length (0x74) because toInt stops at the first
+        // character that is not a hex digit, shifting every later frame
+        QByteArray buffer("074T0012HA1DB3G7\trecovery\n");
+        const QList<QPair<QString, QString>> entries = parseTrackDevices(buffer);
+        QCOMPARE(entries.size(), 1);
+        QCOMPARE(entries.at(0).first, QStringLiteral("HA1DB3G7"));
+        QCOMPARE(entries.at(0).second, QStringLiteral("recovery"));
+        QVERIFY(buffer.isEmpty());
+    }
+
+    void parseTrackDevicesCarriageReturns()
+    {
+        // Windows adb writes the relayed list in text mode: the header counts LF
+        // bytes, the wire carries CRLF
+        QByteArray buffer("0016VHG02613012985\tdevice\r\n");
+        const QList<QPair<QString, QString>> entries = parseTrackDevices(buffer);
+        QCOMPARE(entries.size(), 1);
+        QCOMPARE(entries.at(0).first, QStringLiteral("VHG02613012985"));
+        QCOMPARE(entries.at(0).second, QStringLiteral("device"));
+        QVERIFY(buffer.isEmpty());
+    }
+
+    void parseTrackDevicesCarriageReturnSplitAcrossReads()
+    {
+        const QByteArray frame("0012HA1DB3G7\trecovery\r\n");
+        QByteArray buffer = frame.left(frame.size() - 1);
+        QCOMPARE(parseTrackDevices(buffer).size(), 0);
+
+        buffer.append(frame.right(1));
+        const QList<QPair<QString, QString>> entries = parseTrackDevices(buffer);
+        QCOMPARE(entries.size(), 1);
+        QCOMPARE(entries.at(0).first, QStringLiteral("HA1DB3G7"));
+        QVERIFY(buffer.isEmpty());
+    }
+
+    void parseTrackDevicesModeChangesWithCarriageReturns()
+    {
+        // device -> gone -> recovery -> gone -> device, as adb frames it on Windows
+        const QByteArray device("G074TS0361670XW6\tdevice\r\n");
+        const QByteArray recovery("G074TS0361670XW6\trecovery\r\n");
+        QByteArray stream;
+        stream += QByteArray("0018") + device;
+        stream += QByteArray("0000");
+        stream += QByteArray("001a") + recovery;
+        stream += QByteArray("0000");
+        stream += QByteArray("0018") + device;
+
+        const QList<QPair<QString, QString>> entries = parseTrackDevices(stream);
+        QCOMPARE(entries.size(), 3);
+        for (const QPair<QString, QString> &entry : entries)
+            QCOMPARE(entry.first, QStringLiteral("G074TS0361670XW6"));
+        QCOMPARE(entries.at(0).second, QStringLiteral("device"));
+        QCOMPARE(entries.at(1).second, QStringLiteral("recovery"));
+        QCOMPARE(entries.at(2).second, QStringLiteral("device"));
+        QVERIFY(stream.isEmpty());
+    }
 };
 
 QTEST_MAIN(TestStringUtils)

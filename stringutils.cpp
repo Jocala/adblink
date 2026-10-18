@@ -59,22 +59,60 @@ bool isConnectedStatus(const QString &status)
     return connectedStates.contains(status.trimmed().toLower());
 }
 
+namespace {
+
+bool isHexLengthPrefix(const QByteArray &prefix)
+{
+    for (char c : prefix) {
+        const bool hex = (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+        if (!hex)
+            return false;
+    }
+    return true;
+}
+
+bool isDeviceListFrame(const QByteArray &payload)
+{
+    if (payload.isEmpty())
+        return true;
+    if (!payload.endsWith('\n'))
+        return false;
+    for (const QByteArray &rawLine : payload.split('\n')) {
+        const QByteArray line = rawLine.trimmed();
+        if (!line.isEmpty() && !line.contains('\t'))
+            return false;
+    }
+    return true;
+}
+
+} // namespace
+
 QList<QPair<QString, QString>> parseTrackDevices(QByteArray &buffer)
 {
     QList<QPair<QString, QString>> entries;
 
+    // adb on Windows relays the list through a text-mode stdout, so every newline
+    // arrives as \r\n while the frame header counts the \n only. Dropping the
+    // carriage returns keeps the declared lengths aligned with the wire.
+    buffer.replace("\r", "");
+
     while (buffer.size() >= 4) {
-        bool ok = false;
-        const int payloadLength = buffer.left(4).toInt(&ok, 16);
-        if (!ok) {
+        const QByteArray prefix = buffer.left(4);
+        if (!isHexLengthPrefix(prefix)) {
             // not a length prefix; drop one byte and look for the next frame
             buffer.remove(0, 1);
             continue;
         }
+        const int payloadLength = prefix.toInt(nullptr, 16);
         if (buffer.size() < 4 + payloadLength)
             break;
 
         const QByteArray payload = buffer.mid(4, payloadLength);
+        if (!isDeviceListFrame(payload)) {
+            // a length that parsed but does not frame a device list; resync
+            buffer.remove(0, 1);
+            continue;
+        }
         buffer.remove(0, 4 + payloadLength);
 
         const QList<QByteArray> lines = payload.split('\n');

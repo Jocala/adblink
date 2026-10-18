@@ -37,7 +37,7 @@ cmake --build "%USERPROFILE%\build-adblink" --target package-win
 Qt Creator uses the same build dir with Ninja — run vcvars64.bat first or let Qt Creator handle it.
 Build + test: `C:\source\adblink\build-adblink-windows.ps1`
 Package only (after build): `C:\source\adblink\package-adblink-windows.ps1`
-The `package-win` target wraps `iscc` and produces `packages/adblink-8.2-win64.exe`.
+The `package-win` target wraps `iscc` and produces `packages/adblink-8.3-win64.exe`.
 
 Single test (any platform):
 ```sh
@@ -102,6 +102,7 @@ Persistent `QProcess` running `adb track-devices`, not polling. Streams device s
 
 - `startTrackDevices()`: creates QProcess, connects `readyReadStandardOutput` → `onTrackOutput`, connects `finished` → `onTrackFinished` (auto-restart after 1s).
 - `onTrackOutput()`: appends `readAllStandardOutput()` to `m_trackBuffer` and passes it to `parseTrackDevices()` (`stringutils.cpp`), which consumes adb's 4-hex-digit length-prefixed chunks. One chunk carries the **whole** device list, so the prefix appears once per chunk — never per line. Each payload line is `SERIAL\tSTATUS`. Updates `m_usbStatusCache` (QHash<QString,QString>), starts 150ms debounce timer.
+- **Windows frames are CRLF.** adb writes this stream with `fwrite(..., stdout)` (`DefaultStandardStreamsCallback::OnStream`); only the shell/`exec-out` paths call `_setmode(STDOUT_FILENO, _O_BINARY)`, so on Windows every `\n` is relayed as `\r\n` while the header counts the `\n` only. `parseTrackDevices()` therefore strips `\r` before framing and rejects a header that does not frame a device list — the byte-exact parser drifted a byte per frame without that, slicing the header into the serial and auto-adding duplicate records named `0018G074TS0361670XW6`. Do not "simplify" either step away; the LF-only unit tests cannot catch it. Measured on win10: `adb devices` stdout ends `...100,13,10,13,10`.
 - `applyDebouncedRefresh()` (debounce timeout): iterates cache, skips network devices (contains `:`), skips devices whose status is not connected/recovery/rescue (`isConnectedStatus()`), skips existing DB records, then INSERTs a new device record with default Kodi values. Duplicate descriptions get `-2`, `-3`, etc. suffix.
 - `m_quitting` guard in `onTrackFinished` prevents restart during shutdown.
 
@@ -215,10 +216,11 @@ Hardcoded (widgets removed, setters are no-ops): `ostype()` = `"0"`, `scoped()` 
 
 ## Key paths
 
-- `version.h` → `const QString version = "8.2"`
+- `version.h` → `const QString version = "8.3"`
 - `program.h` → `PROGRAM "adblink"`
+- `buildinfo.h.in` → configured by CMake to `<builddir>/buildinfo.h`, a compile-time `buildStamp` (`built <UTC> , git <sha>`); `mainwindow.cpp` logs it directly under the version line, so a silent rebuild is identifiable
 - `changelog.txt` — full history
-- `adbfiles/<platform>/` — bundled ADB and tool binaries per OS (8.2 payload: adb 37.0.1-15733141 all platforms; Windows scrcpy 5.0.1)
+- `adbfiles/<platform>/` — bundled ADB and tool binaries per OS (8.3 payload: adb 37.0.1-15733141 all platforms; Windows scrcpy 5.0.1)
 - `logfile.cpp` — thread-safe logging singleton
 - `adbutils.cpp` — `syncWaitForProcess()`, `isScopedStorage()`, `resolveKodiPath()`
 - `kodidatamanager.cpp` — CRUD for device records, schema creation, JSON config defaults
@@ -354,7 +356,7 @@ Built app is at `/Users/jeff/source/builds/adblink/adblink.app/`. Contents:
 - `Contents/Resources/adblink.icns` — application icon
 - `Contents/Info.plist` — references `adblink.icns`, bundle ID `jocala.com.adblink`
 
-DMG at `/Users/jeff/source/builds/adblink/packages/adblink-8.2-Darwin.dmg` contains `adblink.app` + `Applications -> /Applications`.
+DMG at `/Users/jeff/source/builds/adblink/packages/adblink-8.3-Darwin.dmg` contains `adblink.app` + `Applications -> /Applications`.
 
 ## Known issues / held-out fixes
 
@@ -395,3 +397,7 @@ Reported 2026-10-13 as "removed in 6.5; I have to reconnect a device constantly"
 ### Recovery / Rescue counts as connected — landed 2026-10-16
 
 `isConnectedStatus()` (`stringutils.cpp`) is the single predicate for "usable" (true for connected/recovery/rescue); `usbStatus()` still renders "Recovery" so the operator can see the device booted into recovery. Hardware-verified on a Lenovo TB-X606F in recovery. Companion work and the gotchas learned (status is a display string, not an enum; `sideload` is excluded on purpose) are in `~/.opencode/plan/adblink-recovery-status-todo.md`.
+
+### Windows CRLF in the track-devices stream — fixed 2026-10-18 (8.3), Windows only
+
+`cb1da66` replaced the line-based USB parser with a byte-exact frame reader and verified it live on macOS. adb on Windows writes the same stream through a text-mode stdout, so the wire carries CRLF while the header counts LF, and the parser drifted one byte per frame — duplicate records named `0018G074TS0361670XW6` / `001aG074TS0361670XW6`, with the device's real row reading Disconnected (the mangled keys are what lands in `m_usbStatusCache`). Fixed by stripping `\r` before framing plus a frame-validity check; both are load-bearing, and an LF-only test suite cannot catch a regression. The version confusion around the same defect: 8.2 was silently rebuilt on 2026-10-16 under the same version string, so "8.2" named two different builds — hence `buildStamp` in the log from 8.3 on. Reporter's other two findings are by design: Refresh ADB rewrites only the status cache (rows are user config) and `deleterecordmanager.cpp` refuses to delete a connected row.

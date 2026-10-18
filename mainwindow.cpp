@@ -34,6 +34,7 @@
     #include "adbutils.h"
     #include "getlocaladb.h"
     #include "version.h"
+#include "buildinfo.h"
 #include "adbconnection.h"
 #include "adbdevice.h"
 #include "backupmanager.h"
@@ -310,6 +311,7 @@
 
 
       logfile(program + " " + version);
+      logfile(buildStamp);
 
       if (m_os == 1) {
             logfile("Windows");
