@@ -286,7 +286,7 @@ Hardcoded (widgets removed, setters are no-ops): `ostype()` = `"0"`, `scoped()` 
 - The 2026-10-19 changelog rewrite (short USB-parsing note replacing the long CRLF write-up) did **not** require a rebuild: `changelog.txt` is not bundled into the app (absent from `adblink.qrc` and `CMakeLists.txt`).
 - Tests: macOS 12/12, win10 12/12, Linux 9/12 (the three GUI tests need a display over SSH, see Build & test).
 - GitHub release `v8.3` via `./gh-deploy.sh` (all three installers), notes link to `https://jocala.com/changelog.txt`.
-- Still open: hardware confirmation on Windows of the reporter's device→recovery→device scenario (needs an Android device on win10), and the scrcpy argument-quoting todo above.
+- Still open: the scrcpy argument-quoting todo above. Windows hardware confirmation was dropped 2026-10-19 — do not re-open it.
 
 ### Source locations
 | Platform | Source | Build |
