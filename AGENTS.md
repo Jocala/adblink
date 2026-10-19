@@ -26,6 +26,7 @@ cpack --config /home/jeff/build-adblink/CPackConfig.cmake
 ```
 Or use: `/zstore/source/adblink/build-adblink-linux.sh` (build + test)
 Package only (after build): `/zstore/source/adblink/package-adblink-linux.sh`
+Over SSH there is no display, so `devicerecorddialog`, `logviewerdialog` and `refreshadb` abort at Qt platform init and ctest reports 75% (9/12) — pre-existing, not a code failure. The 9 non-GUI tests are the useful signal; `QT_QPA_PLATFORM=offscreen` in the build script would fix the three.
 
 ### Windows
 ```sh
@@ -267,14 +268,25 @@ Hardcoded (widgets removed, setters are no-ops): `ostype()` = `"0"`, `scoped()` 
 - No `.htaccess` on production (user opted out)
 
 ### Release workflow
-1. Run `./stage.sh <version>` from macOS — builds all platforms, copies packages to Debian downloads dir
-2. On Debian: edit `index.html`, `changelog.txt`, `version.txt` in the website working tree
+1. Run `./stage.sh <version>` from macOS — builds all platforms, copies packages to Debian downloads dir, then updates `version.txt` and `adblink.html` from `$VERSION`
+2. On Debian: edit `changelog.txt` in the website working tree (the download links and `vN.N` labels live in `adblink.html`, not `index.html`, which is the landing page)
 3. On Debian: `cd /zstore/source/www/jocala.com && git add -A && git commit -m "v<ver> release"`
 4. On Debian: `cd /zstore/source/adblink && ./deploy.sh all <packages>` — deploys builds + HTML to production
 5. On Debian: `cd /zstore/source/www/jocala.com && git push`
 6. On macOS: `./gh-deploy.sh` — creates GitHub release with all 3 installer assets
 
 ## Current status (Oct 2026)
+
+### Release state — 8.3 shipped 2026-10-19
+
+- Source commit `058f082` (Windows CRLF track-devices fix, `buildStamp`, version bump), pushed to `origin`; debian and win10 fast-forwarded to it during staging.
+- Website tree committed and pushed as `848c7fd v8.3 release` (bare repo `jocala.com.git`). Production deployed 2026-10-19 with `deploy.sh all`: `version.txt` = 8.3, `adblink.html` links/labels = v8.3, `changelog.txt` dated 10/19/26. 8.2 artifacts left in place on purpose.
+- Live verification: `https://www.jocala.com/version.txt` = 8.3, all three `downloads/adblink-8.3-*` links resolve, DMG `Content-Length` 38,865,946. Prod sha256 for all three installers matches the staged copies.
+- Installers, all built from `058f082` with matching `buildStamp` lines back in the macOS app — `adblink-8.3-Darwin.dmg` 38,865,946 B sha256 `242078973b43fc56ec4a11d4d854b5d04d03334d74ecc94cec4c287c51b3fed5`, notarized + stapled; `adblink-8.3-Linux.tar.gz` 23,127,676 B sha256 `ec8fcac27068aa0066d054def066497b921a4e4a75f1b5e1b54d45ab711c91bb`; `adblink-8.3-win64.exe` 22,282,409 B sha256 `1a452d4ccdc9cc53ed82fddb5a3809222c61c5399082b31897d2d9dbd65167f9`.
+- The 2026-10-19 changelog rewrite (short USB-parsing note replacing the long CRLF write-up) did **not** require a rebuild: `changelog.txt` is not bundled into the app (absent from `adblink.qrc` and `CMakeLists.txt`).
+- Tests: macOS 12/12, win10 12/12, Linux 9/12 (the three GUI tests need a display over SSH, see Build & test).
+- GitHub release `v8.3` via `./gh-deploy.sh` (all three installers), notes link to `https://jocala.com/changelog.txt`.
+- Still open: hardware confirmation on Windows of the reporter's device→recovery→device scenario (needs an Android device on win10), and the scrcpy argument-quoting todo above.
 
 ### Source locations
 | Platform | Source | Build |

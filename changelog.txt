@@ -1,21 +1,11 @@
-10/18/26
+10/19/26
 
 adblink.8.3
 
-Fixed duplicate device entries on Windows. adb on Windows writes its device list
-to a text-mode stdout, so every newline arrives as CRLF while the frame header
-that precedes the list counts LF bytes only. adblink misread those frame
-lengths, which left a stray byte behind after each device change; the parse
-drifted and could create a record with the 4-digit length header glued to the
-serial (0018G074TS0361670XW6, for example) and leave the device's real entry
-showing Disconnected. Line endings are now normalized before the list is parsed,
-and a header that does not frame a device list is rejected instead of shifting
-every later frame.
+USB device parsing adjusted to correct for a 4-digit hex header.
 
-macOS and Linux were unaffected: adb there writes the same list in binary mode.
-
-The log now records a build stamp (build time and git commit) after the version
-line, so a silently rebuilt installer can be told apart from the original.
+The log now includes a build stamp to accommodate hot fixes that don't warrant
+a version update.
 
 10/16/26
 
