@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html><head><title>Delete Kodi Data</title>
+<link rel="stylesheet" href="style.css"></head><body>
+
+Kodi keeps everything it owns under a single data folder: settings, the media
+library databases, addons and their data, thumbnails, sources, favourites and
+log files. Deleting that folder resets Kodi to a fresh install without touching
+the application itself - Kodi stays installed and rebuilds the folder the next
+time it starts.
+<p>
+Select the device, then choose <b>Kodi &gt; Delete Kodi data</b>. If Kodi is
+running on the device you are asked whether to stop it first; deleting under a
+running Kodi is not allowed, because Kodi rewrites files as it exits. adblink
+then shows the exact folder it found and asks for confirmation.
+<p>
+The folder reported is the one adblink resolves for that device - the location
+named in <code>/sdcard/xbmc_env.properties</code> if one exists, otherwise the
+scoped <code>kodi_data</code> path on Android 11 and later, otherwise
+<code>/sdcard/Android/data/&lt;package&gt;/files/.kodi</code>. The whole folder
+is removed, so the reset is complete and cannot be undone.
+<p>
+Use <b>Backup</b> first if there is anything worth keeping. To reset only part
+of Kodi, clear <code>addons</code> or <code>userdata</code> from the File
+Manager instead, and note that <b>Delete thumbnails</b> removes only the image
+cache.
+
+<p>
+<p>
+<p>If you have questions or comments, please email jocala@jocala.com.
+adblink produces a log file, adblink.log, with each run. Include it in your
+email or post if you're having problems.</p>
+<p><a href="buttons.html">Back</a></p>
+</body></html>

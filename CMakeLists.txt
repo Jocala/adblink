@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(adblink VERSION 8.3 LANGUAGES CXX)
+project(adblink VERSION 8.4 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -130,6 +130,7 @@ set(SOURCES
     kodiarchdialog.cpp
     kodidownloadcoordinator.cpp
     kodidownloader.cpp
+    kodideletemanager.cpp
     kodilogmanager.cpp
     kodisetupmanager.cpp
     preferencesmanager.cpp
@@ -212,6 +213,7 @@ set(HEADERS
     kodiarchdialog.h
     kodidownloadcoordinator.h
     kodidownloader.h
+    kodideletemanager.h
     kodilogmanager.h
     kodisetupmanager.h
     preferencesmanager.h

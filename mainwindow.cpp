@@ -54,6 +54,7 @@
 #include "wirelessadbmanager.h"
 #include "xmleditormanager.h"
 #include "kodidatamanager.h"
+#include "kodideletemanager.h"
 #include "kodidownloader.h"
 #include "kodiarchdialog.h"
 #include "kodidownloadcoordinator.h"
@@ -165,6 +166,7 @@
            , m_wirelessAdbManager(new WirelessAdbManager(this))
            , m_xmlEditor(new XmlEditorManager(this))
            , m_kodiDownloader(new KodiDownloader(this))
+           , m_kodiDeleteManager(new KodiDeleteManager(this))
            , m_kodiDownloadCoordinator(new KodiDownloadCoordinator(this))
            , m_kodiLogManager(new KodiLogManager(this))
            , m_kodiSetupManager(new KodiSetupManager(this))
@@ -1428,6 +1430,20 @@
         DeviceRecord device = queryDeviceRecord(selectedDescription);
 
         m_thumbnailManager->deleteThumbnails(this, device, getadb(),
+            [this](const QString &cstring, const QString &jobname) {
+                return RunLongProcess(cstring, jobname);
+            });
+    }
+
+    void MainWindow::on_actionDelete_kodi_data_triggered()
+    {
+        QString selectedDescription;
+        if (!validateDeviceSelection(selectedDescription))
+            return;
+
+        DeviceRecord device = queryDeviceRecord(selectedDescription);
+
+        m_kodiDeleteManager->deleteKodiData(this, device, getadb(),
             [this](const QString &cstring, const QString &jobname) {
                 return RunLongProcess(cstring, jobname);
             });
@@ -2786,6 +2802,7 @@ void MainWindow::setupKodiMenu()
     actionEdit_XML = new QAction("Edit XML", this);
     actionSplash_Screen = new QAction("Splash Screen", this);
     actiondelthumb = new QAction("Delete thumbnails", this);
+    actionDelete_kodi_data = new QAction("Delete Kodi data", this);
     actionPush_remote = new QAction("Push remote", this);
     actionDownload_Kodi = new QAction("Download Kodi", this);
     actionKodi_data_usage = new QAction("Kodi data size", this);
@@ -2795,6 +2812,7 @@ void MainWindow::setupKodiMenu()
     menuKodi->addAction(actionEdit_XML);
     menuKodi->addAction(actionSplash_Screen);
     menuKodi->addAction(actiondelthumb);
+    menuKodi->addAction(actionDelete_kodi_data);
     menuKodi->addAction(actionPush_remote);
     menuKodi->addAction(actionDownload_Kodi);
     menuKodi->addAction(actionKodi_version);
@@ -2854,6 +2872,7 @@ void MainWindow::setupMenuConnections()
     connect(actionEdit_XML,             &QAction::triggered, this, &MainWindow::on_actionEdit_XML_triggered);
     connect(actionSplash_Screen,        &QAction::triggered, this, &MainWindow::on_actionSplash_Screen_triggered);
     connect(actiondelthumb,             &QAction::triggered, this, &MainWindow::on_actiondelthumb_triggered);
+    connect(actionDelete_kodi_data,     &QAction::triggered, this, &MainWindow::on_actionDelete_kodi_data_triggered);
     connect(actionPush_remote,          &QAction::triggered, this, &MainWindow::on_actionPush_remote_triggered);
     connect(actionDownload_Kodi,        &QAction::triggered, this, &MainWindow::on_actionDownload_Kodi_triggered);
     connect(actionKodi_data_usage,      &QAction::triggered, this, &MainWindow::on_actionKodi_data_usage_triggered);

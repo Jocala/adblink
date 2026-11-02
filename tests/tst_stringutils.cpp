@@ -323,6 +323,137 @@ private slots:
         QCOMPARE(entries.at(2).second, QStringLiteral("device"));
         QVERIFY(stream.isEmpty());
     }
+
+    // --- scrcpyCommandLine / argument quoting ---
+    void scrcpyPosixPlainArgs()
+    {
+        QChar forbidden;
+        const QString command = scrcpyCommandLine(QStringLiteral("scrcpy"),
+                                                  QStringLiteral("192.168.1.10:5555"),
+                                                  QStringLiteral("--no-audio --max-size=1024"),
+                                                  false, &forbidden);
+        QCOMPARE(command, QStringLiteral("scrcpy -s '192.168.1.10:5555' '--no-audio' '--max-size=1024'"));
+        QVERIFY(forbidden.isNull());
+    }
+
+    void scrcpyPosixQuotedTokenWithSpace()
+    {
+        QChar forbidden;
+        const QString command = scrcpyCommandLine(QStringLiteral("scrcpy"),
+                                                  QStringLiteral("192.168.1.10:5555"),
+                                                  QStringLiteral("--window-title \"my phone\""),
+                                                  false, &forbidden);
+        QCOMPARE(command, QStringLiteral("scrcpy -s '192.168.1.10:5555' '--window-title' 'my phone'"));
+    }
+
+    void scrcpyPosixApostrophe()
+    {
+        QChar forbidden;
+        const QString command = scrcpyCommandLine(QStringLiteral("scrcpy"),
+                                                  QStringLiteral("dev"),
+                                                  QStringLiteral("--window-title \"it's mine\""),
+                                                  false, &forbidden);
+        QCOMPARE(command, QStringLiteral("scrcpy -s 'dev' '--window-title' 'it'\\''s mine'"));
+    }
+
+    void scrcpyPosixNeutralisesShellMetacharacters()
+    {
+        QChar forbidden;
+        const QString command = scrcpyCommandLine(QStringLiteral("scrcpy"),
+                                                  QStringLiteral("dev"),
+                                                  QStringLiteral("--record \"$(date).mp4\" ; rm -rf /tmp/x"),
+                                                  false, &forbidden);
+        QCOMPARE(command, QStringLiteral("scrcpy -s 'dev' '--record' '$(date).mp4' ';' 'rm' '-rf' '/tmp/x'"));
+        QVERIFY(!command.contains(QStringLiteral(" ; ")));
+    }
+
+    void scrcpyPosixEmptyArgs()
+    {
+        QChar forbidden;
+        const QString command = scrcpyCommandLine(QStringLiteral("scrcpy"),
+                                                  QStringLiteral("dev"),
+                                                  QString(), false, &forbidden);
+        QCOMPARE(command, QStringLiteral("scrcpy -s 'dev'"));
+    }
+
+    void scrcpyWindowsPlainArgs()
+    {
+        QChar forbidden;
+        const QString command = scrcpyCommandLine(QStringLiteral("scrcpy.exe"),
+                                                  QStringLiteral("192.168.1.10:5555"),
+                                                  QStringLiteral("--window-title \"hello there\""),
+                                                  true, &forbidden);
+        QCOMPARE(command, QStringLiteral("scrcpy.exe -s \"192.168.1.10:5555\" \"--window-title\" \"hello there\""));
+        QVERIFY(forbidden.isNull());
+    }
+
+    void scrcpyWindowsQuotesCmdMetacharacters()
+    {
+        QChar forbidden;
+        const QString command = scrcpyCommandLine(QStringLiteral("scrcpy.exe"),
+                                                  QStringLiteral("dev"),
+                                                  QStringLiteral("--window-title \"a&b|c>d\""),
+                                                  true, &forbidden);
+        QCOMPARE(command, QStringLiteral("scrcpy.exe -s \"dev\" \"--window-title\" \"a&b|c>d\""));
+        QVERIFY(forbidden.isNull());
+    }
+
+    void scrcpyWindowsRefusesUnquotableChars_data()
+    {
+        QTest::addColumn<QString>("args");
+        QTest::addColumn<QString>("expected");
+
+        QTest::newRow("percent") << QStringLiteral("--record %TEMP%\\x.mp4") << QStringLiteral("%");
+        QTest::newRow("bang")    << QStringLiteral("--window-title !delayed!") << QStringLiteral("!");
+    }
+
+    void scrcpyWindowsRefusesUnquotableChars()
+    {
+        QFETCH(QString, args);
+        QFETCH(QString, expected);
+
+        QChar forbidden;
+        const QString command = scrcpyCommandLine(QStringLiteral("scrcpy.exe"),
+                                                  QStringLiteral("dev"),
+                                                  args, true, &forbidden);
+        QVERIFY(command.isEmpty());
+        QCOMPARE(QString(forbidden), expected);
+    }
+
+    void cmdArgForbiddenCharValues_data()
+    {
+        QTest::addColumn<QString>("token");
+        QTest::addColumn<QString>("expected");
+
+        QTest::newRow("quote")     << QStringLiteral("say \"hi\"") << QStringLiteral("\"");
+        QTest::newRow("percent")   << QStringLiteral("%APPDATA%")  << QStringLiteral("%");
+        QTest::newRow("bang")      << QStringLiteral("!delayed!")  << QStringLiteral("!");
+        QTest::newRow("newline")   << QStringLiteral("a\nb")       << QStringLiteral("\n");
+        QTest::newRow("safe")      << QStringLiteral("a&b|c>d e")  << QString();
+    }
+
+    void cmdArgForbiddenCharValues()
+    {
+        QFETCH(QString, token);
+        QFETCH(QString, expected);
+
+        const QChar bad = cmdArgForbiddenChar(token);
+        if (expected.isEmpty())
+            QVERIFY(bad.isNull());
+        else
+            QCOMPARE(QString(bad), expected);
+    }
+
+    void scrcpyPosixDoesNotRefuseWindowsChars()
+    {
+        QChar forbidden;
+        const QString command = scrcpyCommandLine(QStringLiteral("scrcpy"),
+                                                  QStringLiteral("dev"),
+                                                  QStringLiteral("--window-title \"100% done!\""),
+                                                  false, &forbidden);
+        QCOMPARE(command, QStringLiteral("scrcpy -s 'dev' '--window-title' '100% done!'"));
+        QVERIFY(forbidden.isNull());
+    }
 };
 
 QTEST_MAIN(TestStringUtils)

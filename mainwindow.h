@@ -50,6 +50,7 @@ class InstallManager;
 class KodiDataManager;
 class KodiDownloadCoordinator;
 class KodiDownloader;
+class KodiDeleteManager;
 class KodiLogManager;
 class KodiSetupManager;
 class KillServerManager;
@@ -176,6 +177,7 @@ private slots:
     void infoArchitecture();
     void infolog();
     void on_actiondelthumb_triggered();
+    void on_actionDelete_kodi_data_triggered();
     void on_actionPush_remote_triggered();
     void on_actionCreate_kodi_data_triggered();
     void scpyButton_clicked();
@@ -251,6 +253,7 @@ private:
     WirelessAdbManager *m_wirelessAdbManager;
     XmlEditorManager *m_xmlEditor;
     KodiDownloader *m_kodiDownloader;
+    KodiDeleteManager *m_kodiDeleteManager;
     KodiDownloadCoordinator *m_kodiDownloadCoordinator;
     QTimer m_progressTimer;
     QHash<QString, QString> m_usbStatusCache;
@@ -334,6 +337,7 @@ private:
     QAction *actionPreferences;
     QAction *infoArchitecture2;
     QAction *actiondelthumb;
+    QAction *actionDelete_kodi_data;
     QAction *actionPush_remote;
     QAction *actionSplash_Screen;
     QAction *View_Changelog;

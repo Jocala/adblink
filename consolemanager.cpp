@@ -2,6 +2,7 @@
 #include "adbutils.h"
 #include "getlocaladb.h"
 #include "logfile.h"
+#include "stringutils.h"
 
 #include <QCoreApplication>
 #include <QDir>
@@ -590,6 +591,26 @@ void ConsoleManager::openScrcpy(QWidget *parent, const QString &daddr,
     QString sernum = " -s " + daddr + " ";
     QString cstring;
 
+    QChar forbidden;
+    const bool windows = (m_os == Windows);
+    const QString scrcpycmd = scrcpyCommandLine(
+        windows ? QStringLiteral("scrcpy.exe") : QStringLiteral("scrcpy"),
+        daddr, argval, windows, &forbidden);
+    if (scrcpycmd.isEmpty()) {
+        logfile("scrcpy arguments refused, cannot quote " + QString(forbidden) + " for Windows");
+        QMessageBox msgBox(parent);
+        msgBox.setIcon(QMessageBox::Critical);
+        msgBox.setWindowTitle(QString());
+        msgBox.setText(QStringLiteral("Cannot launch scrcpy.\n\n"
+                                      "The arguments contain a character that cannot be "
+                                      "quoted for Windows (%1).\nRemove it and try again.")
+                           .arg(QString(forbidden)));
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setWindowModality(Qt::WindowModal);
+        msgBox.exec();
+        return;
+    }
+
     if (m_os == Windows)
     {
         QString commstr2 = scriptDir + "/scrcpy.txt";
@@ -627,7 +648,7 @@ void ConsoleManager::openScrcpy(QWidget *parent, const QString &daddr,
         }
         QTextStream out(&batFile);
         out << "set PATH=" + adbfilesDir + ";" + scrcpyDir + ";%PATH%" << Qt::endl;
-        out << "scrcpy.exe -s " + daddr + " " + argval << Qt::endl;
+        out << scrcpycmd << Qt::endl;
         batFile.flush();
         batFile.close();
 
@@ -673,7 +694,7 @@ void ConsoleManager::openScrcpy(QWidget *parent, const QString &daddr,
 
         QTextStream out(&shFile);
         out << "#!/bin/sh" << Qt::endl;
-        out << "scrcpy -s " + daddr + " " + argval << Qt::endl;
+        out << scrcpycmd << Qt::endl;
         shFile.flush();
         shFile.close();
 
