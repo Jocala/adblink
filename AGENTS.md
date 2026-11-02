@@ -283,7 +283,7 @@ Hardcoded (widgets removed, setters are no-ops): `ostype()` = `"0"`, `scoped()` 
 - Installers, all built from `e1ff11f` with matching `buildStamp` lines — `adblink-8.4-Darwin.dmg` 38,876,248 B sha256 `79800dda73aa2056eddf44ef0e57bf2b57b09c15058773b6c73ac2a2ca71071f`, notarized + stapled; `adblink-8.4-Linux.tar.gz` 23,137,846 B sha256 `b474486fb2189f99b477b07df387cb5332c24bbdd899992900a2fa25dcfb424d`; `adblink-8.4-win64.exe` 22,274,705 B sha256 `9529b5f4990078a9404b268481355651cc22a7e03c5b09754d1fd500bd55a9b1`.
 - Tests: macOS 12/12, win10 12/12, Linux 9/12 (the three GUI tests need a display over SSH, see Build & test).
 - `Delete Kodi data` flow: refuses to run while Kodi is running unless the operator confirms `am force-stop`, resolves the folder with `resolveKodiPath()` + `isScopedStorage()`, shows the resolved path for confirmation, deletes with `rm -r` under `RunLongProcess`, then re-`ls`es to verify and logs the outcome. Deliberate: no `isPackageInstalled()` gate, so a leftover data folder from an uninstalled Kodi can still be cleared.
-- The Windows smoke test of the new menu item and of the `.bat` quoting (with the scrcpy prompt preference off) was **not** performed; macOS GUI was.
+- GUI-verified by the operator on macOS and on Windows: the **Delete Kodi data** menu item, and (on Windows) the quoting written into `scrcpy.bat` with the "Ask for Scrcpy arguments" preference off. Both platforms passed; no platform-specific caveat remains.
 
 ### Release state — 8.3 shipped 2026-10-19
 
