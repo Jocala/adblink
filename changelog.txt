@@ -1,3 +1,13 @@
+11/02/26
+
+adblink.8.4
+
+New Kodi > Delete Kodi data: removes the device's Kodi data folder and leaves
+Kodi installed, with a fresh setup built on next start. Stops Kodi first.
+
+Scrcpy arguments are now split and quoted per shell: spaces work and shell
+metacharacters no longer execute. Windows refuses " % and !; nothing is expanded.
+
 10/19/26
 
 adblink.8.3

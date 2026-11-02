@@ -38,7 +38,7 @@ cmake --build "%USERPROFILE%\build-adblink" --target package-win
 Qt Creator uses the same build dir with Ninja — run vcvars64.bat first or let Qt Creator handle it.
 Build + test: `C:\source\adblink\build-adblink-windows.ps1`
 Package only (after build): `C:\source\adblink\package-adblink-windows.ps1`
-The `package-win` target wraps `iscc` and produces `packages/adblink-8.3-win64.exe`.
+The `package-win` target wraps `iscc` and produces `packages/adblink-8.4-win64.exe`.
 
 Single test (any platform):
 ```sh
@@ -217,11 +217,11 @@ Hardcoded (widgets removed, setters are no-ops): `ostype()` = `"0"`, `scoped()` 
 
 ## Key paths
 
-- `version.h` → `const QString version = "8.3"`
+- `version.h` → `const QString version = "8.4"`
 - `program.h` → `PROGRAM "adblink"`
 - `buildinfo.h.in` → configured by CMake to `<builddir>/buildinfo.h`, a compile-time `buildStamp` (`built <UTC> , git <sha>`); `mainwindow.cpp` logs it directly under the version line, so a silent rebuild is identifiable
 - `changelog.txt` — full history
-- `adbfiles/<platform>/` — bundled ADB and tool binaries per OS (8.3 payload: adb 37.0.1-15733141 all platforms; Windows scrcpy 5.0.1)
+- `adbfiles/<platform>/` — bundled ADB and tool binaries per OS (8.4 payload: adb 37.0.1-15733141 all platforms; Windows scrcpy 5.0.1)
 - `logfile.cpp` — thread-safe logging singleton
 - `adbutils.cpp` — `syncWaitForProcess()`, `isScopedStorage()`, `resolveKodiPath()`
 - `kodidatamanager.cpp` — CRUD for device records, schema creation, JSON config defaults
@@ -275,7 +275,15 @@ Hardcoded (widgets removed, setters are no-ops): `ostype()` = `"0"`, `scoped()` 
 5. On Debian: `cd /zstore/source/www/jocala.com && git push`
 6. On macOS: `./gh-deploy.sh` — creates GitHub release with all 3 installer assets
 
-## Current status (Oct 2026)
+## Current status (Nov 2026)
+
+### Release state — 8.4 shipped 2026-11-02
+
+- Two features, both GUI-verified on macOS by the operator: **Kodi > Delete Kodi data** (new `KodiDeleteManager`, `kodideletemanager.cpp`) and the **scrcpy argument quoting fix** (below). Code commit `6dd0c22`; `e1ff11f` follows it to derive the macOS DMG name from `version.h` (`package-adblink-macos.sh` had `8.3` hardcoded and would have failed at notarize). Both pushed to `origin`; debian and win10 fast-forwarded to `e1ff11f` before their builds.
+- Installers, all built from `e1ff11f` with matching `buildStamp` lines — `adblink-8.4-Darwin.dmg` 38,876,248 B sha256 `79800dda73aa2056eddf44ef0e57bf2b57b09c15058773b6c73ac2a2ca71071f`, notarized + stapled; `adblink-8.4-Linux.tar.gz` 23,137,846 B sha256 `b474486fb2189f99b477b07df387cb5332c24bbdd899992900a2fa25dcfb424d`; `adblink-8.4-win64.exe` 22,274,705 B sha256 `9529b5f4990078a9404b268481355651cc22a7e03c5b09754d1fd500bd55a9b1`.
+- Tests: macOS 12/12, win10 12/12, Linux 9/12 (the three GUI tests need a display over SSH, see Build & test).
+- `Delete Kodi data` flow: refuses to run while Kodi is running unless the operator confirms `am force-stop`, resolves the folder with `resolveKodiPath()` + `isScopedStorage()`, shows the resolved path for confirmation, deletes with `rm -r` under `RunLongProcess`, then re-`ls`es to verify and logs the outcome. Deliberate: no `isPackageInstalled()` gate, so a leftover data folder from an uninstalled Kodi can still be cleared.
+- The Windows smoke test of the new menu item and of the `.bat` quoting (with the scrcpy prompt preference off) was **not** performed; macOS GUI was.
 
 ### Release state — 8.3 shipped 2026-10-19
 
@@ -368,7 +376,7 @@ Built app is at `/Users/jeff/source/builds/adblink/adblink.app/`. Contents:
 - `Contents/Resources/adblink.icns` — application icon
 - `Contents/Info.plist` — references `adblink.icns`, bundle ID `jocala.com.adblink`
 
-DMG at `/Users/jeff/source/builds/adblink/packages/adblink-8.3-Darwin.dmg` contains `adblink.app` + `Applications -> /Applications`.
+DMG at `/Users/jeff/source/builds/adblink/packages/adblink-8.4-Darwin.dmg` contains `adblink.app` + `Applications -> /Applications`.
 
 ## Known issues / held-out fixes
 
@@ -383,7 +391,7 @@ DMG at `/Users/jeff/source/builds/adblink/packages/adblink-8.3-Darwin.dmg` conta
 - Root cause: `ConsoleManager::openScrcpy()` put the device's saved arg into `line` (used only to pre-fill the prompt) while the value actually written to `scrcpy.bat` / `scrcpy.sh` was `argval`, which was only ever assigned inside the `if (scrcpy)` prompt branch. With the "Ask for Scrcpy arguments" preference off (`adblink.json` key `"scrcpy"`, default `true`), `argval` stayed empty and the saved arg was silently dropped. Shared pre-platform-branch code, so Windows/macOS/Linux were all affected; the 2023 `27a08c8` extraction carried it unchanged.
 - Fix (all platforms, unversioned): `consolemanager.cpp` — `QString argval = scrcpyarg;`. The prompt still wins when enabled. Not scrcpy-version related.
 - Verification: on win10, set a device's Scrcpy arg, uncheck the preference, launch scrcpy, confirm `%APPDATA%\.jocala\scripts\scrcpy.bat` contains the arg. Before the fix it read `scrcpy.exe -s <ip:port> ` with a trailing space.
-- **Unfixed, tracked separately:** the arg string is concatenated unquoted into `.bat`/`.sh`. Multi-token values containing spaces break, and shell metacharacters execute — `scrcpy.sh` gets the operator's shell, `scrcpy.bat` gets cmd, and the per-device arg lives in `adblink.db`, which `syncdb.sh` copies between hosts. Tokenize with `QProcess::splitCommand()` then quote per shell (and do not reuse `adbString()`, whose POSIX escaping is wrong). Full plan, tests and adjacent findings: `~/.opencode/plan/adblink-scrcpy-args-todo.md`.
+- **Argument quoting — fixed in 8.4, all platforms:** `scrcpyCommandLine()` (`stringutils.cpp`) tokenizes with `QProcess::splitCommand()`, then quotes every token and `daddr` — single quotes with `'\''` escaping for POSIX, double quotes for cmd — before the line is written to `scrcpy.bat`/`scrcpy.sh`. `scrcpy.txt` still holds the raw string for the prompt prefill. Windows refuses a token containing `"`, `%`, `!`, CR or LF (`cmdArgForbiddenChar()`) because cmd expands `%VAR%` even inside double quotes and has no escape; the refusal is a window-modal warning naming the character. Behaviour change to remember: arguments are no longer shell-expanded (`~`, `$(date)`, `%TEMP%`, globs reach scrcpy as written). Covered by `tst_stringutils`. Do not reuse `adbString()`, whose POSIX escaping is wrong. Adjacent dead code (`ConsoleManager::scrcpyScript()` has no callers, unused `sernum` at `consolemanager.cpp:590`) was left alone.
 
 ### Record delete fired a bogus `adb disconnect` (fixed 2026-10-16, all platforms)
 
