@@ -2,10 +2,8 @@
 
 adblink.8.5
 
-The startup update check works again. It had been returning silently since
-8.0, so a new version was never announced when adblink launched; the manual
-Check for Updates button in Preferences was unaffected and still worked.
-The check now uses HTTPS and writes its result to the log.
+The broken startup update check is fixed. Check for Updates button in
+Preferences was unaffected and still worked.
 
 11/02/26
 
