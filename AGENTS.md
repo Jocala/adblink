@@ -284,6 +284,11 @@ Hardcoded (widgets removed, setters are no-ops): `ostype()` = `"0"`, `scoped()` 
 - Tests: macOS 12/12, win10 12/12, Linux 9/12 (the three GUI tests need a display over SSH, see Build & test).
 - `Delete Kodi data` flow: refuses to run while Kodi is running unless the operator confirms `am force-stop`, resolves the folder with `resolveKodiPath()` + `isScopedStorage()`, shows the resolved path for confirmation, deletes with `rm -r` under `RunLongProcess`, then re-`ls`es to verify and logs the outcome. Deliberate: no `isPackageInstalled()` gate, so a leftover data folder from an uninstalled Kodi can still be cleared.
 - GUI-verified by the operator on macOS and on Windows: the **Delete Kodi data** menu item, and (on Windows) the quoting written into `scrcpy.bat` with the "Ask for Scrcpy arguments" preference off. Both platforms passed; no platform-specific caveat remains.
+- **Unreleased fixes on `main` after 8.4:** the startup update check was silent
+  from 8.0 through 8.4 (`onReqCompleted` used `sender()`, which is null through
+  the manager callback). Fixed 2026-11-06 along with `http` → `https` for
+  `vqurl` and three log lines. See *Known issues* for the full account; it has
+  not been through a release build or the website.
 
 ### Release state — 8.3 shipped 2026-10-19
 
@@ -379,6 +384,43 @@ Built app is at `/Users/jeff/source/builds/adblink/adblink.app/`. Contents:
 DMG at `/Users/jeff/source/builds/adblink/packages/adblink-8.4-Darwin.dmg` contains `adblink.app` + `Applications -> /Applications`.
 
 ## Known issues / held-out fixes
+
+### Startup update check was silent — 8.0 through 8.4 (fixed on main 2026-11-06)
+
+- **Symptom (user report):** "beginning with v8.1, no update notifications on
+  startup", while Preferences → Check for Updates is enabled and the manual
+  Check button works. No dialog, no error, no log line.
+- **Cause:** `MainWindow::onReqCompleted()` did
+  `qobject_cast<QNetworkReply *>(sender())`. Since the 8.0 extraction into
+  `VersionCheckManager`, the signal is connected with **the manager** as the
+  receiver (`connect(reply, &QNetworkReply::finished, this, [onCompleted](){…})`),
+  so `sender()` evaluated on `MainWindow` is `nullptr` and the handler returned
+  at the null guard. The HTTP GET still happened, which is why it looked like
+  "nothing happens". `adbprefDialog::onRequestCompleted` is connected directly
+  with the dialog as receiver, so its `sender()` is valid — that asymmetry
+  (manual check fine, startup check silent) is the fingerprint of this bug.
+- **Scope, verified by tag:** `adblink.7.2` connects `finished` straight to
+  `&MainWindow::onReqCompleted` and works; `v8.0`, `v8.1`, `v8.2` and current
+  `main` all use the manager callback and are broken. Extraction commit
+  `f1298cc` ("extractions complete"); it shipped in **8.0**, so the user's
+  "since 8.1" is off by one release.
+- **Fix:** `VersionCheckCallback` is now `std::function<void(QNetworkReply *)>`
+  and the connection passes the reply through:
+  `[reply, onCompleted]() { onCompleted(reply); }`. `onReqCompleted` takes the
+  reply as a parameter and no longer calls `sender()`. Also in the same change:
+  `vqurl` moved from `http://` to **`https://`** (the manual check already used
+  https), and three log lines were added — request URL, skipped-when-disabled,
+  and `remote X, local Y` / network error — because the original failure had no
+  trace in the log at all.
+- **Verification:** built and 12/12 tests; launched the dev bundle with
+  `checkversion: true` → log `version check: GET https://…` then
+  `version check: remote 8.4, local 8.4`. Then temporarily set `version.h` to
+  `9.9`, rebuilt → log `remote 8.4, local 9.9` and the process stayed alive on
+  the modal "adblink version 8.4 is ready. Download?" dialog. Reverted to 8.4
+  and rebuilt.
+- **Rule:** never recover a signal's sender with `sender()` in a handler that is
+  invoked through another object's callback/lambda — the receiver, and therefore
+  the sender, is that other object. Pass the pointer explicitly.
 
 ### Uninstall dialog empty (Sep 2026) — fixed in 8.1 silent rebuild 2026-09-09, all platforms
 - Symptom: uninstall dialog lists no program ids (user report: FireTv4K `192.168.200.240:5555`, mantis, API 25, screenshot empty, `adblink.log` shows connect ok then `open uninstall dialog` with empty list).

@@ -113,7 +113,7 @@ private slots:
     void onApplicationQuit();
     bool validateDeviceSelection(QString& selectedDescription);
     void loadDeviceTableX(QTableWidget* table);
-    void onReqCompleted();
+    void onReqCompleted(QNetworkReply *reply);
     void adhocip();
     void on_actionAbout_triggered();
     void onDeviceTableDoubleClicked(int row, int column);
@@ -267,7 +267,7 @@ private:
     KeypadManager *m_keypadManager;
     RemotePushManager *m_remotePushManager;
 
-    const QString vqurl = "http://www.jocala.com/version.txt";
+    const QString vqurl = "https://www.jocala.com/version.txt";
     const QString busypath = "/data/local/tmp/adblink/";
     const QString tempdir = "/data/local/tmp/";
 

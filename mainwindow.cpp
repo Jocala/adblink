@@ -633,19 +633,20 @@
         m_versionCheckManager->checkVersion(this, databasedir, vqurl,
             stackedWidget, menuKodi, infoArchitecture2,
             m_networkManager,
-            [this]() { onReqCompleted(); },
+            [this](QNetworkReply *reply) { onReqCompleted(reply); },
             currentStack);
     }
 
 
-    void MainWindow::onReqCompleted()
+    void MainWindow::onReqCompleted(QNetworkReply *reply)
     {
-        QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
         if (!reply) {
+            logfile(QStringLiteral("version check: no reply object"));
             return;
         }
 
         if (reply->error() != QNetworkReply::NoError) {
+            logfile(QStringLiteral("version check: network error: %1").arg(reply->errorString()));
             QMessageBox msgBox(this);
             msgBox.setIcon(QMessageBox::Critical);
             msgBox.setWindowTitle(QString());
@@ -660,6 +661,8 @@
         QByteArray data = reply->readAll();
         QString s1(data);
         s1 = s1.trimmed();
+
+        logfile(QStringLiteral("version check: remote %1, local %2").arg(s1, version));
 
         if (version != s1) {
             QDialog dialog(this);

@@ -1,4 +1,5 @@
 #include "versioncheckmanager.h"
+#include "logfile.h"
 
 #include <QMessageBox>
 #include <QFile>
@@ -63,9 +64,14 @@ void VersionCheckManager::checkVersion(QWidget *parentWidget,
         }
         QNetworkRequest request;
         request.setUrl(QUrl(versionUrl));
+        logfile(QStringLiteral("version check: GET %1").arg(versionUrl));
         QNetworkReply *reply = networkManager->get(request);
-        connect(reply, &QNetworkReply::finished, this, [onCompleted]() {
-            onCompleted();
+        // Pass the reply itself. sender() inside MainWindow::onReqCompleted
+        // is nullptr, because this manager is the receiver of this signal.
+        connect(reply, &QNetworkReply::finished, this, [reply, onCompleted]() {
+            onCompleted(reply);
         });
+    } else {
+        logfile(QStringLiteral("version check: disabled in preferences"));
     }
 }

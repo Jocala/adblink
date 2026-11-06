@@ -9,13 +9,18 @@ class QStackedWidget;
 class QMenu;
 class QAction;
 class QNetworkAccessManager;
+class QNetworkReply;
 
 class VersionCheckManager : public QObject
 {
     Q_OBJECT
 
 public:
-    using VersionCheckCallback = std::function<void()>;
+    // The reply is passed through explicitly: MainWindow's handler used to
+    // call sender(), which is null because this manager, not MainWindow, is
+    // the connection's receiver. That silently disabled the startup check
+    // from 8.0 through 8.4.
+    using VersionCheckCallback = std::function<void(QNetworkReply *)>;
 
     explicit VersionCheckManager(QObject *parent = nullptr);
 
