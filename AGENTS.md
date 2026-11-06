@@ -277,6 +277,37 @@ Hardcoded (widgets removed, setters are no-ops): `ostype()` = `"0"`, `scoped()` 
 
 ## Current status (Nov 2026)
 
+### Release state — 8.5 shipped 2026-11-06
+
+- Code `bbf0e21` (fix) then `8009138` (CMake project version), both pushed to
+  `origin` and `github`; debian and win10 fast-forwarded and built from
+  `8009138`. The dev bundle's log reads `adblink 8.5` /
+  `built 2026-11-06 15:37 UTC, git 8009138`.
+- **`CMakeLists.txt` `project(adblink VERSION …)` must be bumped with
+  `version.h`.** The first staging run produced `adblink-8.4-Darwin.dmg`
+  because CPack takes the package name from the CMake project version, and
+  notarization then failed looking for the 8.5 name. `version.h` alone is not
+  enough; `stage.sh` will stop at the macOS notarize step.
+- Installers, all built from `8009138`: `adblink-8.5-Darwin.dmg` 38,876,813 B
+  sha256 `93c98f61a79dd6ef462eb5ca80337039d857b54a449b76388f3f5fcdd7d76502`,
+  notarized + stapled (`status: Accepted`); `adblink-8.5-Linux.tar.gz`
+  23,138,318 B sha256 `ed7bed15c548b8b5e61fb2e537a4b722ff9d22a69a28589a69f46191e8a43ac3`;
+  `adblink-8.5-win64.exe` 22,274,823 B sha256
+  `f21409ae4221cc675ae03fb3c5900ebfa2a24d80f55c1475b5a57a9cb63e63a2`.
+- Tests: macOS 12/12, win10 12/12, Linux 9/12 (the three display-less GUI
+  tests, expected).
+- Website tree committed `8df0738 v8.5 release` (adblink.html links, changelog,
+  version.txt, three tracked artifacts) and pushed to `jocala.com.git`;
+  deployed from debian with `deploy.sh all`. Prod `index.html` pre-flight:
+  prod == staging == git HEAD (`de93dd17…`), backup at
+  `prod:/tmp/index.html.bak-20261106-154102-v8.5`. 8.4 artifacts left in place.
+- Live verification: `version.txt` = 8.5, changelog head = 11/06/26
+  adblink.8.5, all three `downloads/adblink-8.5-*` links resolve and their
+  SHA-256 matches the staged copies byte for byte.
+- GitHub release `v8.5` via `gh-deploy.sh`, three assets at the sizes above.
+- 8.5 is a single fix: the startup update check had been silently returning
+  since 8.0 (see *Known issues*), plus http → https and result logging.
+
 ### Release state — 8.4 shipped 2026-11-02
 
 - Two features, both GUI-verified on macOS by the operator: **Kodi > Delete Kodi data** (new `KodiDeleteManager`, `kodideletemanager.cpp`) and the **scrcpy argument quoting fix** (below). Code commit `6dd0c22`; `e1ff11f` follows it to derive the macOS DMG name from `version.h` (`package-adblink-macos.sh` had `8.3` hardcoded and would have failed at notarize). Both pushed to `origin`; debian and win10 fast-forwarded to `e1ff11f` before their builds.
@@ -284,11 +315,10 @@ Hardcoded (widgets removed, setters are no-ops): `ostype()` = `"0"`, `scoped()` 
 - Tests: macOS 12/12, win10 12/12, Linux 9/12 (the three GUI tests need a display over SSH, see Build & test).
 - `Delete Kodi data` flow: refuses to run while Kodi is running unless the operator confirms `am force-stop`, resolves the folder with `resolveKodiPath()` + `isScopedStorage()`, shows the resolved path for confirmation, deletes with `rm -r` under `RunLongProcess`, then re-`ls`es to verify and logs the outcome. Deliberate: no `isPackageInstalled()` gate, so a leftover data folder from an uninstalled Kodi can still be cleared.
 - GUI-verified by the operator on macOS and on Windows: the **Delete Kodi data** menu item, and (on Windows) the quoting written into `scrcpy.bat` with the "Ask for Scrcpy arguments" preference off. Both platforms passed; no platform-specific caveat remains.
-- **Unreleased fixes on `main` after 8.4:** the startup update check was silent
-  from 8.0 through 8.4 (`onReqCompleted` used `sender()`, which is null through
-  the manager callback). Fixed 2026-11-06 along with `http` → `https` for
-  `vqurl` and three log lines. See *Known issues* for the full account; it has
-  not been through a release build or the website.
+- **Released in 8.5 (2026-11-06):** the startup update check was silently
+  broken from 8.0 through 8.4 (`onReqCompleted` used `sender()`, which is null
+  through the manager callback). Fixed along with `http` → `https` for
+  `vqurl` and three log lines. See *Known issues* for the full account.
 
 ### Release state — 8.3 shipped 2026-10-19
 
